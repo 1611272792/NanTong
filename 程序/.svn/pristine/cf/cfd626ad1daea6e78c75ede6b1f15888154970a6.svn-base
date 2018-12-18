@@ -1,0 +1,59 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem_WebApi.Models
+{
+    public class LineData
+    {
+        public string ProductionPlanID { get; set; }
+        public string ProductionPlanName { get; set; }
+        public string ProductionPlanVersion { get; set; }
+        public string PlanNum { get; set; }
+        public string RealNum { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+        public int State { get; set; }
+        public string TerminalID { get; set; }
+        public string c1 { get; set; }
+        public string c2 { get; set; }
+        public string c3 { get; set; }
+        public string c4 { get; set; }
+        public string c5 { get; set; }
+        public string c6 { get; set; }
+        public string c7 { get; set; }
+        public string c8 { get; set; }
+        public string c9 { get; set; }
+        public string c10 { get; set; }
+        public string c11{ get; set; }
+        public string c12 { get; set; }
+        public string c13 { get; set; }
+        public string c14 { get; set; }
+        public string c15 { get; set; }
+        public string c16 { get; set; }
+        public string c17 { get; set; }
+        public string c18 { get; set; }
+        public string c19 { get; set; }
+        public string c20 { get; set; }
+    }
+
+    public class State {
+        public int StateId { get; set; }
+        public string StateName { get; set; }
+        public string StateColor { get; set; }
+    }
+    public class GetProductLineData : ActionResult
+    {
+        public int StateCode { get; set; }
+        public string ReaSon { get; set; }
+        public List<State> State { get; set; }
+        public List<LineData> LineData { get; set; } = new List<LineData>();
+
+        public override void ExecuteResult(ControllerContext context)
+        {
+
+        }
+    }
+}

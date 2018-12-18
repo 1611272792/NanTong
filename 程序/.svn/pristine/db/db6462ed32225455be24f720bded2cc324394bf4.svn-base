@@ -1,0 +1,309 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>工序配置</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/js/checkAlljs.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style>
+        .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .hovers {
+            background-color: #b5b5b5;
+        }
+
+        th {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button class="btn btn-info" data-toggle="modal" data-target="#Add_Modal_User">
+            <img class="buttonicon" src="~/Content/Icon/添加图标.png" />
+            添加
+        </button>
+        <button class="btn btn-danger" id="btn_UserDelete">
+            <img class="buttonicon" src="~/Content/Icon/删除图标.png" />
+            批量删除
+        </button>
+        @*显示字段信息*@
+        @if (ViewBag.allocation == null)
+        {
+            <table class="table table-bordered table-hover table1">
+                <tr>
+                    <th><input type="checkbox" style="width:20px;height:20px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span>&nbsp;全选</span></th>
+                    <th>字段名</th>
+                    <th>工序名</th>
+                    <th>排序</th>
+                    <th>操作</th>
+                </tr>
+            </table>
+        }
+        else
+        {
+            DataTable dt = ViewBag.allocation;
+            <table class="table table-bordered table-striped text-center table-hover table1" style="width:100%;margin-top:10px;">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+                    <th>字段名</th>
+                    <th>工序名</th>
+                    <th>排序</th>
+                    <th>操作</th>
+                </tr>
+                @for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                   
+                     
+                        <tr class="tr1">
+                            <td><input type="checkbox" name="checkAll" class="check" value="@dt.Rows[i]["AllocationID"]" tag="@dt.Rows[i]["AllocationName"]" style="width:20px;height:20px;" /></td>
+                            <td>@dt.Rows[i]["AllocationName"]</td>
+                            <td>@dt.Rows[i]["AllocationTitle"]</td>
+                            <td>@dt.Rows[i]["Serial"]</td>
+                            <td>
+                                <a class="btn_Edit_ALlocation" style="cursor:pointer;" data-toggle="modal" data-target="#Edit_Modal_ALlocation">编辑</a>
+                                <input type="hidden" value="@dt.Rows[i]["AllocationID"].ToString()" class="allocationid" />
+                                <a href="javascript::void" class="btn_delete_UserManager" style="cursor:pointer;"   onclick="deleteSome('@dt.Rows[i]["AllocationID"]','@dt.Rows[i]["AllocationName"]')">删除</a>
+                            </td>
+                        </tr>
+                     
+                }
+            </table>
+        }
+    </div>
+    @*添加*@
+    <div class="modal fade" id="Add_Modal_User" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white;">添加</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr>
+                            <td>字段名：</td>@*从生产表中获取*@
+                            <td>
+                                <select id="add_FiledName" class="form-control">
+                                    @if (ViewBag.ziduan == null)
+                                    {
+                                    }
+                                    else
+                                    {
+                                        DataTable dt = ViewBag.ziduan;
+                                        for (int i = 0; i < dt.Rows.Count-5; i++)
+                                        {
+                                            if (i < 12)
+                                            {
+
+                                            }
+                                            else
+                                            {
+                                                <option value="@dt.Rows[i]["name"].ToString()">@dt.Rows[i]["name"].ToString()</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>工序标题：</td>
+                            <td>
+                                <input id="add_FieldHead" class="form-control" type="text" />
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />取消
+                    </button>
+                    <a onclick="FieldAdd()" class="btn btn-info Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        添加
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+         
+    @*编辑模态窗体*@
+    <div class="modal fade" id="Edit_Modal_ALlocation" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" style="color:white;">编辑字段</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr hidden="hidden">
+                            <td>字段id：</td>
+                            <td><input type="text" class="form-control" id="allocationid" hidden="hidden" /></td>
+                        </tr>
+                        <tr>
+                            <td>字段名称：</td>
+                            <td><input type="text" class="form-control" id="allocationname" disabled="disabled" /></td>
+                        </tr>
+                        <tr>
+                            <td>工序标题：</td>
+                            <td><input type="text" class="form-control" id="allocationtitle" /></td>
+                        </tr>
+                        <tr>
+                            <td>工序排序：</td>
+                            <td>
+                                <input type="text" class="form-control" id="serial" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn_Edit_ok">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        保存
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    <script type="text/javascript">
+        //添加
+        function FieldAdd() {
+            //var Producid = $("#add_ProductionPlanID  ").val();
+            if ($("#add_FiledName").val() == "" || $("#add_FieldHead").val() == "") {
+                alert("请输入有效值!");
+            } else {
+                var Fieldcname = $("#add_FiledName").val();
+                var FieldHead = $("#add_FieldHead").val();
+
+                $.post("/ProceFields/AddField", { filedName: Fieldcname, filedHead: FieldHead }, function (data) {
+
+                    if (data == "添加成功") {
+                        //alert("添加成功！");
+                        document.location.reload();
+                    } else if (data == "已配置此字段") {
+                        alert("已配置此字段!请重新选择字段");
+                    }
+                    else {
+                        alert("添加失败！");
+                    }
+                })
+            }
+
+
+        }
+
+        //得到需要编辑的内容
+        $(".btn_Edit_ALlocation").click(function () {
+            var allocationid = $(this).parent("td").children(".allocationid").val();
+            $.post("/ProceFields/AllocationEditBySelect", { allocationid: allocationid }, function (data) {
+                if (data == "no") {
+                    alert("操作错误");
+                }
+                else {
+                    var info = data.split(",");
+                    $("#allocationid").val(info[0]);
+                    $("#allocationname").val(info[1]);
+                    $("#allocationtitle").val(info[2]);
+                    $("#serial").val(info[3]);
+                }
+            })
+        })
+
+        //编辑
+        $("#btn_Edit_ok").click(function () {
+            //通过用户的id进行修改，管理员只能修改用户的组
+            //id
+            var aid = $("#allocationid").val();
+            var aname = $("#allocationname").val();
+            var atitle = $("#allocationtitle").val();
+            var serial = $("#serial").val();
+            $.post("/ProceFields/AllocationEdit", { aid: aid, aname: aname, atitle: atitle, serial: serial }, function (data) {
+                if (data == "修改成功") {
+                    document.location.reload();
+                }
+                else {
+                    alert(data);
+                }
+            })
+        })
+
+        //多个删除
+        $("#btn_UserDelete").click(function () {
+            var msg = "您真的确定要删除吗？\n\n请确认！";
+            if (confirm(msg) == true) {
+                //确定删除
+                var che = document.getElementsByClassName("check");
+                var cheValue = "";//获取选中的id
+                var cheFieldsName="";//获取选中的字段名
+                for (var i = 0; i < che.length; i++) {
+                    if (che[i].checked) {
+                        cheValue += che[i].value + ",";
+                        cheFieldsName += che[i].attributes.tag.value + "='''',";
+                    }
+                }
+                if (cheValue == "") {
+                    alert("请先选择删除项");
+                } else {
+                    $.post("/ProceFields/DeleteAllManager", { aid: cheValue,FieldsName:cheFieldsName }, function (data) {
+                        if (data == "删除成功") {
+                            document.location.reload();
+                        }
+                        else {
+                            alert(data);
+                        }
+                    })
+                }
+            }
+        })
+
+        //单个删除
+
+        function deleteSome(  allcationId,  fieldName){
+            var msg = "您真的确定要删除吗？\n\n请确认！";
+            if (confirm(msg) == true) {
+                $.post("/ProceFields/DeleteUserManager", { aid: allcationId,FeldName: fieldName}, function (data) {
+                    if (data == "删除成功") {
+                        document.location.reload();
+                    }
+                    else {
+                        alert(data);
+                    }
+                })
+            }
+
+        }
+
+      
+
+        $(".btn-default").click(function () {
+            $("#add_FieldHead").val("");
+            $("#allocationtitle").val("");
+            $("#serial").val("");
+        })
+    </script>
+</body>
+</html>

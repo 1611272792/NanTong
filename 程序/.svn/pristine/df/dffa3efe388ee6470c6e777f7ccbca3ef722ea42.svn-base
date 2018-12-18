@@ -1,0 +1,196 @@
+﻿using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ProjectController : Controller
+    {
+        // GET: Project
+        public ActionResult Index()
+        {
+            //获取产品信息
+            DataTable info = SqlDbHelper.ExecuteDataTable("SELECT * FROM dbo.tb_Project");
+            if (info?.Rows.Count > 0)
+            {
+                for (int i = 0; i < info.Rows.Count; i++)
+                {
+                        info.Rows[i]["ProjectSizeNos"] = getFieldsName(info.Rows[i]["ProjectSizeNos"].ToString());
+                  
+                }
+                    ViewBag.pinfo = info;
+            }
+            else
+            {
+                ViewBag.pinfo = null;
+            }
+            //获取规格信息
+            //string sqlStr = string.Format("SELECT AllocationID,AllocationName,AllocationTitle FROM dbo.Allocation WHERE Type='pro'");
+            string sqlStr = string.Format("SELECT * FROM dbo.tb_ProjectSize");
+            DataTable ds = SqlDbHelper.ExecuteDataTable(sqlStr);
+            if (ds?.Rows.Count > 0)
+            {
+                ViewBag.pro = ds;
+            }
+            else
+            {
+                ViewBag.pro = null;
+            }
+            return View();
+        }
+
+        #region 添加区域
+        /// <summary>
+        /// 添加区域
+        /// </summary>
+        /// <param name="ProcessName">区域名</param>
+        /// <param name="NextProcessId">下一个区域id</param>
+        /// <returns></returns>
+        public ActionResult AddProcess(string ProcessName, string FieldsID)
+        {
+            #region 验证
+            if (string.IsNullOrWhiteSpace(ProcessName.Trim()))
+            {
+                return Content("区域名不能为空！");
+            }
+            if (string.IsNullOrWhiteSpace(FieldsID.Trim()))
+            {
+                return Content("请选择工序！");
+            }
+            #endregion
+
+            FieldsID = FieldsID.TrimStart(',');
+
+            string str = string.Format($@"INSERT INTO dbo.tb_Project 
+        (ProjectName, ProjectSizeNos)
+VALUES(N'{ProcessName}', --ProjectName - nvarchar(200)
+          N'{FieldsID}'-- ProjectSize - nvarchar(200)
+          )");
+            int info = SqlDbHelper.ExecuteNonQuery(str);
+            if (info > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("添加失败");
+            }
+        }
+        #endregion
+
+        #region 删除区域
+        /// <summary>
+        /// 删除区域
+        /// </summary>
+        /// <param name="ProcessId">区域Id</param>
+        /// <returns></returns>
+        public ActionResult DelProcess(string ProcessId)
+        {
+            if (string.IsNullOrWhiteSpace(ProcessId))
+            {
+                return Content("产品id为空");
+            }
+            string ProcessIds = ProcessId.Trim(',');
+            string str = string.Format($"DELETE dbo.tb_Project WHERE ProjectId IN({ProcessIds})");
+            //获取第一个工序中的状态信息
+            int delcstate = SqlDbHelper.ExecuteNonQuery(str);
+            if (delcstate > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        #region 获取需要编辑的区域信息
+        /// <summary>
+        /// 获取需要编辑的区域信息
+        /// </summary>
+        /// <param name="PId">区域Id</param>
+        /// <returns></returns>
+        public ActionResult GetUpdProcessInfo(int PId)
+        {
+            if (string.IsNullOrWhiteSpace(PId.ToString()))
+            {
+                return Content("区域id不能为空");
+            }
+           
+            DataTable ProcessInfo = SqlDbHelper.ExecuteDataTable($"SELECT * FROM dbo.tb_Project WHERE ProjectId={PId}");
+            if (ProcessInfo?.Rows.Count > 0)
+            {
+                string ProcessId = ProcessInfo.Rows[0]["ProjectId"].ToString();
+                string ProcessName = ProcessInfo.Rows[0]["ProjectName"].ToString();
+                string FieldsId = ProcessInfo.Rows[0]["ProjectSizeNos"].ToString();
+                return Content(ProcessId + "." + ProcessName + "."+ FieldsId);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        #endregion
+
+        #region 编辑区域
+        /// <summary>
+        /// 编辑区域
+        /// </summary>
+        /// <param name="ProcessName">区域名称</param>
+        /// <param name="NextProcessId">下个区域Id</param>
+        /// <returns></returns>
+        public ActionResult EditProcess(int ProcessId, string ProcessName, string FieldsID)
+        {
+            #region 验证
+            if (string.IsNullOrWhiteSpace(ProcessId.ToString().Trim()))
+            {
+                return Content("区域id不能为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProcessName.Trim()))
+            {
+                return Content("区域名不能为空");
+            }
+            #endregion
+            FieldsID = FieldsID.TrimStart(',');
+            int info = SqlDbHelper.ExecuteNonQuery($@" 
+ UPDATE dbo.tb_Project SET ProjectName = '{ProcessName}', ProjectSizeNos = '{FieldsID}' WHERE ProjectId = {ProcessId}");
+            if (info > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// 获取规格id对应的规格名称
+        /// </summary>
+        /// <param name="fieldsId"></param>
+        /// <returns></returns>
+        public string getFieldsName(string fieldsId)
+        {
+            string FieldsName = "";
+            string strSql = string.Format($"SELECT * FROM dbo.tb_ProjectSize WHERE ProjectSizeNo in({fieldsId})");
+            //string strSql = string.Format($"EXEC proc_ProcessSet @strType='GetProName',@someField={fieldsId}");
+            DataTable ds = SqlDbHelper.ExecuteDataTable(strSql);
+            if (ds?.Rows.Count > 0)
+            {
+                for (int i = 0; i < ds.Rows.Count; i++)
+                {
+                    FieldsName += ds.Rows[i]["ProjectSizeName"] + ",";
+                }
+                
+            }
+            return FieldsName.TrimEnd(',');
+        }
+    }
+}   

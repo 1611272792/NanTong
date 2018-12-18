@@ -1,0 +1,57 @@
+﻿@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style>
+    th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+        <!--所有的产品信息-->
+   <!--所有的产品信息-->
+@if (ViewBag.AllPdInfo == null)
+{
+    <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+        <tr>
+            <th><input type="checkbox" style="width:20px;height:20px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span>&nbsp;全选</span></th>
+            <th>序号</th>
+            <th>项目编号</th>
+            <th>项目名称</th>
+            <th>产品名称</th>
+            <th>产品规格</th>
+            <th>客户名称</th>
+            <th>操作</th>
+        </tr>
+    </table>
+}
+else
+{
+    DataTable pd = ViewBag.AllPdInfo;
+    <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+        <tr style="font-size:18px;vertical-align:middle">
+            <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+            <th>序号</th>
+            <th>项目编号</th>
+            <th>项目名称</th>
+            <th>产品名称</th>
+            <th>产品规格</th>
+            <th>客户名称</th>
+            <th>操作</th>
+        </tr>
+        @for (int i = 0; i < pd.Rows.Count; i++)
+                {
+            <tr class="tr1">
+                <td><input type="checkbox" name="cks" class="ckstyle check" value="@pd.Rows[i]["ProductId"]" /></td>
+                <td>@pd.Rows[i]["XH"]</td>
+                <td>@pd.Rows[i]["ProductNo"]</td>
+                <td>@pd.Rows[i]["ProductName"]</td>
+                <th>@pd.Rows[i]["ProjectName"]</th>
+                <th>@pd.Rows[i]["ProjectSizeName"]</th>
+                <th>@pd.Rows[i]["Customer"]</th>
+                <td>
+                    <a onclick="GetUpdProductInfo(@pd.Rows[i]["ProductId"])" href="#" data-toggle="modal" data-target="#UpdProduct">编辑</a>
+                    <a onclick="DelProduct(@pd.Rows[i]["ProductId"])" href="#" data-toggle="modal" data-target="#DelOneProduct">删除</a>
+                </td>
+            </tr>
+        }
+    </table>
+}

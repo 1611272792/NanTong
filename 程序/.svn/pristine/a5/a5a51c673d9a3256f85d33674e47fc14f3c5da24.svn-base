@@ -1,0 +1,107 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/BtnStyle/StyleSheet1.css" rel="stylesheet" />
+</head>
+<body>
+    <div>
+        <form method="post" action="/UserInfo/Index" enctype="multipart/form-data">
+            <div class="panel panel-primary">
+                <div class="panel-heading">头像上传</div>
+                <div class="panel-body">
+                    
+                    
+                    <table>
+                        <tr>
+                            <td>姓名</td>
+                            <td>@Session["UserName"].ToString()</td>
+                        </tr>
+                        <tr>
+                            <td>选择头像</td>
+                            <td>
+                                <input id="File1" name="imgUrl" type="file" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="submit" id="bao" class="btn btn-info" value="保存" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                @*<div class="panel panel-footer">
+                    <span style="font-weight:bolder;color:red;">
+                        @{
+                            if (ViewBag.mess == null)
+                            {
+                                <span>请上传您的头像</span>
+                            }
+                            else
+                            {
+                                if (ViewBag.mess == "ok")
+                                {
+                                    <span>上传成功</span>
+                                }
+                                else if (ViewBag.mess == "no")
+                                {
+                                    <span>上传失败</span>
+                                }
+                                else if (ViewBag.mess == "buok")
+                                {
+                                    <span>图片类型不符合</span>
+                                }
+                                else if (ViewBag.mess == "selecct")
+                                {
+                                    <span>请选择头像</span>
+                                }
+                                else
+                                {
+
+                                }
+                                
+                            }
+                        }
+                    </span>
+
+                </div>*@
+            </div>
+            <input id="Hidden1" value="@ViewBag.mess" type="hidden" />
+        </form>
+
+    </div>
+    <script type="text/javascript">                
+        var message = $("#Hidden1").val();
+        //alert("message:" + message);
+        if (message == "ok") {
+            alert("上传成功！");
+            top.location = parent.location;
+        }
+        else if (message == "no"){
+            alert("上传失败！");
+        }
+        else if (message == "buok") {
+            alert("上传图片类型不符合！");
+        }
+        else if (message == "selecct") {
+            alert("请选择要上传的头像！");
+        }
+        else {
+            //undefined
+            //第一次为空
+        }            
+    </script>
+
+</body>
+</html>

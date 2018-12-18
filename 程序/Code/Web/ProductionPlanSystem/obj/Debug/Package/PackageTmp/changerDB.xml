@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<system>
+  <DBServer>localhost</DBServer>
+  <UserID>sa</UserID>
+  <Pwd>
+  </Pwd>
+  <DBName>LightCtrl</DBName>
+  <ComSet>
+    <SeriPort>COM1</SeriPort>
+    <BaudRate>19200</BaudRate>
+    <DataBits>8</DataBits>
+    <Parity>��</Parity>
+    <StopBits>1</StopBits>
+  </ComSet>
+</system>

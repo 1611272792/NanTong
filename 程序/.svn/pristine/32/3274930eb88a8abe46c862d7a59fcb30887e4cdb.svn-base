@@ -1,0 +1,180 @@
+﻿using Newtonsoft.Json;
+using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using XP_PPS_Model.Model;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class QualityTestController : Controller
+    {
+
+        static string urlPath = string.Empty;
+        public QualityTestController()
+        {
+            var applicationPath = VirtualPathUtility.ToAbsolute("~") == "/" ? "" : VirtualPathUtility.ToAbsolute("~");
+            urlPath = applicationPath + "/Upload";
+
+        }
+        // GET: QualityTest
+        public ActionResult Index()
+        {
+            //首页加载的时候给项目下拉框赋值
+            DataTable dt = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjinfo'");
+            if (dt?.Rows.Count>0)
+            {
+                ViewBag.pjinfo = dt;
+            }
+            else
+            {
+                ViewBag.pjinfo = null;
+            }
+
+            //获取区域信息
+            DataTable info = SqlDbHelper.ExecuteDataTable("EXEC proc_Project @strType='allprocess'");
+            if (info?.Rows.Count > 0)
+            {
+                ViewBag.prinfo = info;
+            }
+            else
+            {
+                ViewBag.prinfo = null;
+            }
+            ViewBag.QTInfo = null;
+            return View();
+        }
+
+        /// <summary>
+        /// 根据项目Id获取对应的产品信息
+        /// </summary>
+        /// <param name="ProjectId">项目Id</param>
+        /// <returns>返回Json格式的产品信息</returns>
+        public string GetProductSelInfo(int ProjectId)
+        {
+            DataTable dt = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjpdinfo',@ProjectId={ProjectId}");
+            string Json = "";
+            if (dt?.Rows.Count>0)
+            {
+              Json = JsonConvert.SerializeObject(dt);
+            }
+            else
+            {
+                Json = null;
+            }
+            return Json;
+        }
+
+        /// <summary>
+        /// 分部视图获取质检信息
+        /// </summary>
+        /// <param name="ProjectId">项目Id</param>
+        /// <param name="ProductId">产品Id</param>
+        /// <param name="AllocationId">工序Id</param>
+        /// <param name="OSTime">计划开始时间</param>
+        /// <param name="OETime">计划结束时间</param>
+        /// <param name="ISTime">实际开始时间</param>
+        /// <param name="IETime">实际结束时间</param>
+        /// <returns></returns>
+        public ActionResult GetDetailInfo(string ProjectId, string ProductId, string AllocationId,string OSTime,string OETime,string ISTime,string IETime)
+        {
+            DataTable dt= SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_QualityTest] @strType = 'GetQTInfo',@ProjectId='{ProjectId}',@ProductId='{ProductId}',@AllocationId='{AllocationId}',@OSTime='{OSTime}',@OETime='{OETime}',@ISTime='{ISTime}',@IETime='{IETime}'");
+            if (dt?.Rows.Count>0)
+            {
+                ViewBag.QTInfo = dt;
+            }
+            else
+            {
+                ViewBag.QTInfo = null;
+            }
+            return PartialView("_QTInfo",dt);
+        }
+
+
+        public ActionResult UpLoadProcess(string id, string name, string type, string lastModifiedDate, int size, HttpPostedFileBase file)
+        {
+            string filePathName = string.Empty;
+
+            string localPath = Path.Combine(HttpRuntime.AppDomainAppPath, "Upload");
+            if (Request.Files.Count == 0)
+            {
+                return Json(new { jsonrpc = 2.0, error = new { code = 102, message = "保存失败" }, id = "id" });
+            }
+
+            string ex = Path.GetExtension(file.FileName);
+            filePathName = Guid.NewGuid().ToString("N") + ex;
+            if (!System.IO.Directory.Exists(localPath))
+            {
+                System.IO.Directory.CreateDirectory(localPath);
+            }
+            file.SaveAs(Path.Combine(localPath, filePathName));
+
+            return Json(new
+            {
+                jsonrpc = "2.0",
+                id = id,
+                filePath = urlPath + "/" + filePathName
+            });
+
+        }
+
+        /// <summary>
+        /// 添加质检信息
+        /// </summary>
+        /// <param name="ProjectId">项目Id</param>
+        /// <param name="ProductId">产品Id</param>
+        /// <param name="AllocationId">工序Id</param>
+        /// <param name="PhotoUrlArray">上传图片的数组</param>
+        /// <returns></returns>
+        public ActionResult AddQTTest(string PlanId,string ProjectId, string ProductId,string ProcessId, string AllocationId, string QualityResult, string QualityContent, List<PhotoArr> PhotoUrlArray)
+        {
+            string urls = "";
+            string QTTime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+            if (PhotoUrlArray == null)
+            {
+                urls = null;
+            }
+            else
+            {
+                for (int i = 0; i < PhotoUrlArray.Count; i++)
+                {
+                    urls += PhotoUrlArray[i].filePath + ",";
+                }
+            }
+            int add = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_QualityTest] @strType = 'addQTTest',@PlanId='{PlanId}',@ProjectId='{ProjectId}',@ProductId='{ProductId}',@ProcessId={ProcessId},@AllocationId='{AllocationId}',@QualityResult='{QualityResult}',@QualityContent='{QualityContent}',@QTTime='{QTTime}',@PhotoUrls='{urls}'");
+            if (add > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+
+        /// <summary>
+        /// 通过
+        /// </summary>
+        /// <param name="QId"></param>
+        /// <returns></returns>
+        public string ShowPhoto(string QId)
+        {
+            DataTable dt = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_QualityTest] @strType = 'GetPhoto',@QId={QId}");
+            string Json = "";
+            if (dt?.Rows.Count>0)
+            {
+                string [] PhotoArr= dt.Rows[0].Field<string>("PhotoUrls").TrimEnd(',').Split(',');
+                 Json= JsonConvert.SerializeObject(PhotoArr);
+            }
+            else
+            {
+                Json = null;
+            }
+            return Json;
+        }
+    }
+}

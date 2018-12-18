@@ -1,0 +1,178 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using Newtonsoft.Json;
+using XP_PPS_Model;
+using XP_PPS_DAL;
+using System.Data;
+using System.Text;
+using System.IO;
+using ProductionPlanSystem.nfine.Code;
+using ProductionPlanSystem.Help;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class MainController : BaseController
+    {
+
+        // GET: Main
+        public ActionResult Index()
+        {
+            //if (Session["UserId"] == null)
+            //{
+            //    return Content("<script>top.location = '/Login/Index';</script>");
+            //}
+            //else
+            //{
+                string sql = string.Format("select * from FirmInfo where FirmInfoID=1");
+                DataTable dt = ServerOrLit.isDataTable(LoginController.connType, sql);
+
+                //DataTable dt =LoginController.connType == "sqlserver" ? SqlDbHelper.ExecuteDataTable(sql) : DALHelp.ExecuteDataTable(sql, null);
+            
+                if (dt.Rows.Count > 0)
+                {
+                    ViewBag.company = dt;
+                }
+                return View();
+            //}
+        }
+        //欢迎
+        public ActionResult Welcome()
+        {
+            return View();
+        }
+
+
+        //数据
+        //[HttpGet]
+        public ActionResult GetClientsDataJson()
+        {
+            //WriteLog("GetClientsDataJson");
+            try
+            {
+                var data = new
+                {
+
+                    authorizeMenu = this.GetMenuList()
+                };
+                return Content(data.ToJson());
+            }
+            catch (Exception ex)
+            {
+                WriteLog(ex.Message);
+                throw;
+            }
+        }
+
+        //获取菜单栏
+        public object GetMenuList()
+        {
+            string Role;
+            string userId;
+            if (Session["Role"] == null || Session["UserInfoID"] == null)
+            {
+                return "no";
+            }
+            else
+            {
+                Role = Session["Role"].ToString();
+                userId = Session["UserInfoID"].ToString();
+            }
+            string sqlstr3 = string.Format("select * from UserGroups where UserGroupsId=(select UserGroupsID from UserInfo where UserInfoID='{0}')", userId);
+            string sqlstr = "";
+            string sqlstr2 = "";
+
+            if (Role == AppConfig.Role)
+            {
+                sqlstr = string.Format("select * from Author where U_ID !=0 and IsActive=1");
+                sqlstr2 = string.Format("select * from Author where AuthorId in(select U_ID from Author where U_ID !=0) and IsActive=1");
+            }
+            else
+            {
+                //DataTable dt3 = LoginController.connType == "sqlserver" ? SqlDbHelper.ExecuteDataTable(sqlstr3) : DALHelp.ExecuteDataTable(sqlstr3, null);
+                DataTable dt3 = ServerOrLit.isDataTable(LoginController.connType, sqlstr3);
+
+                string UserGroupId = "";
+                string AuthorId = "";
+                if (dt3.Rows.Count > 0)
+                {
+                    UserGroupId = dt3.Rows[0]["UserGroupsId"].ToString();
+                    Session["UserGroupId"] = UserGroupId;
+                    AuthorId = dt3.Rows[0]["AuthorId"].ToString();
+                }
+                //string sqlstr = string.Format("select * from tb_Author where AuthorId in(7,11,14,15)");
+                AuthorId = AuthorId.Substring(1, AuthorId.Length - 2);
+
+                sqlstr = string.Format("select * from Author where AuthorId in({0}) and U_ID !=0 and IsActive=1", AuthorId);
+                sqlstr2 = string.Format("select * from Author where AuthorId in(select U_ID from Author where AuthorId in({0}) and U_ID !=0) and IsActive=1", AuthorId);
+            }
+
+            DataTable dt4 = ServerOrLit.isDataTable(LoginController.connType, sqlstr);
+
+            DataTable dt5 = ServerOrLit.isDataTable(LoginController.connType, sqlstr2);
+     
+            List<Author> menulist = new List<Author>();
+            for (int i = 0; i < dt4.Rows.Count; i++)
+            {
+                Author m = new Author();
+                m.AuthorId = int.Parse(dt4.Rows[i]["AuthorID"].ToString());
+                m.AuthorName = dt4.Rows[i]["AuthorName"].ToString();
+                m.p_id = int.Parse(dt4.Rows[i]["U_ID"].ToString());
+                m.url = dt4.Rows[i]["AuthorURL"].ToString();
+                m.Serial = int.Parse(dt4.Rows[i]["Serial"].ToString());
+                menulist.Add(m);
+            }
+            for (int i = 0; i < dt5.Rows.Count; i++)
+            {
+                Author m = new Author();
+                m.AuthorId = int.Parse(dt5.Rows[i]["AuthorID"].ToString());
+                m.AuthorName = dt5.Rows[i]["AuthorName"].ToString();
+                m.p_id = int.Parse(dt5.Rows[i]["U_ID"].ToString());
+                m.url = dt5.Rows[i]["AuthorURL"].ToString();
+                m.image = dt5.Rows[i]["image"].ToString();
+                m.Serial = int.Parse(dt5.Rows[i]["Serial"].ToString());
+                menulist.Add(m);
+            }
+            return ToMenu(menulist, 0);
+        }
+
+
+        //转换为json数据
+        public string ToMenu(List<Author> data, int pid)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[");
+            //查出所有的父节点
+            List<Author> FmenuList = data.Where(m => m.p_id == pid).OrderBy(s => s.Serial).ToList();
+            if (FmenuList.Count > 0)
+            {
+                foreach (var item in FmenuList)
+                {
+                    string strJson = JsonConvert.SerializeObject(item);
+                    //for (int i = 0; i < dt.Rows.Count; i++)
+                    //{
+                    strJson = strJson.Insert(strJson.Length - 1, ",\"ChildNodes\":" + ToMenu(data, item.AuthorId) + "");
+                    sb.Append(strJson + ",");
+                    //}
+
+                }
+                sb = sb.Remove(sb.Length - 1, 1);
+            }
+            sb.Append("]");
+            return sb.ToString();
+        }
+        //日志
+        private void WriteLog(string strmsg)
+        {
+            strmsg = $"{strmsg}\r\n";
+            using (FileStream fs = System.IO.File.Open("D:\\1.txt", FileMode.Append, FileAccess.Write, FileShare.Write))
+            {
+                byte[] bys = Encoding.Default.GetBytes(strmsg);
+                fs.Write(bys, 0, bys.Length);
+                fs.Close();
+            }
+        }
+    }
+}

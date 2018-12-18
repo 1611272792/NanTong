@@ -1,0 +1,600 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>权限设置</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/UI/jquery.easyui.min.js"></script>
+    <link href="~/Content/UI/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/UI/themes/icon.css" rel="stylesheet" />
+    <script src="~/Content/UI/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style>
+                .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+        .ahover {
+            cursor: pointer;
+        }
+
+        .hovers {
+            /*background-color: #b5b5b5;*/
+        }
+
+        th {
+            text-align:center;
+        }
+        .tree {
+            margin-top:5px;
+            margin-bottom:12px;
+        }
+        #btn_update_UserGroup {
+            margin-left:25px;
+        }
+
+        td {
+            cursor:pointer;
+        }
+
+        th {
+            text-align:center;
+        }
+        .pd {
+            padding-left:0px;
+        }
+    </style>
+    </head>
+<body>
+    <div>
+        @if (ViewBag.usergroup != null)
+        {
+            DataTable dt = ViewBag.usergroup;
+            <div class="col-lg-6 pd">
+                <p>
+                    <button class="btn btn-info" data-toggle="modal" data-target="#Add_Modal_UserGroup">
+                        <img class="buttonicon" src="~/Content/Icon/添加图标.png" />
+                        添加组
+                    </button>
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#Delete_Modal_UserGroup" id="delete_UserGroup">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png" />
+                        批量删除
+                    </button>
+                </p>
+
+
+                @if (dt.Rows.Count > 0)
+                {
+                    <table class="table table-bordered table-hover text-center" style="width:100%">
+                        <tr style="font-size:18px;vertical-align:middle">
+                            <th style="width: 200px;"><input type="checkbox" style="width: 30px;height:20px;margin-left: 68px;text-align:center;" id="checkAll" name="checkAll" onchange="GetAll()" /><span style="display: block;float:right;margin-right: 30px;">全选</span></th>
+                            <th>
+                                组名
+                            </th>
+                            <th>
+                                操作
+                            </th>
+                        </tr>
+
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            if (dt.Rows[i]["UserGroupsName"].ToString() == "管理员")
+                            {
+                                <tr style="height:46px;background-color:#f9f9f9;">
+                                    <td></td>
+                                    <td class="a">@dt.Rows[i]["UserGroupsName"].ToString()</td>
+                                    <td>       
+                                        <input type="hidden" value="@dt.Rows[i]["UserGroupsID"]" class="UserGroupsId" />                                
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td><input type="checkbox" name="checkAll" class="check" value="@dt.Rows[i]["UserGroupsId"]" style="width:20px;height:20px;" /></td>
+                                    <td class="a">@dt.Rows[i]["UserGroupsName"].ToString()</td>
+                                    <td>
+                                        <a class="ahover" onclick="EditUser(@dt.Rows[i]["UserGroupsID"])" data-toggle="modal" data-target="#Edit_Modal_UserGroupManager">编辑</a>
+                                        <a class="ahover" onclick="DeleteByOnce(@dt.Rows[i]["UserGroupsID"])">删除</a>
+                                        <input type="hidden" value="@dt.Rows[i]["UserGroupsID"]" class="UserGroupsId" />
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                }
+            </div>
+            <div class="col-lg-6" id="edit" style="border:1px #e6e2e2 solid;width:250px;margin-top:43px;">
+                <ul id="tree2"></ul>
+                <input type="hidden" value="1" id="gid" />
+                <input type="hidden" value="@dt.Rows[0]["UserGroupsName"]" id="gName" />
+                @*<p><button id="btn_update_UserGroup" class="btn btn-info">确认修改</button></p>*@
+            </div>
+        }
+        else
+        {
+            <p>无记录，请<button class="btn btn-info" data-toggle="modal" data-target="#Add_Modal_UserGroup">添加组</button></p>
+        }
+    </div>
+    @*</div>
+        </div>*@
+    @*添加用户组模态窗体*@
+    <div class="modal fade" id="Add_Modal_UserGroup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" style="color:white;">添加用户组</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>组名：</td>
+                            <td><input type="text" class="form-control" id="UserGroupsName" /></td>
+                        </tr>
+                        <tr>
+                            <td>权限：</td>
+                            <td>
+                                <div style="width:250px;text-align:left;">
+                                    <ul id="tree"></ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-primary" id="btn_add_UserGroup">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        添加
+                    </a>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+    @*编辑模态窗体*@
+    <div class="modal fade" id="Edit_Modal_UserGroupManager" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" style="color:white;">编辑用户组</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>组名：</td>
+                            <td class="bianju">
+                                <input type="hidden" class="form-control" id="UserGroupsId_edit" disabled="disabled" />
+                                <input type="text" class="form-control" id="UserGroupsName_edit" />
+                            </td>
+                        </tr>
+                        @*<tr>
+                            <th>编辑权限：</th>
+                            <td class="bianju">
+
+                                <input type="radio" id="you_edit" name="radio2" value="1" checked="checked" />
+                                有
+                                <input type="radio" id="wu_edit" name="radio2" value="0" />
+                                无
+                            </td>
+                        </tr>*@
+                        <tr>
+                            <td>权限：</td>
+                            <td class="bianju" style="text-align:left">
+                                <div style="width:250px;text-align:left;">
+                                    <ul id="edit_AuthorId"></ul>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default quxiao" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-info" id="btn_Edit_ok">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        保存
+                    </a>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+    <script src="~/Content/js/checkAlljs.js"></script>
+    <script>
+        $(function () {
+            var gid = 1;
+            $("#tree").tree({
+                url: "/UsergroupManager/GetClientsDataJson",
+                //data:[{"id":1,"text":"用户管理","children":[{"id":5,"text":"员工管理"},{"id":6,"text":"用户组管理"},]},{"id":2,"text":"设备管理","children":[{"id":7,"text":"车间管理"},{"id":8,"text":"产线管理"},{"id":9,"text":"按钮盒管理"},{"id":10,"text":"按钮盒权限管理"},{"id":11,"text":"状态监控"},{"id":12,"text":"报警等级权限"},]},{"id":3,"text":"报表查询","children":[{"id":13,"text":"常规数据报表"},{"id":14,"text":"车间/产线报表异常"},{"id":15,"text":"异常类型报表"},]},{"id":4,"text":"系统设置","children":[{"id":16,"text":"报警种类设置"},{"id":17,"text":"报警通知设置"},{"id":18,"text":"声光报警设置"},{"id":19,"text":"显示屏信息推送"},{"id":20,"text":"数据库管理"},{"id":21,"text":"终端管理"},]},],
+                checkbox:true,
+                onClick: function (node) {
+                    //获取父节点
+                    var par = $("#tree").tree("getParent", node.target);
+                    if (par == null) {
+                        //是父节点
+                        $("#tree").tree("toggle", node.target);
+
+                    }
+                    else {
+                        //不是父节点
+                        if (node.url != null) {
+                            window.location.href = node.url;
+
+                        }
+                        //else {
+                        //    window.alert("此页面不存在");
+                        //}
+                    }
+                }
+            })
+            $("#tree2").tree({
+                url: "/UsergroupManager/GetClientsDataJson2",
+                checkbox: true,
+
+            })
+
+            //添加用户组
+            $("#btn_add_UserGroup").click(function () {
+                //alert("添加");
+                //组名
+                var UserGroupsName1= $("#UserGroupsName").val();
+                var nodes = $('#tree').tree('getChecked');
+                var AuthorName1 = ",";
+                for (var i = 0; i < nodes.length; i++) {
+                    //alert(nodes[i].text);
+                    AuthorName1 += nodes[i].id + ",";
+                }
+                $.post("/UsergroupManager/AddGroup", { UserGroupsName: UserGroupsName1, AuthorName: AuthorName1 }, function (data) {
+                    if(data=="添加成功")
+                    {
+                        document.location.reload();
+                    }
+                    else
+                    {
+                        alert(data);
+                    }                    
+                })
+
+
+            })
+
+            //修改用户组
+            $("#btn_update_UserGroup").click(function () {
+                //用户组id
+                var gid = $("#gid").val();
+                //用户组名称
+                var gName = $("#gName").val();
+              // alert("修改的："+gName);
+                //得到权限id
+                var nodes = $('#tree2').tree('getChecked');
+                var AuthorName1 = ",";
+                for (var i = 0; i < nodes.length; i++) {
+                    //alert(nodes[i].text);
+                    AuthorName1 += nodes[i].id + ",";
+                }
+                //alert(AuthorName1);
+                $.post("/UsergroupManager/UpdateGroup", { UserGroupsName: gName, AuthorName: AuthorName1, AuthorId: gid }, function (data) {
+                    if(data=="修改成功")
+                    {
+                        document.location.reload();
+                    }
+                    else
+                    {
+                        alert(data);
+                    }           
+                })
+            })
+
+            //删除(全选或多选)
+            $("#delete_UserGroup").click(function () {
+                var msg = "您真的确定要删除吗？\n\n请确认！";
+                if (confirm(msg) == true) {
+                    //如果全选被选中，那么就全部删除
+                    //var che = document.getElementById("checkAll");
+
+                    var che = document.getElementsByClassName("check");
+                    var cheValue = "";//获取选中的id
+                    for (var i = 0; i < che.length; i++) {
+                        if (che[i].checked) {
+                            cheValue += che[i].value + ",";
+                        }
+                    }
+                    if (cheValue=="") {
+                        alert("请先选择删除项");
+                    }
+                    //alert("s:" + s);
+                    else{
+                        $.post("/UsergroupManager/DeleteGroup", { groupId: cheValue }, function (data) {                            
+                            if(data=="删除成功")
+                            {
+                                document.location.reload();
+                            }
+                            else
+                            {
+                                alert(data);
+                            }           
+                        })
+                    }
+
+
+                    //if (che.checked) {
+                    //    alert("全部删除");
+                    //}
+                    //else {
+                    //    //获取选中的id，删除对应的id
+
+
+                    //}
+
+
+                    return true;
+                } else {
+                    return false;
+                }
+            })
+
+
+
+            ////编辑文本框和查看详情
+            //$("td.a").click(function () {
+            //    $("tr").removeClass("hovers");
+            //    $(this).parent("tr").addClass("hovers");
+            //    //用户组id
+            //    var aa= $(this).html();
+            //    $("#gName").val(aa);
+            //    var usergrid = $(this).siblings().find(".UserGroupsId").val();
+            //     $("#gid").val(usergrid);
+            //     var gid = $("#gid").val();
+            //    // alert("gid"+gid);
+            //     //把获取到的gid给隐藏的标签，为了让修改时得到数据
+
+            //     $("#tree2").removeData();
+
+            //        $("#tree2").tree({
+            //            url: "/UsergroupManager/GetClientsDataJson2?usergrid="+usergrid,
+            //            checkbox: true,
+
+            //        })
+            //    if ($(this).children("input.gname").length > 0) {
+            //        //代表是input
+            //        //gName = $(this).children("input.gname").val();
+
+            //        return false;
+            //    }
+            //    else {
+
+            //    }
+            //    var tdObj = $(this);
+
+            //    //得到当前文本内容
+            //    var preText = tdObj.html();
+
+            //    //创建一个文本框元素
+            //    var inputObj = $("<input type='text' class='gname'/>");
+
+            //    tdObj.html("");
+            //    inputObj.width(300)
+            //    .height(tdObj.height())
+            //    .css({ border: "0px", fontsize: "17px", font: "宋体" })
+
+            //    .val(preText)
+            //        //把创建的文本框插入到tdObj子节点的最后
+            //    .appendTo(tdObj)
+
+            //    .trigger("focus")
+            //    .trigger("select");
+
+
+            //    inputObj.keyup(function (event) {
+            //        if (13 == event.which) {
+            //            //用户按enter键就是输入的内容
+            //            var text = $(this).val();
+            //            tdObj.html(text);
+
+            //        }
+            //        else if (27 == event.which) {
+            //            //按esc就是原值
+            //            tdObj.html(preText);
+            //        }
+
+            //        var abc = $(this).val();
+            //        //alert("abc" + abc);
+            //        $("#gName").val(abc);
+            //        var gname = $("#gName").val();
+            //    });
+
+
+            //    inputObj.click(function () {
+            //        return false;
+            //    })
+
+
+            //})
+
+            
+            //编辑文本框和查看详情
+            $("td").click(function () {
+                debugger;
+                $("tr").removeClass("hovers").addClass("ahover");
+                $(this).parent("tr").addClass("hovers").addClass("ahover");
+                ////用户组id
+                //var aa= $(this).html();
+                //$("#gName").val(aa);
+                var usergrid = $(this).siblings().find(".UserGroupsId").val();
+                if (usergrid!=""&&usergrid!=null) {
+                    $("#tree2").tree({
+                        url: "/UsergroupManager/GetClientsDataJson2?usergrid="+usergrid,
+                        checkbox: true,
+
+                    })
+                }
+
+                //$("#tree2").removeData();
+              
+
+            })
+        })
+        //单个删除
+        function DeleteByOnce(gid) {
+            var msg = "您真的确定要删除吗？\n\n请确认！";
+            if (confirm(msg) == true) {
+                var cheValue=gid+",";
+                $.post("/UsergroupManager/DeleteGroup", { groupId: cheValue }, function (data) {
+                    if(data=="删除成功")
+                    {
+                        document.location.reload();
+                    }
+                    else
+                    {
+                        alert(data);
+                    }           
+                })
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+
+
+        //编辑显示数据
+        function EditUser(gid) {
+            if (gid == "") {
+                alert("没有获取到需要编辑的数据");
+                return false;
+            }
+            $.post("/UsergroupManager/SelectEditData",{gid:gid},function(data){
+                var info=data.split('/');
+                $("#UserGroupsId_edit").val(info[0]);
+                $("#UserGroupsName_edit").val(info[1]);                
+                $("#edit_AuthorId").tree({
+                    url: "/UsergroupManager/GetClientsDataJson2?usergrid="+gid,
+                    checkbox: true,
+
+                })
+            })            
+        }
+
+        //编辑
+        $("#btn_Edit_ok").click(function(){
+            var gid=$("#UserGroupsId_edit").val();
+            //组名
+            var UserGroupsName_edit = $("#UserGroupsName_edit").val();
+            var Editvar = document.getElementsByName("radio2");
+            var Isedit;
+            for (var i = 0; i < Editvar.length; i++) {
+                if (Editvar[i].checked) {
+                    Isedit = Editvar[i].value
+                }
+
+            }
+            //得到权限id
+            var nodes = $('#edit_AuthorId').tree('getChecked');
+            var AuthorName1 = ",";
+            for (var i = 0; i < nodes.length; i++) {
+                AuthorName1 += nodes[i].id + ",";
+            }
+            if (gid == "" || UserGroupsName_edit == "" || Isedit == "" || AuthorName1 == "") {
+                alert("不能为空");
+                return false;
+            }
+
+            $.post("/UsergroupManager/UpdateGroup", { UserGroupsName: UserGroupsName_edit, AuthorName: AuthorName1, AuthorId: gid }, function (data) {
+                if (data == "修改成功") {
+                    //alert("修改成功");
+                    document.location.reload();
+                }
+                else {
+                    alert(data);
+                }
+            })
+        })
+
+
+        /** 拖拽模态框*/
+        var dragModal = {
+            mouseStartPoint: { "left": 0, "top": 0 },
+            mouseEndPoint: { "left": 0, "top": 0 },
+            mouseDragDown: false,
+            basePoint: { "left": 250, "top": -250 },
+            moveTarget: null,
+            topleng: 0
+        }
+        $(document).on("mousedown", ".modal-header", function (e) {
+            //webkit内核和火狐禁止文字被选中
+            $('body').addClass('select')
+            //ie浏览器禁止文字选中
+            document.body.onselectstart = document.body.ondrag = function () {
+                return false;
+            }
+            if ($(e.target).hasClass("close"))//点关闭按钮不能移动对话框  
+                return;
+            dragModal.mouseDragDown = true;
+            dragModal.moveTarget = $(this).parent().parent();
+            dragModal.mouseStartPoint = { "left": e.clientX, "top": e.pageY };
+            dragModal.basePoint = dragModal.moveTarget.offset();
+            dragModal.topLeng = e.pageY - e.clientY;
+        });
+        $(document).on("mouseup", function (e) {
+            dragModal.mouseDragDown = false;
+            dragModal.moveTarget = undefined;
+            dragModal.mouseStartPoint = { "left": 0, "top": 0 };
+            dragModal.basePoint = { "left": 0, "top": 0 };
+        });
+        $(document).on("mousemove", function (e) {
+            if (!dragModal.mouseDragDown || dragModal.moveTarget == undefined) return;
+            var mousX = e.clientX;
+            var mousY = e.pageY;
+            if (mousX < 0) mousX = 0;
+            if (mousY < 0) mousY = 0;
+            dragModal.mouseEndPoint = { "left": mousX, "top": mousY };
+            var width = dragModal.moveTarget.width();
+            var height = dragModal.moveTarget.height();
+            var clientWidth = document.body.clientWidth
+            var clientHeight = document.body.clientHeight;
+            if (dragModal.mouseEndPoint.left < dragModal.mouseStartPoint.left - dragModal.basePoint.left) {
+                dragModal.mouseEndPoint.left = 0;
+            }
+            else if (dragModal.mouseEndPoint.left >= clientWidth - width + dragModal.mouseStartPoint.left - dragModal.basePoint.left) {
+                dragModal.mouseEndPoint.left = clientWidth - width - 38;
+            } else {
+                dragModal.mouseEndPoint.left = dragModal.mouseEndPoint.left - (dragModal.mouseStartPoint.left - dragModal.basePoint.left);//移动修正，更平滑  
+
+            }
+            //if (dragModal.mouseEndPoint.top - (dragModal.mouseStartPoint.top - dragModal.basePoint.top) < dragModal.topLeng) {
+            //    dragModal.mouseEndPoint.top = dragModal.topLeng;
+            //} else if (dragModal.mouseEndPoint.top - dragModal.topLeng > clientHeight - height + dragModal.mouseStartPoint.top - dragModal.basePoint.top) {
+            //    dragModal.mouseEndPoint.top = clientHeight - height - 38 + dragModal.topLeng;
+            //}
+            //else {
+            dragModal.mouseEndPoint.top = dragModal.mouseEndPoint.top - (dragModal.mouseStartPoint.top - dragModal.basePoint.top);
+            //}
+            dragModal.moveTarget.offset(dragModal.mouseEndPoint);
+        });
+        $(document).on('hidden.bs.modal', '.modal', function (e) {
+            $('.modal-dialog').css({ 'top': '0px', 'left': '0px' })
+            $('body').removeClass('select')
+            document.body.onselectstart = document.body.ondrag = null;
+        })
+    </script>
+</body>
+</html>

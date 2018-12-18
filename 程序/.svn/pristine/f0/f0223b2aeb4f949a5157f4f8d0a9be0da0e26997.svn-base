@@ -1,0 +1,213 @@
+﻿@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style type="text/css">
+    .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+        border-radius: 3px 4px;
+    }
+            ul li {
+           list-style: none;
+           margin-top:10px;
+           text-align:center;
+        }
+    #divshow {
+        display: none;
+    }
+
+    #barcon a {
+        text-decoration: none;
+    }
+
+    .barcon {
+        width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .barcon1 {
+        font-size: 17px;
+        float: left;
+        margin-top: 20px;
+    }
+
+    .barcon2 {
+        float: right;
+    }
+
+        .barcon2 ul {
+            margin: 20px 0;
+            padding-left: 0;
+            list-style: none;
+            text-align: center;
+        }
+
+        .barcon2 li {
+            display: inline;
+        }
+
+        .barcon2 a {
+            font-size: 16px;
+            font-weight: normal;
+            display: inline-block;
+            padding: 5px;
+            padding-top: 0;
+            color: black;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+            .barcon2 a:hover {
+                background-color: #eee;
+            }
+
+    .ban {
+        opacity: .4;
+    }
+
+    #reportta td {
+        padding-bottom: 5px;
+    }
+
+    .select {
+        -moz-user-select: none; /*火狐*/
+        -webkit-user-select: none; /*webkit浏览器*/
+        -ms-user-select: none; /*IE10*/
+        -khtml-user-select: none; /*早期浏览器*/
+        user-select: none;
+    }
+
+    .modal-header {
+        cursor: move;
+    }
+
+    /*table tr td {
+
+    }*/
+    table tr td {
+        padding-right: 5px;
+        max-width: 200px;
+        word-break: break-all;
+        word-wrap: break-word;
+    }
+
+
+    th {
+        text-align: center;
+        vertical-align: central;
+    }
+</style>
+<table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+    <tr>
+        <th>序号</th>
+        <th hidden="hidden">ID</th>
+        <th>项目编号</th>
+        <th>项目名称</th>
+        <th>产品名称</th>
+        <th>产品规格</th>
+        <th>所属区域</th>
+        <th>所属工序</th>
+        <th>质检时间</th>
+        <th>质检内容</th>
+        <th>质检结果</th>
+        <th>操作</th>
+    </tr>
+    @*数据*@
+    @if (ViewBag.QTInfo != null)
+            {
+                DataTable dt = ViewBag.QTInfo;
+        <tbody id="adminTbody">
+            @for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                <tr>
+
+
+                    @for (int j = 0; j < dt.Columns.Count; j++)
+                    {
+                        if (j == 1)
+                        {
+                            <td hidden="hidden">@dt.Rows[i][j].ToString()</td>
+                        }
+                        else if (j == 10)
+                        {
+                            if (dt.Rows[i][j].ToString() == "0")
+                            {
+                                <td>合格</td>
+                            }
+                            else
+                            {
+                                <td>不合格</td>
+                            }
+                        }
+                        else
+                        {
+                            <td>@dt.Rows[i][j].ToString()</td>
+                        }
+
+                    }
+                    <td><a href="javascript:void(0)" data-toggle="modal" data-target="#Photos" onclick="ShowPhoto(@dt.Rows[i][1].ToString())">查看图片</a></td>
+                </tr>
+            }
+        </tbody>
+            <tr>
+                @if (ViewBag.QTInfo != null)
+                {
+                    <td colspan="11">
+                        <div id="barcon" class="barcon">
+                            <input type="hidden" id="yeNums" value="" />
+                            <div id="barcon1" class="barcon1"></div>
+                            <div id="barcon2" class="barcon2">
+                                <ul>
+                                    <li><a href="###" id="firstPage">首页</a></li>
+                                    <li><a href="###" id="prePage">上一页</a></li>
+                                    <li><a href="###" id="nextPage">下一页</a></li>
+                                    <li><a href="###" id="lastPage">尾页</a></li>
+                                    <li>
+                                        <select id="jumpWhere"></select>
+                                    </li>
+                                    <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                }
+            </tr>
+    }
+    else
+    {
+        <tbody id="adminTbody"></tbody>
+            <tr>
+
+                <td colspan="11">
+                    <div id="barcon" class="barcon">
+                        <input type="hidden" id="yeNums" value="" />
+                        <div id="barcon1" class="barcon1"></div>
+                        <div id="barcon2" class="barcon2">
+                            <ul>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="firstPage">首页</a></li>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="prePage">上一页</a></li>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="nextPage">下一页</a></li>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="lastPage">尾页</a></li>
+                                <li>
+                                    <select id="jumpWhere" disabled="disabled"></select>
+                                </li>
+                                <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+    }
+</table>
+<label>质检总数：</label><label style="margin-right:15px;">@ViewBag.allCount</label>
+<label>合格次数：</label><label style="margin-right:15px;">@ViewBag.trueCount</label>
+<label>不合格次数：</label><label style="margin-right:15px;">@ViewBag.falseCount</label>
+<label>合格率：</label><label style="margin-right:15px;">@ViewBag.fpy </label>
+
+
+
+
+
+
+<script src="~/Scripts/diepage.js"></script>
+
+
+

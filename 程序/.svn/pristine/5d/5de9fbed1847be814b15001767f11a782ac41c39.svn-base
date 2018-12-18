@@ -1,0 +1,185 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap-datetimepicker-master/sample in bootstrap v3/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/diepage.js"></script>
+    <style type="text/css">
+           .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+               border-radius: 3px 4px;
+           }
+
+           #divshow {
+               display: none;
+           }
+
+           #barcon a {
+               text-decoration: none;
+           }
+
+           .barcon {
+               width: 1000px;
+               margin: 0 auto;
+               text-align: center;
+           }
+
+           .barcon1 {
+               font-size: 17px;
+               float: left;
+               margin-top: 20px;
+           }
+
+           .barcon2 {
+               float: right;
+           }
+
+               .barcon2 ul {
+                   margin: 20px 0;
+                   padding-left: 0;
+                   list-style: none;
+                   text-align: center;
+               }
+
+               .barcon2 li {
+                   display: inline;
+               }
+
+               .barcon2 a {
+                   font-size: 16px;
+                   font-weight: normal;
+                   display: inline-block;
+                   padding: 5px;
+                   padding-top: 0;
+                   color: black;
+                   border: 1px solid #ddd;
+                   background-color: #fff;
+               }
+
+                   .barcon2 a:hover {
+                       background-color: #eee;
+                   }
+
+           .ban {
+               opacity: .4;
+           }
+
+           #reportta td {
+               padding-bottom: 5px;
+           }
+
+           .select {
+               -moz-user-select: none; /*火狐*/
+               -webkit-user-select: none; /*webkit浏览器*/
+               -ms-user-select: none; /*IE10*/
+               -khtml-user-select: none; /*早期浏览器*/
+               user-select: none;
+           }
+
+           .modal-header {
+               cursor: move;
+           }
+
+           /*table tr td {
+
+        }*/
+           table tr td {
+               padding-right: 5px;
+               max-width: 200px;
+               word-break: break-all;
+               word-wrap: break-word;
+           }
+    </style>
+</head>
+<body>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        组合查询：
+        <span id="TimeZu1" style="margin-right:20px;">
+            <input id="starttime" class="form-control" style="display:inline;width:150px;margin-right:5px" type="text" placeholder="年/月/日" name="name" />至<input id="endtime" placeholder="年/月/日" style="display:inline;width:150px;margin-left:5px;" class="form-control" type="text" />
+        </span>
+        @if (ViewBag.pinfo == null)
+        {
+            <select>
+                <option value="0">请选择</option>
+            </select>
+        }
+        else
+        {
+            DataTable lp = ViewBag.pinfo;
+            <label>工序：</label>
+            <select class="form-control" style="margin-right:20px;width:150px;display:inline;" id="Select_ProcessId" onchange="GetTerminalInfo()">
+                <option value="0">请选择</option>
+                @for (int i = 0; i < lp.Rows.Count; i++)
+                {
+                    <option value="@lp.Rows[i]["ProcessId"]">@lp.Rows[i]["ProcessName"]</option>
+                }
+            </select>
+            @*<button type="button" id="SelectDataDiffs" class="btn btn-info Buttons" onclick="GetStateInfo()">
+                    <img src="~/Content/Icon/select.png" />
+                    查询
+                </button>*@
+
+        }
+        @*产线*@
+        @ViewBag.TerName：
+        <select id="Select88" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            <option value="0">请选择</option>
+            @*@if (ViewBag.terlist != null)
+                {
+                    if (ViewBag.Role == 1)
+                    {
+                        <option value="0">查询所有</option>
+                        List<Terminal> terlist1 = ViewBag.terlist;
+                        foreach (var item in terlist1)
+                        {
+                            <option value="@item.TerminalID">@item.TerminalName</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="0">查询所有</option>
+                        if (ViewBag.terlist != null)
+                        {
+                            List<Terminal> terlist1 = ViewBag.terlist;
+                            foreach (var item in terlist1)
+                            {
+                                <option value="@item.TerminalID">@item.TerminalName</option>
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    <option>暂无选项</option>
+                }*@
+
+        </select>
+        @*产品型号*@
+        @ViewBag.XinHao：
+        <input type="text" name="name" value="" id="Select99" class="form-control" style="display:inline;width:150px;" />
+        <button type="button" id="SelectDataDiffs" class="btn btn-info Buttons" onclick="all2()">
+            <img src="~/Content/Icon/select.png" />
+            查询
+        </button>
+        <button type="button" id="excel" class="btn btn-info Buttons" onclick="Export()">
+            <img src="~/Content/Icon/导出.png" style="padding-bottom:3px;" />
+            导出
+        </button>
+    </p>
+    <div> 
+    </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+﻿@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+    <tr></tr>
+    @*数据*@
+    @if (ViewBag.QTInfo != null)
+            {
+                DataTable dt = ViewBag.QTInfo;
+        <tbody id="adminTbody">
+            @for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                <tr>
+                    @for (int j = 0; j < dt.Columns.Count; j++)
+                    {
+                        <td>@dt.Rows[i][j]</td>
+                    }
+                </tr>
+            }
+        </tbody>
+        <tr>
+            @if (ViewBag.QTInfo != null)
+                {
+                <td colspan="7">
+                    <div id="barcon" class="barcon">
+                        <input type="hidden" id="yeNums" value="" />
+                        <div id="barcon1" class="barcon1"></div>
+                        <div id="barcon2" class="barcon2">
+                            <ul>
+                                <li><a href="###" id="firstPage">首页</a></li>
+                                <li><a href="###" id="prePage">上一页</a></li>
+                                <li><a href="###" id="nextPage">下一页</a></li>
+                                <li><a href="###" id="lastPage">尾页</a></li>
+                                <li>
+                                    <select id="jumpWhere"></select>
+                                </li>
+                                <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            }
+        </tr>
+    }
+    else
+    {
+        <tbody id="adminTbody"></tbody>
+        <tr>
+            <td colspan="7">
+                <div id="barcon" class="barcon">
+                    <input type="hidden" id="yeNums" value="" />
+                    <div id="barcon1" class="barcon1"></div>
+                    <div id="barcon2" class="barcon2">
+                        <ul>
+                            <li><a href="javascript:return false;" style="opacity: 0.5" id="firstPage">首页</a></li>
+                            <li><a href="javascript:return false;" style="opacity: 0.5" id="prePage">上一页</a></li>
+                            <li><a href="javascript:return false;" style="opacity: 0.5" id="nextPage">下一页</a></li>
+                            <li><a href="javascript:return false;" style="opacity: 0.5" id="lastPage">尾页</a></li>
+                            <li>
+                                <select id="jumpWhere" disabled="disabled"></select>
+                            </li>
+                            <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+</table>
+<script src="~/Scripts/diepage.js"></script>
+
+
+

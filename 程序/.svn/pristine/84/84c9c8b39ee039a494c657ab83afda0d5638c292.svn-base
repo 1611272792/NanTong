@@ -1,0 +1,49 @@
+﻿@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style>
+            th {
+            text-align: center;
+            vertical-align: middle;
+        }
+</style>
+@if (ViewBag.pstate == null)
+{
+    <table class="table table-bordered table-striped text-center table-hover table1" style="width:100%;margin-top:10px;">
+        <tr style="font-size:18px;vertical-align:middle">
+            <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>  
+            <th>工序名称</th>
+            <th>状态名称</th>
+            <th>状态序号</th>
+            <th>状态颜色</th>
+            <th>操作</th>
+        </tr>
+    </table>
+}
+else
+{
+    DataTable lp = ViewBag.pstate;
+    <table class="table table-bordered table-striped text-center table-hover table1" style="width:100%;margin-top:10px;">
+        <tr style="font-size:18px;vertical-align:middle">
+            <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>  
+            <th>工序名称</th>
+            <th>状态名称</th>
+            <th>状态序号</th>
+            <th>状态颜色</th>
+            <th>操作</th>
+        </tr>
+        @for (int i = 0; i < lp.Rows.Count; i++)
+                {
+            <tr class="tr1">
+                <td><input type="checkbox" name="cks" class="ckstyle check" value="@lp.Rows[i]["StateId"]" /></td>
+                <td>@lp.Rows[i]["ProcessName"]</td>
+                <td>@lp.Rows[i]["StateName"]</td>
+                <td>@lp.Rows[i]["StateSerial"]</td>
+                <td><div style="background-color:@lp.Rows[i]["StateColor"];width:70px;height:25px;margin:0px auto;"></div></td>
+                <td>
+                    <a onclick="GetUpdStateInfo(@lp.Rows[i]["StateId"])" href="#" data-toggle="modal" data-target="#UpdState">编辑</a>
+                    <a onclick="DelState(@lp.Rows[i]["StateId"])" href="#" data-toggle="modal" data-target="#DelOneState">删除</a>
+                </td>
+            </tr>
+        }
+    </table>
+}

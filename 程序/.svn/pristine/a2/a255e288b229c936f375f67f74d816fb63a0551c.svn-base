@@ -1,0 +1,557 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data;
+using System.IO;
+using System.Text;
+using NPOI.SS.UserModel;
+using NPOI.HSSF.UserModel;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ExcelController : Controller
+    {
+        // GET: Excel
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        //  
+        // GET: /Excel/  
+        //Models.zbwxglEntities myMdl = new Models.zbwxglEntities();
+        /// <summary>  
+        /// 第一种方法,利用文件输出流进行读写操作  
+        /// </summary>  
+        public void outExcel()
+        {
+            DataTable dtData = (DataTable)Session["datatable"];
+            string shtnl = "";
+            shtnl = "<table border='1' cellspacing='1' cellpadding='1'>";
+            shtnl = shtnl + "<thead>";
+            for (int j = 0; j < dtData.Columns.Count; j++)
+            {
+                shtnl = shtnl + "<th>" + j + "</th>";
+            }
+            shtnl = shtnl + "</thead><tbody>";
+            for (int i = 0; i < dtData.Rows.Count; i++)
+            {
+                shtnl = shtnl + "<tr>";
+                for (int j = 0; j < dtData.Columns.Count; j++)
+                {
+                    shtnl = shtnl + "<td>" + dtData.Rows[i][j] + "</td>";
+                }
+                shtnl = shtnl + "</tr>";
+            }
+            shtnl = shtnl + "</tbody></table>";
+            ExportToExcel("application/x-excel", "123.xls", shtnl);
+        }
+        public void ExportToExcel(string FieldType, string FileName, string dt)
+        {
+            System.Web.HttpContext.Current.Response.Charset = "utf-8";
+            System.Web.HttpContext.Current.Response.AppendHeader("Content-Disposition", "attachment;filename=" + HttpUtility.UrlEncode(FileName, System.Text.Encoding.UTF8).ToString());
+            System.Web.HttpContext.Current.Response.ContentEncoding = System.Text.Encoding.GetEncoding("GB2312");
+            System.Web.HttpContext.Current.Response.ContentType = FieldType;
+            StringWriter tw = new StringWriter();
+            System.Web.HttpContext.Current.Response.Output.Write(dt);
+            System.Web.HttpContext.Current.Response.Flush();
+            System.Web.HttpContext.Current.Response.End();
+        }
+
+        /// <summary>  
+        /// 第三种方法，利用NPOI插件  
+        /// </summary>  
+        /// <returns></returns>  
+        public ActionResult DownLoadExcel()
+        {
+            if (Session["datatable"] != null)
+            {
+                DataTable dt = (DataTable)Session["datatable"];//获取需要导出的datatable数据 
+                DataTable dt1 = (DataTable)Session["title"];                 
+                //创建Excel文件的对象  
+                HSSFWorkbook book = new HSSFWorkbook();
+                //添加一个sheet  
+                ISheet sheet1 = book.CreateSheet("Sheet1");
+
+                for (int i = 0; i < dt1.Rows.Count; i++)
+                {//设置每一列的宽度
+                    sheet1.SetColumnWidth(0, 30 * 80);
+                    sheet1.SetColumnWidth(i, 30 * 170);
+                }
+                sheet1.SetColumnWidth(4, 30 * 300);
+                //sheet1.SetColumnWidth(11, 30 * 200);
+                //sheet1.SetColumnWidth(12, 30 * 200);
+                //sheet1.SetColumnWidth(13, 30 * 200);
+                //sheet1.SetColumnWidth(14, 30 * 200);
+                //给sheet1添加第一行的头部标题
+
+                //设置标题字体样式
+                IFont titlefont = book.CreateFont();
+                titlefont.Boldweight = (Int16)FontBoldWeight.Bold;                
+             
+                //创建标题行
+                IRow row1 = sheet1.CreateRow(0);
+                //给标题单元格设置高度
+                row1.HeightInPoints = 13;
+
+                //创建标题CellStyle                
+                ICellStyle cellTitleStyle = book.CreateCellStyle();
+                //设置单元格的样式：水平对齐居中
+                cellTitleStyle.VerticalAlignment = VerticalAlignment.Justify;//垂直对齐(默认应该为center，如果center无效则用justify)                
+                cellTitleStyle.Alignment = HorizontalAlignment.Center;//水平对齐
+                cellTitleStyle.SetFont(titlefont);
+
+                //创建内容CellStyle                
+                ICellStyle cellStyle = book.CreateCellStyle();                
+                //设置单元格的样式：水平对齐居中
+                cellStyle.VerticalAlignment = VerticalAlignment.Justify;//垂直对齐(默认应该为center，如果center无效则用justify)                
+                cellStyle.Alignment = HorizontalAlignment.Center;//水平对齐
+
+                if (dt.Rows.Count>0)
+                {
+                    for (int i = 1; i < dt1.Rows.Count; i++)
+                    {
+                        //创建标题Row中的Cell并赋值   
+                        ICell celltitle = row1.CreateCell(i);
+                        celltitle.CellStyle = cellStyle;
+                        
+                        row1.CreateCell(0).SetCellValue("序号");
+                        row1.CreateCell(i).SetCellValue(dt1.Rows[i]["AllocationTitle"].ToString());
+                        if (dt1.Rows[i]["AllocationName"].ToString() == "ProcessId" || dt1.Rows[i]["AllocationName"].ToString() == "TerminalID")
+                        {
+                            sheet1.SetColumnHidden(i, true);
+                        }
+                        //row1.CreateCell(1).SetCellValue("生产计划名称");
+                        //row1.CreateCell(2).SetCellValue("产品型号");
+                        //row1.CreateCell(3).SetCellValue("计划数量");
+                        //row1.CreateCell(4).SetCellValue("实际数量");
+                        //row1.CreateCell(5).SetCellValue("开始时间");
+                        //row1.CreateCell(6).SetCellValue("结束时间");
+                        //row1.CreateCell(7).SetCellValue("状态");
+                        //row1.CreateCell(8).SetCellValue("产线名称");  
+                        row1.GetCell(0).CellStyle = cellTitleStyle;
+                        row1.GetCell(i).CellStyle = cellTitleStyle;//给单元格添加样式                      
+                    }
+                    row1.CreateCell(dt1.Rows.Count).SetCellValue("质检报告");
+                    row1.GetCell(dt1.Rows.Count).CellStyle = cellTitleStyle;//给单元格添加样式  
+                }
+
+                ////将数据逐步写入sheet1各个行  (原始网上的方法)
+                //for (int i = 0; i < dt.Rows.Count; i++)
+                //{
+
+                //    for (int j = 0; j < dt.Columns.Count; j++)
+                //    {
+                //        rowtemp.CreateCell(j).SetCellValue(dt.Rows[i][j].ToString().Trim());
+                //    }
+                //}                               
+
+
+                //修改原始方法后的方法
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    //创建内容Row           
+                    IRow rowtemp = sheet1.CreateRow(i+1);//因为第一行被标题占用所以要+1
+                    //给内容单元格设置高度
+                    rowtemp.HeightInPoints = 13;
+
+                    rowtemp.CreateCell(0).SetCellValue(i + 1);//序号得从0开始所以+1      
+                    rowtemp.GetCell(0).CellStyle = cellStyle;//给序号这一列设计居中样式
+
+                    //创建内容Row中的Cell并赋值
+                    ICell cell = rowtemp.CreateCell(i+1);//因为第0个是序号所以从1开始
+                    cell.CellStyle = cellStyle;
+                    for (int j = 1; j < dt1.Rows.Count; j++)//数据行数从第一行开始
+                    {
+                        if (dt1.Rows[j]["AllocationTitle"].ToString() == "ProcessId" || dt1.Rows[j]["AllocationTitle"].ToString() == "TerminalID")
+                        {
+                            sheet1.SetColumnHidden(j - 1, true);
+                        }
+                        else if (dt1.Rows[j]["AllocationName"].ToString() == "Issue")
+                        {
+                            if (dt.Rows[i]["Issue"].ToString() == "0")
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("未发放");
+                            }
+                            else
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("已发放");
+                            }
+                        }
+                        else if (dt1.Rows[j]["Type"].ToString() == "pro")
+                        {
+                            if (dt.Rows[i][dt1.Rows[j]["AllocationName"].ToString()].ToString()=="0")
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("无");
+                            }
+                            else if (dt.Rows[i][dt1.Rows[j]["AllocationName"].ToString()].ToString() == "1")
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("未开始");
+                            }
+                            else if (dt.Rows[i][dt1.Rows[j]["AllocationName"].ToString()].ToString() == "2")
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("进行中");
+                            }
+                            else if (dt.Rows[i][dt1.Rows[j]["AllocationName"].ToString()].ToString() == "3")
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("已完成");
+                            }
+                            else
+                            {
+                                rowtemp.CreateCell(j).SetCellValue(dt.Rows[i][dt1.Rows[j]["AllocationName"].ToString()].ToString().Trim());
+                            }
+                        }
+                        else
+                        {
+                            rowtemp.CreateCell(j).SetCellValue(dt.Rows[i][dt1.Rows[j]["AllocationName"].ToString()].ToString().Trim());
+                        }
+                        rowtemp.GetCell(j).CellStyle = cellStyle;//给单元格添加样式
+                    }
+                    rowtemp.CreateCell(dt1.Rows.Count).SetCellValue(dt.Rows[i]["Result"].ToString());
+                }
+
+
+                string strdate = DateTime.Now.ToString("yyyyMMddhhmmss");//获取当前时间  
+                                                                         // 写入到客户端   
+                MemoryStream ms = new MemoryStream();
+                book.Write(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                return File(ms, "application/vnd.ms-excel", strdate + "Excel.xls");
+            }
+            else
+            {
+                //var contentType = "text/xml";
+                //var content = "<content>数据为空</content>";
+                //var bytes = Encoding.UTF8.GetBytes(content);
+                //var result = new FileContentResult(bytes, contentType);
+                //result.FileDownloadName = "myfile.xls";
+                return Content("<script>alert('暂无数据可以导入！');history.go(-1);</script>");
+            }          
+        }
+
+        public ActionResult DownLoadExcel1()
+        {
+            if (Session["datatable1"] != null)
+            {
+                DataTable dt = (DataTable)Session["datatable1"];//获取需要导出的datatable数据 
+                //创建Excel文件的对象  
+                HSSFWorkbook book = new HSSFWorkbook();
+                //添加一个sheet  
+                ISheet sheet1 = book.CreateSheet("Sheet1");
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {//设置每一列的宽度
+                    sheet1.SetColumnWidth(0, 30 * 80);
+                    sheet1.SetColumnWidth(i, 30 * 300);
+                }
+                sheet1.SetColumnWidth(6, 30 * 150);
+                sheet1.SetColumnWidth(7, 30 * 150);
+                sheet1.SetColumnWidth(8, 30 * 150);
+                sheet1.SetColumnWidth(9, 30 * 150);
+                //sheet1.SetColumnWidth(4, 30 * 300);
+                //给sheet1添加第一行的头部标题
+
+                //设置标题字体样式
+                IFont titlefont = book.CreateFont();
+                titlefont.Boldweight = (Int16)FontBoldWeight.Bold;
+
+                //创建标题行
+                IRow row1 = sheet1.CreateRow(0);
+                //给标题单元格设置高度
+                row1.HeightInPoints = 13;
+
+                //创建标题CellStyle                
+                ICellStyle cellTitleStyle = book.CreateCellStyle();
+                //设置单元格的样式：水平对齐居中
+                cellTitleStyle.VerticalAlignment = VerticalAlignment.Justify;//垂直对齐(默认应该为center，如果center无效则用justify)                
+                cellTitleStyle.Alignment = HorizontalAlignment.Center;//水平对齐
+                cellTitleStyle.SetFont(titlefont);
+
+                //创建内容CellStyle                
+                ICellStyle cellStyle = book.CreateCellStyle();
+                //设置单元格的样式：水平对齐居中
+                cellStyle.VerticalAlignment = VerticalAlignment.Justify;//垂直对齐(默认应该为center，如果center无效则用justify)                
+                cellStyle.Alignment = HorizontalAlignment.Center;//水平对齐
+
+                if (dt.Rows.Count > 0)
+                {
+                    row1.CreateCell(0).SetCellValue("序号");
+                    row1.CreateCell(1).SetCellValue("产品名称");
+                    row1.CreateCell(2).SetCellValue("项目名称");
+                    row1.CreateCell(3).SetCellValue("项目编号");
+                    row1.CreateCell(4).SetCellValue("产品规格");
+                    row1.CreateCell(5).SetCellValue("客户名称");
+                    row1.CreateCell(6).SetCellValue("是否发放");
+                    row1.CreateCell(7).SetCellValue("计划开始时间");
+                    row1.CreateCell(8).SetCellValue("计划结束时间");
+                    row1.CreateCell(9).SetCellValue("实际开始时间");
+                    row1.CreateCell(10).SetCellValue("实际结束时间");
+                    row1.CreateCell(11).SetCellValue("时间差");
+                    row1.CreateCell(12).SetCellValue("质检结果");
+                    for (int i = 0; i < 13; i++)
+                    {
+                        row1.GetCell(i).CellStyle = cellTitleStyle;//给单元格添加样式    
+                    }
+
+                }
+
+                //修改原始方法后的方法
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    //创建内容Row           
+                    IRow rowtemp = sheet1.CreateRow(i + 1);//因为第一行被标题占用所以要+1
+                    //给内容单元格设置高度
+                    rowtemp.HeightInPoints = 13;
+
+                    rowtemp.CreateCell(0).SetCellValue(i + 1);//序号得从0开始所以+1      
+                    rowtemp.GetCell(0).CellStyle = cellStyle;//给序号这一列设计居中样式
+
+                    //创建内容Row中的Cell并赋值
+                    ICell cell = rowtemp.CreateCell(i + 1);//因为第0个是序号所以从1开始
+                    cell.CellStyle = cellStyle;
+                    for (int j = 1; j < dt.Columns.Count; j++)//数据行数从第一行开始
+                    {
+                        if (dt.Columns[j].Caption == "Issue")
+                        {
+                            if (dt.Rows[i]["Issue"].ToString() == "0")
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("未发放");
+                            }
+                            else
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("已发放");
+                            }
+                        }
+                        else
+                        {
+                            rowtemp.CreateCell(j).SetCellValue(dt.Rows[i][j].ToString().ToString().Trim());
+                        }
+                        rowtemp.GetCell(j).CellStyle = cellStyle;//给单元格添加样式
+                    }
+                }
+
+
+                string strdate = DateTime.Now.ToString("yyyyMMddhhmmss");//获取当前时间  
+                                                                         // 写入到客户端   
+                MemoryStream ms = new MemoryStream();
+                book.Write(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                return File(ms, "application/vnd.ms-excel", "生产报表" + strdate + "Excel.xls");
+            }
+            else
+            {
+                return Content("<script>alert('暂无数据可以导入！');history.go(-1);</script>");
+            }
+        }
+
+        public ActionResult QTExcel()
+        {
+            if (Session["qtTest"] != null)
+            {
+                DataTable dt = (DataTable)Session["qtTest"];//获取需要导出的datatable数据 
+                //创建Excel文件的对象  
+                HSSFWorkbook book = new HSSFWorkbook();
+                //添加一个sheet  
+                ISheet sheet1 = book.CreateSheet("Sheet1");
+                sheet1.SetColumnWidth(0, 30 * 80);
+                sheet1.SetColumnWidth(1, 30 * 150);
+                sheet1.SetColumnWidth(2, 30 * 150);
+                sheet1.SetColumnWidth(3, 30 * 150);
+                sheet1.SetColumnWidth(4, 30 * 180);
+                sheet1.SetColumnWidth(5, 30 * 180);
+                sheet1.SetColumnWidth(6, 30 * 150);
+                sheet1.SetColumnWidth(7, 30 * 150);
+                sheet1.SetColumnWidth(8, 30 * 180);
+                sheet1.SetColumnWidth(9, 30 * 180);
+                //sheet1.SetColumnWidth(4, 30 * 300);
+                //给sheet1添加第一行的头部标题
+
+                //设置标题字体样式
+                IFont titlefont = book.CreateFont();
+                titlefont.Boldweight = (Int16)FontBoldWeight.Bold;
+
+                //创建标题行
+                IRow row1 = sheet1.CreateRow(0);
+                //给标题单元格设置高度
+                row1.HeightInPoints = 13;
+
+                //创建标题CellStyle                
+                ICellStyle cellTitleStyle = book.CreateCellStyle();
+                //设置单元格的样式：水平对齐居中
+                cellTitleStyle.VerticalAlignment = VerticalAlignment.Justify;//垂直对齐(默认应该为center，如果center无效则用justify)                
+                cellTitleStyle.Alignment = HorizontalAlignment.Center;//水平对齐
+                cellTitleStyle.SetFont(titlefont);
+
+                //创建内容CellStyle                
+                ICellStyle cellStyle = book.CreateCellStyle();
+                //设置单元格的样式：水平对齐居中
+                cellStyle.VerticalAlignment = VerticalAlignment.Justify;//垂直对齐(默认应该为center，如果center无效则用justify)                
+                cellStyle.Alignment = HorizontalAlignment.Center;//水平对齐
+
+                if (dt.Rows.Count > 0)
+                {
+                    row1.CreateCell(0).SetCellValue("序号");
+                    row1.CreateCell(1).SetCellValue("QId号");
+                    row1.CreateCell(2).SetCellValue("项目编号");
+                    row1.CreateCell(3).SetCellValue("项目名称");
+                    row1.CreateCell(4).SetCellValue("产品名称");
+                    row1.CreateCell(5).SetCellValue("产品规格");
+                    row1.CreateCell(6).SetCellValue("所属区域");
+                    row1.CreateCell(7).SetCellValue("所属工序");
+                    row1.CreateCell(8).SetCellValue("质检时间");
+                    row1.CreateCell(9).SetCellValue("质检内容");
+                    row1.CreateCell(10).SetCellValue("质检结果");
+                    for (int i = 0; i < 11; i++)
+                    {
+                        row1.GetCell(i).CellStyle = cellTitleStyle;//给单元格添加样式    
+                    }
+                }
+
+                //修改原始方法后的方法
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    //创建内容Row           
+                    IRow rowtemp = sheet1.CreateRow(i + 1);//因为第一行被标题占用所以要+1
+                    //给内容单元格设置高度
+                    rowtemp.HeightInPoints = 13;
+
+                    rowtemp.CreateCell(0).SetCellValue(i + 1);//序号得从0开始所以+1      
+                    rowtemp.GetCell(0).CellStyle = cellStyle;//给序号这一列设计居中样式
+
+                    //创建内容Row中的Cell并赋值
+                    ICell cell = rowtemp.CreateCell(i + 1);//因为第0个是序号所以从1开始
+                    cell.CellStyle = cellStyle;
+                    for (int j = 1; j < dt.Columns.Count; j++)//数据行数从第一行开始
+                    {
+                        if (dt.Columns[j].Caption == "QId")
+                        {
+                            sheet1.SetColumnHidden(j, true);
+                        }
+                        else if (dt.Columns[j].Caption == "QualityResult")
+                        {
+                            if (dt.Rows[i]["QualityResult"].ToString() == "0")
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("合格");
+                            }
+                            else
+                            {
+                                rowtemp.CreateCell(j).SetCellValue("不合格");
+                            }
+                        }
+                        else
+                        {
+                            rowtemp.CreateCell(j).SetCellValue(dt.Rows[i][j].ToString().ToString().Trim());
+                        }
+                        if (j == 1)
+                        {
+                            //QId号这一列被隐藏了不能加样式 会报错
+                        }
+                        else
+                        {
+                            rowtemp.GetCell(j).CellStyle = cellStyle;//给单元格添加样式
+                        }
+                    }
+                    sheet1.CreateRow(dt.Rows.Count + 1).CreateCell(2).SetCellValue("质检总数：" + Session["allCount"]);
+                    sheet1.CreateRow(dt.Rows.Count + 2).CreateCell(2).SetCellValue("合格数量：" + Session["trueCount"]);
+                    sheet1.CreateRow(dt.Rows.Count + 3).CreateCell(2).SetCellValue("不合格数量：" + Session["falseCount"]);
+                    sheet1.CreateRow(dt.Rows.Count + 4).CreateCell(2).SetCellValue("合格率：" + Session["fpy"]);
+                }
+
+
+                string strdate = DateTime.Now.ToString("yyyyMMddhhmmss");//获取当前时间  
+                                                                         // 写入到客户端   
+                MemoryStream ms = new MemoryStream();
+                book.Write(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                return File(ms, "application/vnd.ms-excel", "质检报表" + strdate + "Excel.xls");
+            }
+            else
+            {
+                return Content("<script>alert('暂无数据可以导入！');history.go(-1);</script>");
+            }
+        }
+        ///// <summary>  
+        ///// Excel导入  
+        ///// </summary>  
+        ///// <returns></returns>  
+        //public ActionResult GetTableFromExcel()
+        //{
+        //    //FileStream file = new FileStream(Server.HtmlEncode(Request.PhysicalApplicationPath).ToString() + "excel\\123.xlsx", FileMode.Open, FileAccess.Read);  
+
+        //    HttpPostedFileBase fostFile = Request.Files["file1"];
+        //    Stream streamfile = fostFile.InputStream;
+        //    //HSSFWorkbook hssfworkbook = new HSSFWorkbook(streamfile);  
+        //    HSSFWorkbook hssfworkbook = new HSSFWorkbook(streamfile);
+        //    using (NPOI.SS.UserModel.ISheet sheet = hssfworkbook.GetSheetAt(0))
+        //    {
+        //        DataTable table = new DataTable();
+        //        IRow headerRow = sheet.GetRow(0);//第一行为标题行  
+        //        int cellCount = headerRow.LastCellNum;//LastCellNum = PhysicalNumberOfCells  
+        //        int rowCount = sheet.LastRowNum;//LastRowNum = PhysicalNumberOfRows - 1  
+        //        //handling header.  
+        //        for (int i = headerRow.FirstCellNum; i < cellCount; i++)
+        //        {
+        //            DataColumn column = new DataColumn(headerRow.GetCell(i).StringCellValue);
+        //            table.Columns.Add(column);
+        //        }
+        //        for (int i = (sheet.FirstRowNum + 1); i <= rowCount; i++)
+        //        {
+        //            IRow row = sheet.GetRow(i);
+        //            DataRow dataRow = table.NewRow();
+        //            if (row != null)
+        //            {
+        //                for (int j = row.FirstCellNum; j < cellCount; j++)
+        //                {
+        //                    if (row.GetCell(j) != null)
+        //                        dataRow[j] = GetCellValue(row.GetCell(j));
+        //                }
+        //            }
+        //            table.Rows.Add(dataRow);
+        //        }
+        //        for (int i = 0; i < table.Rows.Count; i++)
+        //        {
+        //            //myUpLoadBLL.ForDownLoad(table.Rows[i][1].ToString(), table.Rows[i][2].ToString(),Convert.ToBoolean( table.Rows[i][3]));  
+        //        }
+        //    }
+        //    return Content("");
+        //}
+        ///// <summary>  
+        ///// 根据Excel列类型获取列的值  
+        ///// </summary>  
+        ///// <param name="cell">Excel列</param>  
+        ///// <returns></returns>  
+        //private static string GetCellValue(ICell cell)
+        //{
+        //    if (cell == null)
+        //        return string.Empty;
+        //    switch (cell.CellType)
+        //    {
+        //        case CellType.BLANK:
+        //            return string.Empty;
+        //        case CellType.BOOLEAN:
+        //            return cell.BooleanCellValue.ToString();
+        //        case CellType.ERROR:
+        //            return cell.ErrorCellValue.ToString();
+        //        case CellType.NUMERIC:
+        //        case CellType.Unknown:
+        //        default:
+        //            return cell.ToString();
+        //        case CellType.STRING:
+        //            return cell.StringCellValue;
+        //        case CellType.FORMULA:
+        //            try
+        //            {
+        //                HSSFFormulaEvaluator e = new HSSFFormulaEvaluator(cell.Sheet.Workbook);
+        //                e.EvaluateInCell(cell);
+        //                return cell.ToString();
+        //            }
+        //            catch
+        //            {
+        //                return cell.NumericCellValue.ToString();
+        //            }
+        //    }
+        //}
+    }
+}

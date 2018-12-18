@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.sunpn.productionplan.MainActivity"
+    >
+    <RelativeLayout
+        android:background="@drawable/bg"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:paddingRight="20dp"
+        android:id="@+id/header_rl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_marginLeft="20dp"
+            android:layout_centerVertical="true"
+            android:scaleType="centerInside"
+            android:id="@+id/logo_iv"
+            android:src="@mipmap/ic_launcher"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+        <TextView
+            android:id="@+id/companyName_tv"
+            android:layout_marginLeft="5dp"
+            android:text="讯鹏科技"
+            android:textColor="#fff"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_toRightOf="@id/logo_iv"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:layout_centerVertical="true"
+            android:id="@+id/terminalName_tv"
+            android:textColor="#fff"
+            android:textSize="40sp"
+            android:text="一产线"
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextClock
+            android:layout_alignBottom="@id/logo_iv"
+            android:text="1231232"
+            android:textColor="#fff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format24Hour="yyyy年MM月dd日 HH:mm:ss"
+            android:format12Hour="yyyy年MM月dd日 HH:mm:ss"
+            android:layout_alignParentRight="true"
+            android:textStyle="bold"
+            android:textSize="25sp"
+            />
+    </RelativeLayout>
+    <LinearLayout
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:orientation="horizontal"
+        android:id="@+id/tableHeader_ll"
+        android:layout_width="match_parent"
+        android:background="#429CFC"
+        android:layout_height="50dp">
+    </LinearLayout>
+    <view.AutoPlayRecyclerView
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/data_rv"
+        android:layout_weight="1"
+        android:background="@drawable/border_bg"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+    </view.AutoPlayRecyclerView>
+    <LinearLayout
+        android:background="@drawable/bg2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <view.AlwaysMarqueeTextView
+        android:layout_below="@+id/data_rv"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:textStyle="bold"
+        android:textColor="#c50e26"
+        android:id="@+id/msg_tv"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"  />
+        <View
+            android:id="@+id/state_view"
+            android:background="@drawable/green_bg"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="center"
+            android:layout_width="10dp"
+            android:layout_height="10dp"/>
+        <TextView
+            android:layout_gravity="center"
+            android:text="字体大小"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Spinner
+            android:layout_marginRight="10dp"
+            android:background="@drawable/bg3"
+            android:layout_gravity="center"
+            android:id="@+id/textSize_sp"
+            android:entries="@array/textSize"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp" />
+        <TextView
+            android:layout_gravity="center"
+            android:text="行数"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Spinner
+            android:background="@drawable/bg3"
+            android:layout_gravity="center"
+            android:id="@+id/showCount_sp"
+            android:entries="@array/showCount"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp" />
+        <ImageButton
+            android:layout_marginLeft="20dp"
+            android:layout_gravity="right"
+            android:id="@+id/chang_ib"
+            android:scaleType="centerInside"
+            android:padding="3dp"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg3"
+            android:focusable="true"
+            android:src="@mipmap/change_light"
+            android:textSize="16sp" />
+    </LinearLayout>
+</LinearLayout>

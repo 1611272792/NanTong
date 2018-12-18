@@ -1,0 +1,207 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using XP_PPS_DAL;
+using ProductionPlanSystem_WebApi.Models;
+using System.Web.Mvc;
+using System.IO;
+using System.Text;
+using System.Data;
+using ProductionPlanSystem.Help;
+using ProductionPlanSystem.Controllers;
+using System.Reflection;
+
+namespace ProductionPlanSystem_WebApi.Controllers
+{
+    public class GetProductLineDataController : ApiController
+    {
+        [System.Web.Mvc.HttpGet]
+        //接口3 获取产线数据
+        public ActionResult GetProductLineData(int ProductLineID, string AndroidID)
+        {
+            GetProductLineData gpl = new GetProductLineData();
+            try
+            {
+              string  sqltitle = string.Format($"EXEC AboutSelect @type='getAllocationName',@TerminalId={ProductLineID}");
+                DataTable ds = SqlDbHelper.ExecuteDataTable(sqltitle);
+                string fieldName = "";
+                if (ds?.Rows.Count>0)
+                {
+                    for (int i = 0; i < ds.Rows.Count; i++)
+                    {
+                        fieldName = fieldName + ds.Rows[i].Field<string>("AllocationName") + ",";
+                    }
+                    fieldName = fieldName.TrimEnd(',');
+                }
+                else
+                {
+                    gpl.StateCode = 100;
+                    gpl.ReaSon = "没有获取到数据！！";
+                    gpl.LineData = new List<LineData>();
+                }
+
+                string sqlld = string.Format($"select {fieldName} from ProductionPlan where  Issue=1 and Clear=0");
+                //string sqlld = string.Format("select * from ProductionPlan where TerminalID={0} and Issue=1 and Clear=0", ProductLineID);
+                //DataTable dt = DALHelp.ExecuteDataTable(sqlld, null);
+                DataTable dt = ServerOrLit.isDataTable(LoginController.connType, sqlld);
+                //WriteLog("dt" + dt.Rows.Count);
+                if (dt?.Rows.Count > 0)
+                {
+                    string macsql = string.Format("select Mac,Time from Terminal where TerminalID={0}", ProductLineID);
+                    //DataTable mac = DALHelp.ExecuteDataTable(macsql, null);
+                    DataTable mac = ServerOrLit.isDataTable(LoginController.connType, macsql);
+                    //如果Mac为空可以获取数据`
+                    if (mac != null)
+                    {
+                        if (mac.Rows[0]["Mac"].ToString() == "" || mac.Rows[0]["Mac"] == null)
+                        {
+                            string timenow = Convert.ToDateTime(DateTime.Now.ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                            string addmac = string.Format("update Terminal set Mac='{0}',Time='{1}' where TerminalID={2}", AndroidID, timenow, ProductLineID);
+                            //int add = DALHelp.ExecuteNonQuery(addmac, null);
+                            int add = ServerOrLit.isNum(LoginController.connType, addmac);
+                            if (add > 0)
+                            {
+                                gpl.StateCode = 100;
+                                gpl.ReaSon = "";
+                                for (int i = 0; i < dt.Rows.Count; i++)
+                                {
+                                    gpl.LineData = DataTableToList<LineData>(dt);
+                                }
+                            }
+                            else
+                            {
+                                gpl.StateCode = 100;
+                                gpl.ReaSon = "没有获取到数据！！";
+                                gpl.LineData = new List<LineData>();
+                            }
+                        }
+                        else if (mac.Rows[0]["Mac"] != null && mac.Rows[0]["Mac"].ToString() != "")
+                        {
+                            //如果mac不为空但是mac相等时也可以获取
+                            if (mac.Rows[0]["Mac"].ToString() == AndroidID)
+                            {
+                                gpl.StateCode = 100;
+                                gpl.ReaSon = "";
+                                for (int i = 0; i < dt.Rows.Count; i++)
+                                {
+                                    gpl.LineData = DataTableToList<LineData>(dt);
+                                }
+                                string timenow = Convert.ToDateTime(DateTime.Now.ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                                string upmac = string.Format("update Terminal set Mac='{0}',Time='{1}' where TerminalID={2}", AndroidID, timenow, ProductLineID);
+                                int add = ServerOrLit.isNum(LoginController.connType, upmac);
+                            }
+                            //如果mac不相等但是间隔时间大于5分钟也可以获取
+                            else if (mac.Rows[0]["Mac"].ToString() != AndroidID)
+                            {
+                                DateTime accessTime;
+                                TimeSpan ts = TimeSpan.FromDays(1);
+                                if (DateTime.TryParse(mac.Rows[0]["Time"].ToString(), out accessTime))
+                                {
+                                    ts = DateTime.Now - accessTime;
+                                }
+                                if (ts.TotalMinutes > 5)
+                                {
+                                    gpl.StateCode = 100;
+                                    gpl.ReaSon = "";
+                                    for (int i = 0; i < dt.Rows.Count; i++)
+                                    {
+                                        gpl.LineData = DataTableToList<LineData>(dt);
+                                    }
+                                    string timenow = Convert.ToDateTime(DateTime.Now.ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                                    string upmac = string.Format("update Terminal set Mac='{0}',Time='{1}' where TerminalID={2}", AndroidID, timenow, ProductLineID);
+                                    int add = ServerOrLit.isNum(LoginController.connType, upmac);
+                                }
+                                else
+                                {
+                                    gpl.StateCode = 104;
+                                    gpl.ReaSon = "此产线已被占用！！";
+                                    gpl.LineData = new List<LineData>();
+                                }
+                            }
+                            else
+                            {
+                                gpl.StateCode = 104;
+                                gpl.ReaSon = "此产线已被占用！！";
+                                gpl.LineData = new List<LineData>();
+                            }
+                        }
+                        else
+                        {
+                            gpl.StateCode = 104;
+                            gpl.ReaSon = "此产线已被占用！！";
+                            gpl.LineData = new List<LineData>();
+                        }
+                    }
+                }
+                else
+                {
+                    gpl.StateCode = 100;
+                    gpl.ReaSon = "没有获取到数据！！";
+                    gpl.LineData = new List<LineData>();
+                }
+            }
+            catch (Exception ex)
+            {
+                gpl.StateCode = 104;
+                gpl.ReaSon = ex.Message;
+                gpl.LineData = new List<LineData>();
+            }
+            return gpl;
+        }
+
+        private void WriteLog(string strmsg)
+        {
+            strmsg = $"{strmsg}\r\n";
+            using (FileStream fs = File.Open("D:\\77.txt", FileMode.Append, FileAccess.Write, FileShare.Write))
+            {
+                byte[] bys = Encoding.Default.GetBytes(strmsg);
+                fs.Write(bys, 0, bys.Length);
+                fs.Close();
+            }
+        }
+
+
+
+
+        /// 利用反射将DataTable转换为List<T>对象
+        /// </summary> 
+        /// <param name="dt">DataTable 对象</param> 
+        /// <returns>List<T>集合</returns> 
+        public static List<T> DataTableToList<T>(DataTable dt) where T : class, new()
+        {
+            // 定义集合 
+            List<T> ts = new List<T>();
+            //定义一个临时变量 
+            string tempName = string.Empty;
+            //遍历DataTable中所有的数据行 
+            foreach (DataRow dr in dt.Rows)
+            {
+                T t = new T();
+                // 获得此模型的公共属性 
+                PropertyInfo[] propertys = t.GetType().GetProperties();
+                //遍历该对象的所有属性 
+                foreach (PropertyInfo pi in propertys)
+                {
+                    tempName = pi.Name;//将属性名称赋值给临时变量 
+                                       //检查DataTable是否包含此列（列名==对象的属性名）  
+                    if (dt.Columns.Contains(tempName))
+                    {
+                        //取值 
+                        object value = dr[tempName];
+                        //如果非空，则赋给对象的属性 
+                        if (value != DBNull.Value)
+                        {
+                            pi.SetValue(t, value, null);
+                        }
+                    }
+                }
+                //对象添加到泛型集合中 
+                ts.Add(t);
+            }
+            return ts;
+        }
+    }
+}

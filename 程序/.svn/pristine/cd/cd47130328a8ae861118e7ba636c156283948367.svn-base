@@ -1,0 +1,803 @@
+﻿@using XP_PPS_Model;
+@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/CSS/paging.css" rel="stylesheet" />
+    @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+    <link href="~/Content/bootstrap-datetimepicker-master/sample in bootstrap v3/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+    @*<script src="~/Scripts/diepage.js"></script>*@
+    <script src="~/Scripts/echarts.js"></script>
+
+    <script src="~/Scripts/paging.js"></script>
+
+    <style type="text/css">
+        .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+            border-radius: 3px 4px;
+        }
+
+        #divshow {
+            display: none;
+        }
+
+        .ban {
+            opacity: .4;
+        }
+
+        #reportta td {
+            padding-bottom: 5px;
+        }
+
+        .select {
+            -moz-user-select: none; /*火狐*/
+            -webkit-user-select: none; /*webkit浏览器*/
+            -ms-user-select: none; /*IE10*/
+            -khtml-user-select: none; /*早期浏览器*/
+            user-select: none;
+        }
+
+        .modal-header {
+            cursor: move;
+        }
+
+        /*table tr td {
+
+            }*/
+        table tr td {
+            padding-right: 5px;
+            max-width: 200px;
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        @if (ViewBag.pinfo == null)
+        {
+            <label>区域：</label>
+            <select class="form-control" style="margin-right:20px;width:150px;display:inline;" id="Select_ProcessId">
+                <option value="0">请选择</option>
+            </select>
+        }
+        else
+        {
+            DataTable lp = ViewBag.pinfo;
+            <label>区域：</label>
+            <select class="form-control" style="margin-right:20px;width:150px;display:inline;" id="Select_ProcessId" onchange="GetTerminalInfo(0)">
+                <option value="0">请选择</option>
+                @for (int i = 0; i < lp.Rows.Count; i++)
+                {
+                    <option value="@lp.Rows[i]["ProcessId"]">@lp.Rows[i]["ProcessName"]</option>
+                }
+            </select>
+
+
+        }
+        @*终端*@
+        <label>终端：</label>
+        <select id="Select88" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            <option value="0">请选择</option>
+        </select>
+        <label>
+            项目编号：
+        </label>
+        <input id="ProductId" style="margin-right:20px;width:150px;display:inline;" class="form-control" />
+        @*<select id="Select_ProjectId" style="margin-right:20px;width:150px;display:inline;" class="form-control" onchange="SelectPD(this.options[this.options.selectedIndex].value)">
+                @if (ViewBag.pjinfo == null)
+            {
+                    <option value="">暂无项目</option>
+                }
+                else
+                {
+                    <option value="0">请选择</option>
+                    DataTable pj = ViewBag.pjinfo;
+                    for (int i = 0; i < pj.Rows.Count; i++)
+                    {
+                        <option value="@pj.Rows[i]["ProjectId"]">@pj.Rows[i]["ProjectName"]</option>
+                    }
+                }
+            </select>*@
+        <label>
+            项目名称：
+        </label>
+        <input id="ProductName" style="margin-right:20px;width:150px;display:inline;" class="form-control" />
+        <label>
+            产品名称：
+        </label>
+        <input id="ProjectName" style="margin-right:20px;width:150px;display:inline;" class="form-control" />
+        <label>
+            产品规格：
+        </label>
+        <input id="ProjectSize" style="margin-right:20px;width:150px;display:inline;" class="form-control" />
+        @*<select id="Select_ProductId" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+                <option value="0">请选择</option>
+            </select>*@
+
+
+    </p>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        <label>
+            组合查询：
+        </label>
+        <span id="TimeZu1" style="margin-right:20px;">
+            <input id="starttime" class="form-control" style="display:inline;width:150px;margin-right:5px" type="text" placeholder="年/月/日" />至<input id="endtime" placeholder="年/月/日" style="display:inline;width:150px;margin-left:5px;" class="form-control" type="text" />
+        </span>
+        <button type="button" id="SelectDataDiffs" class="btn btn-info Buttons" onclick="all2()">
+            <img src="~/Content/Icon/select.png" />
+            查询
+        </button>
+        <button type="button" id="excel" class="btn btn-info Buttons" onclick="Export()">
+            <img src="~/Content/Icon/导出.png" style="padding-bottom:3px;" />
+            导出生产进度表
+        </button>
+        <button type="button" id="excel1" class="btn btn-info Buttons" onclick="Export1()">
+            <img src="~/Content/Icon/导出.png" style="padding-bottom:3px;" />
+            导出生产报表
+        </button>
+        <input type="button" value="显示图表" id="checkview" class="btn btn-info Buttons" />
+        @*<img src="~/Content/Icon/导出.png" style="padding-bottom:3px;" />*@
+    </p>
+
+    <div id="dsidiv">
+        <table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+            <tr>
+                @*标题*@
+                @if (ViewBag.title != null)
+                {
+                    DataTable dt2 = ViewBag.title;
+                    Session["title"] = ViewBag.title;
+                    for (int i = 1; i < dt2.Rows.Count; i++)
+                    {
+                        if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                        {
+                            <th class="thf" hidden="hidden">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                        }
+                        else
+                        {
+                            <th class="thf">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                        }
+
+                    }
+                    <th>质检报告</th>
+                }
+            </tr>
+
+            @*数据*@
+            @if (ViewBag.indexdata != null)
+            {
+                DataTable dt2 = ViewBag.title;
+                DataTable dt = ViewBag.selectdata;
+                DataTable dt3 = ViewBag.terlist1;
+                Session["datatable"] = ViewBag.indexdata;
+                <tbody id="adminTbody">
+                    @for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        <tr>
+                            @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                            {
+                                if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[ii]["AllocationName"].ToString() == "ProcessId")
+                                {
+                                    <td hidden="hidden"></td>
+                                }
+                                @*else if (dt2.Rows[ii]["AllocationName"].ToString() == "StartTime")
+                                    {
+                                        <td>@DateTime.Parse(dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()).ToString("yyyy/MM/dd")</td>
+                                    }*@
+                                @*else if (dt2.Rows[ii]["AllocationName"].ToString() == "State")
+                                    {
+                                        if (dt.Rows[i]["State"].ToString() == "0")
+                                        {
+                                            <td>未完成</td>
+                                        }
+                                        else if (dt.Rows[i]["State"].ToString() == "1")
+                                        {
+                                            <td>已完成</td>
+                                        }
+                                    }*@
+                            else if (dt2.Rows[ii]["AllocationName"].ToString() == "Issue")
+                            {
+                                if (dt.Rows[i]["Issue"].ToString() == "0")
+                                {
+                                    <td>未发放</td>
+                                }
+                                else
+                                {
+                                    <td>已发放</td>
+                                }
+                                <td hidden="hidden"></td>
+                            }
+                            else if (dt2.Rows[ii]["AllocationName"].ToString() == "c50")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    @dt.Rows[i]["c50"].ToString()
+                                </td>
+                            }
+                            else if (dt2.Rows[ii]["AllocationName"].ToString() == "Result")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    @dt.Rows[i]["Result"].ToString()
+                                </td>
+                            }
+                            else
+                            {
+                                if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "1")
+                                {
+                                    <td class="@dt2.Rows[ii]["AllocationName"]">
+                                        <span style="color:blue">未开始</span>
+                                    </td>
+                                }
+                                else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "2")
+                                {
+                                    <td class="@dt2.Rows[ii]["AllocationName"]">
+                                        <span style="color:red">进行中</span>
+                                    </td>
+                                }
+                                else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "3")
+                                {
+                                    <td class="@dt2.Rows[ii]["AllocationName"]">
+                                        <span style="color:lightgreen">已完成</span>
+                                    </td>
+                                }
+                                else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "0")
+                                {
+                                    <td class="@dt2.Rows[ii]["AllocationName"]">
+                                        <span style="color:gray">--</span>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="@dt2.Rows[ii]["AllocationName"]">
+                                        @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()
+                                    </td>
+                                    }
+                                }
+
+                            }
+
+                        </tr>
+                    }
+                </tbody>
+            }
+            else
+            {
+
+            }
+        </table>
+    </div>
+    <span id="count" value="@ViewBag.count" hidden>@ViewBag.count</span>
+    <div id="pageTool"></div>
+    <div class="modal fade" id="myModal">
+        @*<div class="modal-dialog modal-sm">
+
+                <img alt="" src="data:image/gif;base64,R0lGODlhGQAZAJECAK7PTQBjpv///wAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDE0IDc5LjE1MTQ4MSwgMjAxMy8wMy8xMy0xMjowOToxNSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RUNGNUFGRUFGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RUNGNUFGRTlGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjk5NjI1NDg2LTZkZWQtMjY0NS04MTAzLWQ3Yzg4MTg5YzExNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFCgACACwAAAAAGQAZAAACTpSPqcu9AKMUodqLpAb0+rxFnWeBIUdixwmNqRm6JLzJ38raqsGiaUXT6EqO4uIHRAYQyiHw0GxCkc7l9FdlUqWGKPX64mbFXqzxjDYWAAAh+QQFCgACACwCAAIAFQAKAAACHYyPAsuNH1SbME1ajbwra854Edh5GyeeV0oCLFkAACH5BAUKAAIALA0AAgAKABUAAAIUjI+py+0PYxO0WoCz3rz7D4bi+BUAIfkEBQoAAgAsAgANABUACgAAAh2EjxLLjQ9UmzBNWo28K2vOeBHYeRsnnldKBixZAAA7" />
+
+            </div>*@<!-- /.modal-dialog -->
+
+        <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+            <div class="progress progress-striped active" style="margin-bottom: 0;">
+                <div class="progress-bar" style="width: 100%;"></div>
+            </div>
+            <h5 style="color:black"> <strong>数据加载中，请稍后…！</strong> </h5>
+        </div>
+    </div><!-- /.modal -->
+
+    <div id="container" style="height: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        //alert($('#count').text());
+        var page = new Paging();
+        //重新渲染分页使用render
+        // p.render({ count: 100, pagesize: 10, current: 3 });
+        page.init({
+            target: $('#pageTool'), pagesize: 10, count: $('#count').text(), pageSizeList: [5, 10, 20], toolbar: true, current: 1, callback: function (pagecount, size, count) {
+                console.log(arguments)
+                //alert('当前第 ' + pagecount + '页,每页 ' + size + '条,总页数：' + count + '页');
+                ////动态设置总条数 https://github.com/tianxiangbing/paging
+                //page.render({ count: 89, current: pagecount });
+                //alert($(".ui-select-pagesize").val())
+                var ss = $("#starttime").val();
+                var gg = $("#endtime").val();
+                var line = $("#Select88").val();
+                var ProductId = $("#ProductId").val();//项目编号
+                var ProductName = $("#ProductName").val();//项目名称
+                var ProjectName = $("#ProjectName").val();//产品名称
+                var ProjectSize = $("#ProjectSize").val();//产品规格
+                $.ajax({
+                    type: "GET",
+                    url: "/Report/SelectAll",
+                    data: { starttime: ss, endtime: gg, line: line, ProductId: ProductId, ProductName: ProductName, ProjectName: ProjectName, ProjectSize:ProjectSize,pagecount: pagecount, size: size },
+                    beforeSend: function () {
+                        showModal();
+                    },
+                    success: function (data) {
+                        //alert(data);
+                        $("#dsidiv").html(data);
+                        hideModal();
+                    }
+                });
+                $.ajax({
+                    type: "GET",
+                    url: "/Report/SelectAll1",
+                    dataType: 'json',
+                    data: { starttime: ss, endtime: gg, line: line, ProductId: ProductId, ProductName: ProductName, ProjectName: ProjectName, ProjectSize: ProjectSize, pagecount: pagecount, size: size },
+                    success: function (jsonData) {
+                        //alert(jsonData);
+                        // 第二个参数可以指定前面引入的主题
+                        //var chart = echarts.init(document.getElementById('main'), 'shine');
+                        //chart.setOption({
+
+                        //});
+                        var xpush = [];
+                        var ypush = [];
+                        if (jsonData != null) {
+                            debugger;
+                            for (var i = 0; i < jsonData.length; i++) {
+                                xpush.push(jsonData[i].ProductionPlanVersion);
+                                ypush.push(jsonData[i].c50);
+                            }
+                        } else {
+                            xpush.push();
+                            ypush.push();
+                        }
+                        var dom = document.getElementById("container");
+                        var myChart = echarts.init(dom);
+                        var app = {};
+                        option = null;
+                        app.title = '正负条形图';
+                        option = {
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                                }
+                            },
+                            legend: {
+                                data: ['完成时间差值（天）']
+                            },
+                            grid: {
+                                left: '3%',
+                                right: '4%',
+                                bottom: '3%',
+                                containLabel: true
+                            },
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    data: ypush
+                                }
+                            ],
+                            xAxis: [
+                                {
+                                    type: 'category',
+                                    axisTick: { show: false },
+                                    data: xpush
+                                }
+                            ],
+                            series: [
+                                {
+                                    name: '完成时间差值（天）',
+                                    type: 'bar',
+                                    label: {
+                                        normal: {
+                                            show: true,
+                                            position: 'inside'
+                                        }
+                                    },
+                                    data: ypush
+                                }
+                                //,
+                                //{
+                                //    name: '收入',
+                                //    type: 'bar',
+                                //    stack: '总量',
+                                //    label: {
+                                //        normal: {
+                                //            show: true
+                                //        }
+                                //    },
+                                //    data: [320, 302, 341, 374, 390, 450, 420]
+                                //},
+                                //{
+                                //    name: '支出',
+                                //    type: 'bar',
+                                //    stack: '总量',
+                                //    label: {
+                                //        normal: {
+                                //            show: true,
+                                //            position: 'left'
+                                //        }
+                                //    },
+                                //    data: [-120, -132, -101, -134, -190, -230, -210]
+                                //}
+                            ]
+                        };
+                        if (option && typeof option === "object") {
+                            myChart.setOption(option, true);
+                        }
+                    }
+                })
+                //这里我写个ajax吧
+                //getHTML();
+                //alert("callback");
+                //如果你不用ajax分页，你可以直接在这里location.href='xxx.html?page='+pagecount 作跳转，这样的话，页面刷新后，你要传递current进来。
+            },
+            go: function (p) {
+                //alert("go");
+            },
+            changePagesize: function (pagesize, currenpage, pagecount) {
+                alert(pagesize);
+                alert("changePagesize");
+            }
+        });
+
+        $("input").keyup(function (event) {
+            if (event.which == "13") { //回车键的键值为13
+                //alert("a");
+                document.getElementById("SelectDataDiffs").click();
+                //调用查询按钮的单击事件
+            }
+        })
+
+        $("#starttime").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+
+        function Export() {
+            location.href = "/Excel/DownLoadExcel";
+        }
+
+        function Export1() {
+            location.href = "/Excel/DownLoadExcel1";
+        }
+
+        $("#endtime").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+
+
+        $("#checkview").click(function () {
+            if ($("#container").css("display") == 'none') {
+                $("#container").fadeIn(500)
+            } else {
+                $("#container").fadeOut(500)
+            }
+
+            if ($("#checkview").val() == "显示图表") {
+                $("#checkview").val("隐藏图表")
+            } else {
+                $("#checkview").val("显示图表")
+            }
+        })
+
+        function hideModal() {
+            $('#myModal').modal('hide');
+        }
+
+        function showModal() {
+            $('#myModal').modal({ backdrop: 'static', keyboard: false });
+        }
+        function all2() {
+            //$("#SelectDataDiffs").attr("disabled", true);
+            var ss = $("#starttime").val();
+            var gg = $("#endtime").val();
+            var line = $("#Select88").val();
+            var ProductId = $("#ProductId").val();//项目编号
+            var ProductName = $("#ProductName").val();//项目名称
+            var ProjectName = $("#ProjectName").val();//产品名称
+            var ProjectSize = $("#ProjectSize").val();//产品规格
+
+            if (ss > gg) {
+                alert("开始日期不能大于结束日期！");
+            }
+            else {
+                $.ajax({
+                    type: "GET",
+                    url: "/Report/SelectAll",
+                    data: { starttime: ss, endtime: gg, line: line, ProductId: ProductId, ProductName: ProductName, ProjectName: ProjectName, ProjectSize: ProjectSize, pagecount: 1, size: 10 },
+                    beforeSend: function () {
+                        showModal();
+                    },
+                    success: function (data) {
+                        //alert(data);
+                        $("#dsidiv").html(data);
+                        hideModal();
+                    }
+                });
+                $.ajax({
+                    type: "GET",
+                    url: "/Report/SelectAll1",
+                    dataType: 'json',
+                    data: { starttime: ss, endtime: gg, line: line, ProductId: ProductId, ProductName: ProductName, ProjectName: ProjectName, ProjectSize: ProjectSize, pagecount: 1, size: 10 },
+                    success: function (jsonData) {
+                        //alert(jsonData);
+                        // 第二个参数可以指定前面引入的主题
+                        //var chart = echarts.init(document.getElementById('main'), 'shine');
+                        //chart.setOption({
+
+                        //});
+                        var xpush = [];
+                        var ypush = [];
+                        if (jsonData != null) {
+                            debugger;
+                            for (var i = 0; i < jsonData.length; i++) {
+                                xpush.push(jsonData[i].ProductionPlanVersion);
+                                ypush.push(jsonData[i].c50);
+                            }
+                        } else {
+                            xpush.push();
+                            ypush.push();
+                        }
+                        var dom = document.getElementById("container");
+                        var myChart = echarts.init(dom);
+                        var app = {};
+                        option = null;
+                        app.title = '正负条形图';
+                        option = {
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                                }
+                            },
+                            legend: {
+                                data: ['完成时间差值（天）']
+                            },
+                            grid: {
+                                left: '3%',
+                                right: '4%',
+                                bottom: '3%',
+                                containLabel: true
+                            },
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    data: ypush
+                                }
+                            ],
+                            xAxis: [
+                                {
+                                    type: 'category',
+                                    axisTick: { show: false },
+                                    data: xpush
+                                }
+                            ],
+                            series: [
+                                {
+                                    name: '完成时间差值（天）',
+                                    type: 'bar',
+                                    label: {
+                                        normal: {
+                                            show: true,
+                                            position: 'inside'
+                                        }
+                                    },
+                                    data: ypush
+                                }
+                                //,
+                                //{
+                                //    name: '收入',
+                                //    type: 'bar',
+                                //    stack: '总量',
+                                //    label: {
+                                //        normal: {
+                                //            show: true
+                                //        }
+                                //    },
+                                //    data: [320, 302, 341, 374, 390, 450, 420]
+                                //},
+                                //{
+                                //    name: '支出',
+                                //    type: 'bar',
+                                //    stack: '总量',
+                                //    label: {
+                                //        normal: {
+                                //            show: true,
+                                //            position: 'left'
+                                //        }
+                                //    },
+                                //    data: [-120, -132, -101, -134, -190, -230, -210]
+                                //}
+                            ]
+                        };
+                        if (option && typeof option === "object") {
+                            myChart.setOption(option, true);
+                        }
+                    }
+                })
+            }
+        }
+
+        function GetTerminalInfo() {
+            var ProcessId = $("#Select_ProcessId").val();
+            //alert(ProcessId);
+            $.post("/Report/GetProcessTerminal", { ProcessId: ProcessId }, function (data) {
+                var str = '';
+                if (data != "" && data != null) {
+                    var json = eval('(' + data + ')');
+                    //str = '<option value="0">全部终端</option>'
+                    for (var o in json) {
+                        str += '<option value="' + json[o].TerminalID + '">' + json[o].TerminalName + '</option>';
+                    }
+                    $("#Select88").find("option").remove();
+                    $("#Select88").append(str);
+                }
+                else {
+                    str = '<option value="0">暂无终端</option>';
+                    $("#Select88").find("option").remove();
+                    $("#Select88").append(str);
+                }
+            })
+        }
+
+
+        //根据项目选择产品
+        //function SelectPD(ProjectId) {
+        //    if (ProjectId == "" || ProjectId == null) {
+        //        alert("请选择项目");
+        //    }
+        //    $.post("/QualityTest/GetProductSelInfo", { ProjectId: ProjectId }, function (data) {
+        //        var str = '';
+        //        if (data != "" && data != null) {
+        //            var json = eval('(' + data + ')');
+        //            str = '<option value="0">全部项目</option>'
+        //            for (var o in json) {
+        //                str += '<option value="' + json[o].ProductId + '">' + json[o].ProductName + '</option>';
+        //            }
+        //            $("#Select_ProductId").find("option").remove();
+        //            $("#Select_ProductId").append(str);
+        //        }
+        //        else {
+        //            str = '<option value="0">暂无项目</option>';
+        //            $("#Select_ProductId").find("option").remove();
+        //            $("#Select_ProductId").append(str);
+        //        }
+        //    })
+        //}
+
+        function ImgTable() {
+            var ss = $("#starttime").val();
+            var gg = $("#endtime").val();
+            var line = $("#Select88").val();
+            var ProductId = $("#ProductId").val();//项目编号
+            var ProductName = $("#ProductName").val();//项目名称
+            var ProjectName = $("#ProjectName").val();//产品名称
+            var ProjectSize = $("#ProjectSize").val();//产品规格
+            $.ajax({
+                type: "GET",
+                url: "/Report/SelectAll1",
+                dataType: 'json',
+                data: { starttime: ss, endtime: gg, line: line, ProductId: ProductId, ProductName: ProductName, ProjectName: ProjectName, ProjectSize: ProjectSize, pagecount: 1, size: 10 },
+                success: function (jsonData) {
+                    //alert(jsonData);
+                    // 第二个参数可以指定前面引入的主题
+                    //var chart = echarts.init(document.getElementById('main'), 'shine');
+                    //chart.setOption({
+
+                    //});
+                    var xpush = [];
+                    var ypush = [];
+                    if (jsonData != null) {
+                        debugger;
+                        for (var i = 0; i < jsonData.length; i++) {
+                            xpush.push(jsonData[i].ProductionPlanVersion);
+                            ypush.push(jsonData[i].c50);
+                        }
+                    } else {
+                        xpush.push();
+                        ypush.push();
+                    }
+
+                    var dom = document.getElementById("container");
+                    var myChart = echarts.init(dom);
+                    var app = {};
+                    option = null;
+                    app.title = '正负条形图';
+                    option = {
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                                type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                            }
+                        },
+                        legend: {
+                            data: ['完成时间差值（天）']
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        yAxis: [
+                            {
+                                type: 'value',
+                                data: ypush
+                            }
+                        ],
+                        xAxis: [
+                            {
+                                type: 'category',
+                                axisTick: { show: false },
+                                data: xpush
+                            }
+                        ],
+                        series: [
+                            {
+                                name: '完成时间差值（天）',
+                                type: 'bar',
+                                label: {
+                                    normal: {
+                                        show: true,
+                                        position: 'inside'
+                                    }
+                                },
+                                data: ypush
+                            }
+                            //,
+                            //{
+                            //    name: '收入',
+                            //    type: 'bar',
+                            //    stack: '总量',
+                            //    label: {
+                            //        normal: {
+                            //            show: true
+                            //        }
+                            //    },
+                            //    data: [320, 302, 341, 374, 390, 450, 420]
+                            //},
+                            //{
+                            //    name: '支出',
+                            //    type: 'bar',
+                            //    stack: '总量',
+                            //    label: {
+                            //        normal: {
+                            //            show: true,
+                            //            position: 'left'
+                            //        }
+                            //    },
+                            //    data: [-120, -132, -101, -134, -190, -230, -210]
+                            //}
+                        ]
+                    };
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

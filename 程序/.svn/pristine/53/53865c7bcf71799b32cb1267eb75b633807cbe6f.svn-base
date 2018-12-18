@@ -1,0 +1,79 @@
+﻿@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style>
+    .Buttons {
+        border-radius: 3px 4px;
+        background-color: #227dda;
+        border: 1px solid #227dda;
+        color: white;
+    }
+
+    th {
+        text-align: center;
+        vertical-align: central;
+    }
+</style>
+
+@if (ViewBag.selectdata != null)
+{
+    DataTable dt = ViewBag.selectdata;
+    Session["datatable"] = ViewBag.extable;
+    <table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+        @if (ViewBag.title != null)
+        {
+            DataTable dt2 = ViewBag.title;
+
+            <tr>
+                @for (int i = 1; i < dt2.Rows.Count; i++)
+                {
+                    <th style="text-align:center;">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                }
+            </tr>
+        }
+        @for (int i = 0; i < dt.Rows.Count; i++)
+        {
+            DataTable dt2 = ViewBag.title;
+            DataTable dt3 = ViewBag.terlist1;
+            <tr>
+                @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                {
+                    <td>
+                        @if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID")
+                        {
+                            var lieName = "TerminalName";
+                            @dt.Rows[i][lieName].ToString()
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "StartTime")
+                        {
+                            @DateTime.Parse(dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()).ToString("yyyy/MM/dd");
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "State")
+                        {
+                            if (dt.Rows[i]["State"].ToString() == "0")
+                            {
+                                <span>未完成</span>
+                            }
+                            else if (dt.Rows[i]["State"].ToString() == "1")
+                            {
+                                <span>已完成</span>
+                            }
+                        }
+                        else
+                        {
+                            @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()
+                        }
+
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+    <span style="margin-left:380px;margin-right:10px;">总页数：<input type="text" name="name" readonly="readonly" value="@ViewBag.lastpage" style="border:0;width:30px;text-align:center;color:red;margin-right:10px;" id="pagenum" />页</span>
+    <span style="margin-left:25px;">总行数： <input type="text" readonly="readonly" name="name" value="@ViewBag.hang" style="border:0;width:30px;text-align:center;color:red;margin-right:10px;" />行</span>
+}
+else
+{
+    <div style="width:100%;text-align:center;margin-bottom:30px;"><h2 id="noData">暂无数据</h2></div>
+    <span style="margin-left:450px;margin-right:10px;">总页数：<input type="text" name="name" readonly="readonly" value="1" style="border:0;width:30px;text-align:center;color:red;margin-right:10px;" id="pagenum" />页</span>
+    <span style="margin-left:25px;">总行数： <input type="text" readonly="readonly" name="name" value="0" style="border:0;width:30px;text-align:center;color:red;margin-right:10px;" />行</span>
+}

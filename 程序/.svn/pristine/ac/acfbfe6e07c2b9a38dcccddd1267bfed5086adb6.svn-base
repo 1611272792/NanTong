@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="E:\Project\Android\HZC00014\ProductionPlan\summary\src\main\assets"/><source path="E:\Project\Android\HZC00014\ProductionPlan\summary\build\generated\assets\shaders\debug"/></dataSet><dataSet config="debug"><source path="E:\Project\Android\HZC00014\ProductionPlan\summary\src\debug\assets"/></dataSet></merger>

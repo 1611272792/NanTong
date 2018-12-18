@@ -1,0 +1,81 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="keywords" content="讯鹏科技" />
+    <meta name="description" content="讯鹏科技" />
+    <title>讯鹏生产管理系统Logo管理</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <style type="text/css">
+        .align-center {
+            margin: 0 auto; /* 居中 这个是必须的，，其它的属性非必须 */
+            width: 500px; /* 给个宽度 顶到浏览器的两边就看不出居中效果了 */
+            text-align: center; /* 文字等内容居中 */
+        }
+
+        .file input {
+            position: absolute;
+            right: 0;
+            top: 0;
+            opacity: 0; /*关键点*/
+            filter: alpha(opacity=0); /*兼容ie*/
+            font-size: 100px; /* 增大不同浏览器的可点击区域 */
+            cursor: pointer;
+        }
+    </style>
+    <script type="text/javascript">
+        
+    </script>
+</head>
+<body>
+    <div class="align-center">
+        <div class="page-header">
+            <h1>
+                Logo管理中心
+                <small>欢迎您</small>
+            </h1>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 col-md-3" style="margin-left:50px;width:400px;">
+                <div class="thumbnail">
+                    @if (Session["LogoUrl"] == null)
+                    {
+                    }
+                    else
+                    {
+                        <img src="@Session["LogoUrl"].ToString()" alt="Logo">
+                    }                    
+                    <div class="caption">
+                        <h3>公司：</h3>
+                        <form method="post" action="/LogoSet/Index" enctype="multipart/form-data">
+                            <p>@if (Session["CompanyName"] == null) { }else {<input type="text" value="@Session["CompanyName"].ToString()" name="CompanyName" id="CompanyName" />}<p>
+                            <p style="margin-left:100px;">
+                                <a href="javascript:;" class="a-upload">
+                                    <input type="file" name="file1" id="file1">
+                                </a>
+                            </p>
+                            <p>
+                                <button type="submit" class="btn btn-primary" onclick="OutTO()">
+                                    提交更改
+                                </button>
+                            </p>
+                            <label style="color:red" >@ViewBag.info</label>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

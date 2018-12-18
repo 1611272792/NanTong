@@ -1,0 +1,46 @@
+﻿@using System.Data;
+<div id="showTer">
+    <table class="table table-bordered text-center table-hover table1  table-striped">
+        <tr style="font-size:18px;vertical-align:middle">
+            <th style="width:200px;"><input id="Checkbox1_Terminal" onchange="GetAll_Terminal()" class="ckstyle" style="margin-left: 67px;position:relative;bottom:4px;" type="checkbox" /><span style="display: block;float:right;margin-right: 30px;position:relative;right: 10px;bottom:2px;">全选</span></th>
+            <th>终端名</th>
+            <th>责任人</th>
+            <th>翻页时间</th>
+            <th>操作</th>
+        </tr>
+        @if (ViewBag.terminal == null)
+            {
+
+            }
+            else
+            {
+                DataTable dt = ViewBag.terminal;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                <tr>
+                    <td><input type="checkbox" name="ckname" class="ckstyle check" value="@dt.Rows[i]["TerminalId"]" /></td>
+                    <td>@dt.Rows[i]["TerminalName"].ToString()</td>
+                    <td>@dt.Rows[i]["UserName"].ToString()</td>
+                    <td>@dt.Rows[i]["PageTime"].ToString() S</td>
+                    @*<td hidden="hidden">@dt.Rows[i]["TerminalPwd"].ToString().Replace(@dt.Rows[i]["TerminalPwd"].ToString(), "******")</td>*@
+                    <td>
+                        @if (ViewBag.Role == 1)
+                        {
+                            <a onclick="TerminalEdit(@dt.Rows[i]["TerminalId"])" href="#" data-toggle="modal" data-target="#Terminalbianji">编辑</a>
+
+                        }
+                        else
+                        {
+                            <a onclick="TerminalEdit(@dt.Rows[i]["TerminalId"])" href="#" data-toggle="modal" data-target="#Terminalbianji">编辑</a>
+                                    <a onclick="TerminalDelete(@dt.Rows[i]["TerminalId"])" href="#">删除</a>
+                        }
+
+                    </td>
+                </tr>
+            }
+        }
+
+
+
+    </table>
+</div>

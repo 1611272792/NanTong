@@ -1,0 +1,189 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap-datetimepicker-master/sample in bootstrap v3/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/diepage.js"></script>
+    <style type="text/css">
+        .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+            border-radius: 3px 4px;
+        }
+
+        #divshow {
+            display: none;
+        }
+
+        #barcon a {
+            text-decoration: none;
+        }
+
+        .barcon {
+            width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .barcon1 {
+            font-size: 17px;
+            float: left;
+            margin-top: 20px;
+        }
+
+        .barcon2 {
+            float: right;
+        }
+
+            .barcon2 ul {
+                margin: 20px 0;
+                padding-left: 0;
+                list-style: none;
+                text-align: center;
+            }
+
+            .barcon2 li {
+                display: inline;
+            }
+
+            .barcon2 a {
+                font-size: 16px;
+                font-weight: normal;
+                display: inline-block;
+                padding: 5px;
+                padding-top: 0;
+                color: black;
+                border: 1px solid #ddd;
+                background-color: #fff;
+            }
+
+                .barcon2 a:hover {
+                    background-color: #eee;
+                }
+
+        .ban {
+            opacity: .4;
+        }
+
+        #reportta td {
+            padding-bottom: 5px;
+        }
+
+        .select {
+            -moz-user-select: none; /*火狐*/
+            -webkit-user-select: none; /*webkit浏览器*/
+            -ms-user-select: none; /*IE10*/
+            -khtml-user-select: none; /*早期浏览器*/
+            user-select: none;
+        }
+
+        .modal-header {
+            cursor: move;
+        }
+
+        /*table tr td {
+
+        }*/
+        table tr td {
+            padding-right: 5px;
+            max-width: 200px;
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+
+    </style>
+</head>
+<body>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        项目编号：
+        <select id="Select_ProjectId" style="margin-right:20px;width:150px;display:inline;" class="form-control" onchange="SelectPD(this.options[this.options.selectedIndex].value)">
+            @if (ViewBag.pjinfo == null)
+            {
+                <option value="">暂无项目</option>
+            }
+            else
+            {
+                <option value="0">请选择</option>
+                DataTable pj = ViewBag.pjinfo;
+                for (int i = 0; i < pj.Rows.Count; i++)
+                {
+                    <option value="@pj.Rows[i]["ProjectId"]">@pj.Rows[i]["ProjectName"]</option>
+                }
+            }
+        </select>
+        产品名称：
+        <select id="Select_ProductId" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            <option value="0">请选择</option>
+        </select>
+        所属工序：
+        <select id="Select_ProcessId" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            @if (ViewBag.prinfo == null)
+            {
+                <option value="">暂无工序</option>
+            }
+            else
+            {
+                <option value="0">请选择</option>
+                DataTable pr = ViewBag.prinfo;
+                for (int i = 0; i < pr.Rows.Count; i++)
+                {
+                    <option value="@pr.Rows[i]["AllocationID"]">@pr.Rows[i]["AllocationTitle"]</option>
+                }
+            }
+        </select>
+    </p>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        计划开始时间：
+        <span id="" style="margin-right:20px;">
+            <input id="" class="form-control" style="display:inline;width:150px;margin-right:5px" type="text" placeholder="年/月/日" name="name" />至<input id="" placeholder="年/月/日" style="display:inline;width:150px;margin-left:5px;" class="form-control" type="text" />
+        </span>
+        实际开始时间：
+        <span id="" style="margin-right:20px;">
+            <input id="" class="form-control" style="display:inline;width:150px;margin-right:5px" type="text" placeholder="年/月/日" name="name" />至<input id="" placeholder="年/月/日" style="display:inline;width:150px;margin-left:5px;" class="form-control" type="text" />
+        </span>
+    </p>
+    <div>
+    </div>
+
+    <script>
+        function SelectPD(ProjectId) {
+            if (ProjectId == "" || ProjectId == null) {
+                alert("请选择项目");
+            }
+            $.post("/QualityTest/GetProductSelInfo", { ProjectId: ProjectId }, function (data) {
+                var str = '';
+                if (data != "" && data != null) {
+                    var json = eval('(' + data + ')');
+                    str = '<option value="0">全部项目</option>'
+                    for (var o in json) {
+                        str += '<option value="' + json[o].ProductId + '">' + json[o].ProductName + '</option>';
+                    }
+                    $("#Select_ProductId").find("option").remove();
+                    $("#Select_ProductId").append(str);
+                }
+                else {
+                    str = '<option value="0">暂无项目</option>';
+                    $("#Select_ProductId").find("option").remove();
+                    $("#Select_ProductId").append(str);
+                }
+            })
+
+        }
+
+
+    </script>
+
+</body>
+</html>

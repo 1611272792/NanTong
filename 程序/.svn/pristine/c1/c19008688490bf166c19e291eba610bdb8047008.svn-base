@@ -1,0 +1,578 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap-datetimepicker-master/sample in bootstrap v3/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/diepage.js"></script>
+
+    <link href="~/CSS/webuploader.css" rel="stylesheet" />
+    <script src="~/Scripts/webuploader.js"></script>
+    <link href="~/CSS/style.css" rel="stylesheet" />
+    <link href="~/CSS/demo.css" rel="stylesheet" />
+    <link href="~/CSS/font-awesome.css" rel="stylesheet" />
+
+    <style type="text/css">
+            .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+                border-radius: 3px 4px;
+            }
+
+            #divshow {
+                display: none;
+            }
+
+            #barcon a {
+                text-decoration: none;
+            }
+
+            .barcon {
+                width: 1000px;
+                margin: 0 auto;
+                text-align: center;
+            }
+
+            .barcon1 {
+                font-size: 17px;
+                float: left;
+                margin-top: 20px;
+            }
+
+            .barcon2 {
+                float: right;
+            }
+
+                .barcon2 ul {
+                    margin: 20px 0;
+                    padding-left: 0;
+                    list-style: none;
+                    text-align: center;
+                }
+
+                .barcon2 li {
+                    display: inline;
+                }
+
+                .barcon2 a {
+                    font-size: 16px;
+                    font-weight: normal;
+                    display: inline-block;
+                    padding: 5px;
+                    padding-top: 0;
+                    color: black;
+                    border: 1px solid #ddd;
+                    background-color: #fff;
+                }
+
+                    .barcon2 a:hover {
+                        background-color: #eee;
+                    }
+
+            .ban {
+                opacity: .4;
+            }
+
+            #reportta td {
+                padding-bottom: 5px;
+            }
+
+            .select {
+                -moz-user-select: none; /*火狐*/
+                -webkit-user-select: none; /*webkit浏览器*/
+                -ms-user-select: none; /*IE10*/
+                -khtml-user-select: none; /*早期浏览器*/
+                user-select: none;
+            }
+
+            .modal-header {
+                cursor: move;
+            }
+                            .modal-header-backgcolo {
+                    background-color: #2684e6;
+                }
+            /*table tr td {
+
+            }*/
+            table tr td {
+                padding-right: 5px;
+                max-width: 200px;
+                word-break: break-all;
+                word-wrap: break-word;
+            }
+
+
+        th {
+            text-align: center;
+            vertical-align: central;
+        }
+
+        ul li {
+                list-style: none;
+        }
+    </style>
+</head>
+<body>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        项目编号：
+        <select id="Select_ProjectId" style="margin-right:20px;width:150px;display:inline;" class="form-control" onchange="SelectPD(this.options[this.options.selectedIndex].value)">
+            @if (ViewBag.pjinfo == null)
+            {
+            <option value="">暂无项目</option>
+            }
+            else
+            {
+            <option value="0">请选择</option>
+                DataTable pj = ViewBag.pjinfo;
+                for (int i = 0; i < pj.Rows.Count; i++)
+                {
+            <option value="@pj.Rows[i]["ProjectId"]">@pj.Rows[i]["ProjectName"]</option>
+                }
+            }
+        </select>
+        产品名称：
+        <select id="Select_ProductId" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            <option value="0">请选择</option>
+        </select>
+        所属工序：
+        <select id="Select_ProcessId" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            @if (ViewBag.prinfo == null)
+            {
+            <option value="">暂无工序</option>
+            }
+            else
+            {
+            <option value="0">请选择</option>
+                DataTable pr = ViewBag.prinfo;
+                for (int i = 0; i < pr.Rows.Count; i++)
+                {
+            <option value="@pr.Rows[i]["AllocationID"]">@pr.Rows[i]["AllocationTitle"]</option>
+                }
+            }
+        </select>
+
+    </p>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        计划开始时间：
+        <span id="" style="margin-right:20px;">
+            <input id="OrderStartTime" class="form-control" style="display:inline;width:150px;margin-right:5px" type="text" placeholder="年/月/日" />至<input id="OrderEndTime" placeholder="年/月/日" style="display:inline;width:150px;margin-left:5px;" class="form-control" type="text" />
+        </span>
+        实际开始时间：
+        <span id="endtime" style="margin-right:20px;">
+            <input id="InfactStartTime" class="form-control" style="display:inline;width:150px;margin-right:5px" type="text" placeholder="年/月/日" />至<input id="InfactEndTime" placeholder="年/月/日" style="display:inline;width:150px;margin-left:5px;" class="form-control" type="text" />
+        </span>
+        <button type="button" id="SelectDataDiffs" class="btn btn-info Buttons" onclick="Search()">
+            <img src="~/Content/Icon/select.png" />
+            查询
+        </button>
+    </p>
+
+    <div id="dsidiv">
+        <table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+            <tr>
+                <th>序号</th>
+                <th hidden="hidden">ID</th>
+                <th>项目名称</th>
+                <th>产品名称</th>
+                <th>所属区域</th>
+                <th>所属工序</th>
+                <th>质检时间</th>
+                <th>质检内容</th>
+                <th>质检结果</th>
+                <th>操作</th>
+            </tr>
+            @*数据*@
+            @if (ViewBag.QTInfo != null)
+            {
+                DataTable dt = ViewBag.QTInfo;
+                <tbody id="adminTbody">
+                    @for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        <tr>
+
+
+                            @for (int j = 0; j < dt.Columns.Count; j++)
+                    {
+                        if (j == 1)
+                        {
+                                    <td hidden="hidden">@dt.Rows[i][j].ToString()</td>
+                                }
+                                else if (j == 8)
+                                {
+                                    if (dt.Rows[i][j].ToString() == "0")
+                                    {
+                                        <td>合格</td>
+                                    }
+                                    else
+                                    {
+                                        <td>不合格</td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td>@dt.Rows[i][j].ToString()</td>
+                                }
+
+                            }
+                            <td><a href="javascript:void(0)" data-toggle="modal" data-target="#Photos" onclick="ShowPhoto(@dt.Rows[i][1].ToString())">查看图片</a></td>
+                        </tr>
+                    }
+                </tbody>
+                <tr>
+                    @if (ViewBag.QTInfo != null)
+                {
+                        <td colspan="9">
+                            <div id="barcon" class="barcon">
+                                <input type="hidden" id="yeNums" value="" />
+                                <div id="barcon1" class="barcon1"></div>
+                                <div id="barcon2" class="barcon2">
+                                    <ul>
+                                        <li><a href="###" id="firstPage">首页</a></li>
+                                        <li><a href="###" id="prePage">上一页</a></li>
+                                        <li><a href="###" id="nextPage">下一页</a></li>
+                                        <li><a href="###" id="lastPage">尾页</a></li>
+                                        <li>
+                                            <select id="jumpWhere"></select>
+                                        </li>
+                                        <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    }
+                </tr>
+            }
+            else
+            {
+                <tbody id="adminTbody"></tbody>
+                <tr>
+
+                    <td colspan="9">
+                        <div id="barcon" class="barcon">
+                            <input type="hidden" id="yeNums" value="" />
+                            <div id="barcon1" class="barcon1"></div>
+                            <div id="barcon2" class="barcon2">
+                                <ul>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="firstPage">首页</a></li>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="prePage">上一页</a></li>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="nextPage">下一页</a></li>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="lastPage">尾页</a></li>
+                                    <li>
+                                        <select id="jumpWhere" disabled="disabled"></select>
+                                    </li>
+                                    <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+    <!--显示图片-->
+    <div class="modal fade" id="Photos" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header  modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">查看图片</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="show" style="height:500px;">
+                    </div>
+                </div>               
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    @*<button type="button" class="btn btn-info Buttons chanxiandele">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myModal">
+
+
+        @*<div class="modal-dialog modal-sm">
+
+                <img alt="" src="data:image/gif;base64,R0lGODlhGQAZAJECAK7PTQBjpv///wAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDE0IDc5LjE1MTQ4MSwgMjAxMy8wMy8xMy0xMjowOToxNSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RUNGNUFGRUFGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RUNGNUFGRTlGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjk5NjI1NDg2LTZkZWQtMjY0NS04MTAzLWQ3Yzg4MTg5YzExNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFCgACACwAAAAAGQAZAAACTpSPqcu9AKMUodqLpAb0+rxFnWeBIUdixwmNqRm6JLzJ38raqsGiaUXT6EqO4uIHRAYQyiHw0GxCkc7l9FdlUqWGKPX64mbFXqzxjDYWAAAh+QQFCgACACwCAAIAFQAKAAACHYyPAsuNH1SbME1ajbwra854Edh5GyeeV0oCLFkAACH5BAUKAAIALA0AAgAKABUAAAIUjI+py+0PYxO0WoCz3rz7D4bi+BUAIfkEBQoAAgAsAgANABUACgAAAh2EjxLLjQ9UmzBNWo28K2vOeBHYeRsnnldKBixZAAA7" />
+
+            </div>*@<!-- /.modal-dialog -->
+
+        <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+            <div class="progress progress-striped active" style="margin-bottom: 0;">
+                <div class="progress-bar" style="width: 100%;"></div>
+            </div>
+            <h5 style="color:black"> <strong>数据加载中，请稍后…！</strong> </h5>
+        </div>
+    </div><!-- /.modal -->
+    <script>
+        $("input").keyup(function (event) {
+            if (event.which == "13") { //回车键的键值为13
+                //alert("a");
+                document.getElementById("SelectDataDiffs").click();
+                //调用查询按钮的单击事件
+            }
+        })
+
+        //根据项目选择产品
+        function SelectPD(ProjectId) {
+            if (ProjectId == "" || ProjectId == null) {
+                alert("请选择项目");
+            }
+            $.post("/QualityTest/GetProductSelInfo", { ProjectId: ProjectId }, function (data) {
+                var str = '';
+                if (data != "" && data != null) {
+                    var json = eval('(' + data + ')');
+                    str = '<option value="0">全部项目</option>'
+                    for (var o in json) {
+                        str += '<option value="' + json[o].ProductId + '">' + json[o].ProductName + '</option>';
+                    }
+                    $("#Select_ProductId").find("option").remove();
+                    $("#Select_ProductId").append(str);
+                }
+                else {
+                    str = '<option value="0">暂无项目</option>';
+                    $("#Select_ProductId").find("option").remove();
+                    $("#Select_ProductId").append(str);
+                }
+            })
+        }
+
+
+        $("#InfactStartTime,#InfactEndTime,#OrderStartTime,#OrderEndTime").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+
+        //隐藏加载等待页面
+        function hideModal() {
+            $('#myModal').modal('hide');
+        }
+
+        //显示加载等待页面
+        function showModal() {
+            $('#myModal').modal({ backdrop: 'static', keyboard: false });
+        }
+
+        //主页面加载的时候调用查询方法查询默认数据
+        $(function () {
+            Search();
+        })
+
+        //搜索按钮
+        function Search() {
+            var ProjectId = $("#Select_ProjectId").val();
+            var ProductId = $("#Select_ProductId").val();
+            var AllocationId = $("#Select_ProcessId").val();//工序Id
+            var OSTime = $("#OrderStartTime").val();//计划开始时间
+            var OETime = $("#OrderEndTime").val();//计划结束时间
+            var ISTime = $("#InfactStartTime").val();//实际开始时间
+            var IETime = $("#InfactEndTime").val();//实际结束时间
+            $.ajax({
+                type: "GET",
+                url: "/QualityTest/GetDetailInfo",
+                data: { ProjectId: ProjectId, ProductId: ProductId, AllocationId: AllocationId, OSTime: OSTime, OETime: OETime, ISTime: ISTime, IETime: IETime },
+                beforeSend: function () {
+                    showModal();
+                },
+                success: function (data) {
+                    $("#dsidiv").html(data);
+                    hideModal();
+                }
+            })
+        }
+
+        //查看图片按钮
+        function ShowPhoto(QId) {
+            $.ajax({
+                type: "GET",
+                url: "/QualityTest/ShowPhoto",
+                data: { QId: QId },
+                dataType: "json",//后台返回的数据类型
+                success: function (data) {
+                    var str;
+                    if (data != "" && data != null) {
+                        str = '<ul>';
+                        for (var o in data) {
+                            //alert(data[o])
+                            str += '<li><img src="' + data[o] + '"  height="150" style="border:1px solid black"/></li>';
+                        }
+                        str += '</ul>';
+                    } else {
+                        str = '<h2 style="text-align: center;">暂无图片！</h2>'
+                    }
+                    $("#show").html(str);//如果用append在多次查询后不会清空#show中的内容
+                }
+            })
+        }
+
+
+    </script>
+
+    <script type="text/javascript">
+
+    var applicationPath = window.applicationPath === "" ? "" : window.applicationPath || "../../";
+    $(function () {
+        var $ = jQuery,
+        $list = $('#fileList'),
+        // 优化retina, 在retina下这个值是2
+        ratio = window.devicePixelRatio || 1,
+        // 缩略图大小
+        thumbnailWidth = 90 * ratio,
+        thumbnailHeight = 90 * ratio,
+
+        // Web Uploader实例
+        uploader;
+        uploader = WebUploader.create({
+            // 选完文件后，是否自动上传。
+            auto: false,
+
+            disableGlobalDnd: true,
+            // swf文件路径
+            swf: applicationPath + '/Script/Uploader.swf',
+
+            // 文件接收服务端。
+            server: applicationPath + '/QualityTest/UpLoadProcess',
+
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+
+            //只允许选择图片
+            accept: {
+                title: 'Images',
+                extensions: 'gif,jpg,jpeg,bmp,png',
+                mimeTypes: 'image/*'
+            }
+        });
+
+        // 当有文件添加进来的时候
+        uploader.on('fileQueued', function (file) {
+            var $li = $(
+                    '<div id="' + file.id + '" class="cp_img">' +
+                        '<img>' +
+                    '<div class="cp_img_jian"></div></div>'
+                    ),
+                $img = $li.find('img');
+
+
+            // $list为容器jQuery实例
+            $list.append($li);
+
+            // 创建缩略图
+            // 如果为非图片文件，可以不用调用此方法。
+            // thumbnailWidth x thumbnailHeight 为 100 x 100
+            uploader.makeThumb(file, function (error, src) {
+                if (error) {
+                    $img.replaceWith('<span>不能预览</span>');
+                    return;
+                }
+
+                $img.attr('src', src);
+            }, thumbnailWidth, thumbnailHeight);
+        });
+
+        // 文件上传过程中创建进度条实时显示。
+        uploader.on('uploadProgress', function (file, percentage) {
+            var $li = $('#' + file.id),
+                $percent = $li.find('.progress span');
+
+            // 避免重复创建
+            if (!$percent.length) {
+                $percent = $('<p class="progress"><span></span></p>')
+                        .appendTo($li)
+                        .find('span');
+            }
+
+            $percent.css('width', percentage * 100 + '%');
+        });
+
+        // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+        uploader.on('uploadSuccess', function (file, response) {
+
+            $('#' + file.id).addClass('upload-state-done');
+        });
+
+        // 文件上传失败，显示上传出错。
+        uploader.on('uploadError', function (file) {
+            var $li = $('#' + file.id),
+                $error = $li.find('div.error');
+
+            // 避免重复创建
+            if (!$error.length) {
+                $error = $('<div class="error"></div>').appendTo($li);
+            }
+
+            $error.text('上传失败');
+        });
+
+        // 完成上传完了，成功或者失败，先删除进度条。
+        uploader.on('uploadComplete', function (file) {
+            $('#' + file.id).find('.progress').remove();
+        });
+
+        //所有文件上传完毕
+        uploader.on("uploadFinished", function ()
+        {
+           //提交表单
+
+        });
+
+        //开始上传
+        $("#ctlBtn").click(function () {
+            uploader.upload();
+
+        });
+
+        //显示删除按钮
+        $("#fileList").on("mouseover", ".cp_img", function ()
+        {
+            $(this).children(".cp_img_jian").css('display', 'block');
+
+        });
+        //隐藏删除按钮
+        $("#fileList").on("mouseout", ".cp_img", function () {
+            $(this).children(".cp_img_jian").css('display', 'none');
+
+        });
+        //执行删除方法
+        $list.on("click", ".cp_img_jian", function ()
+        {
+            debugger;
+            var Id = $(this).parent().attr("id");
+            uploader.removeFile(uploader.getFile(Id,true));
+            $(this).parent().remove();
+        });
+
+    });
+
+
+    </script>
+</body>
+
+</html>

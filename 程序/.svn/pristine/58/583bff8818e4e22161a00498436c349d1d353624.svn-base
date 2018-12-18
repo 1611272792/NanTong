@@ -1,0 +1,90 @@
+﻿using Newtonsoft.Json;
+using ProductionPlanSystem.Areas.ProductionPlanApi.Models;
+using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Web.Http;
+
+namespace ProductionPlanSystem.Areas.ProductionPlanApi.Controllers
+{
+    public class GetProcessTerminalController : ApiController
+    {
+        #region 获取所有工序及其对应的终端
+        /// <summary>
+        /// 获取所有工序及其对应的终端
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public HttpResponseMessage GetProcessTerminal()
+        {
+            SqlParameter[] pars = new SqlParameter[1];
+            pars[0] = new SqlParameter("@strType", "process");
+            //获取第一个工序中的状态信息
+            DataSet procstate = SqlDbHelper.RunProcedure("proc_StateSet", pars, "process");
+
+            ProcessTerminal pt = new ProcessTerminal();
+            try
+            {
+                if (procstate?.Tables.Count > 0 && procstate.Tables[0]?.Rows.Count > 0)
+                {
+                    pt.StateCode = 100;
+                    pt.ReaSon = "";
+                    List<ProcessInfo> lpi = new List<ProcessInfo>();
+                    for (int i = 0; i < procstate.Tables[0]?.Rows.Count; i++)
+                    {
+                        //获取工序信息
+                        ProcessInfo pi = new ProcessInfo();
+                        pi.ProcessId = procstate.Tables[0].Rows[i].Field<int>("ProcessId");
+                        pi.ProcessName = procstate.Tables[0].Rows[i].Field<string>("ProcessName");
+
+                        SqlParameter[] ptrs = new SqlParameter[2];
+                        ptrs[0] = new SqlParameter("@strType", "pterminal");
+                        ptrs[1] = new SqlParameter("@ProcessId", pi.ProcessId);
+                        DataSet ptinfo = SqlDbHelper.RunProcedure("proc_StateSet", ptrs, "pterminal");
+                        if (ptinfo?.Tables.Count > 0 && ptinfo.Tables[0]?.Rows.Count > 0)
+                        {
+                            List<TerminalInfo> lti = new List<TerminalInfo>();
+                            for (int j = 0; j < ptinfo.Tables[0]?.Rows.Count; j++)
+                            {
+                                TerminalInfo ti = new TerminalInfo();
+                                ti.TerminalID = ptinfo.Tables[0].Rows[j].Field<int>("TerminalID");
+                                ti.TerminalName = ptinfo.Tables[0].Rows[j].Field<string>("TerminalName");
+                                ti.PageTime = ptinfo.Tables[0].Rows[j].Field<int?>("PageTime") ?? 0;
+                                lti.Add(ti);
+                            }
+                            pi.TerminalList = lti;
+                        }
+                        else
+                        {
+                            pi.TerminalList = new List<TerminalInfo>();
+                        }
+                        lpi.Add(pi);
+                    }
+                    pt.ProcessList = lpi;
+                }
+                else
+                {
+                    pt.StateCode = 100;
+                    pt.ReaSon = "暂无数据";
+                    pt.ProcessList = new List<ProcessInfo>();
+                }
+            }
+            catch (Exception ex)
+            {
+                pt.StateCode = 104;
+                pt.ReaSon = ex.Message;
+                pt.ProcessList = new List<ProcessInfo>();
+            }
+            string Json = JsonConvert.SerializeObject(pt);
+
+            return new HttpResponseMessage { Content = new StringContent(Json, Encoding.GetEncoding("UTF-8"), "text/json") };
+        } 
+        #endregion
+    }
+}

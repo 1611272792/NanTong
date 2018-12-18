@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: cn.dreamtobe.filedownloader:filedownloader-okhttp3-connection-1.1.0">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/filedownloader-okhttp3-connection-1.1.0.aar/bf77b3dc98297fa1d30f7dbcdabee6d3/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/filedownloader-okhttp3-connection-1.1.0.aar/bf77b3dc98297fa1d30f7dbcdabee6d3/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cn.dreamtobe.filedownloader/filedownloader-okhttp3-connection/1.1.0/d4b89d4bb344026ddc7604d5e3eb57a9dabdd3a0/filedownloader-okhttp3-connection-1.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

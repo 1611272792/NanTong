@@ -1,0 +1,1010 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data;
+using XP_PPS_Model;
+using XP_PPS_DAL;
+using NPOI.SS.UserModel;
+using System.IO;
+using NPOI.XSSF.UserModel;
+using NPOI.HSSF.UserModel;
+using ProductionPlanSystem.Help;
+using System.Data.SqlClient;
+using Newtonsoft.Json;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ProducelineManagerController : BaseController
+    {
+        // GET: ProducelineManager
+        public ActionResult Index()
+        {
+            try
+            {
+ 
+                #region  查询表头
+             
+                string sqltitle = string.Format("EXEC AboutProduction @sqlType='biaotou'");
+                DataTable dt2 = SqlDbHelper.ExecuteDataTable(sqltitle);
+            if (dt2?.Rows.Count > 0)
+            {
+                ViewBag.title = dt2;
+            
+            }
+            else
+            {
+                ViewBag.title = null;
+            }
+                #endregion
+
+                #region  获取登录用户信息
+               
+                string userID;
+            string Role;
+            if (Session["UserInfoID"] == null || Session["Role"] == null)
+            {
+                return Content("<script>top.location = '/Login/Index';</script>");
+            }
+            else
+            {
+                userID = Session["UserInfoID"].ToString();//登录人id
+                Role = Session["Role"].ToString();
+            }
+                #endregion
+              
+                #region 查询数据
+
+                string sql = "";           
+            if (Role != AppConfig.Role)
+            {
+                ViewBag.Role = 1;
+                    //sql = string.Format($"select * from DataReport where TerminalID in(SELECT TerminalID FROM dbo.Terminal WHERE   UserInfoID LIKE '%,{userID},%'   OR UserInfoID LIKE '%,{userID}' OR UserInfoID LIKE '{userID},%' OR UserInfoID='{userID}')" );
+                    sql = string.Format($@"EXEC[dbo].[AboutProduction] @sqlType = N'oneDataReport', @userid = N'{userID}'");
+            }
+            else  //为最高管理员时
+            {
+                    sql = string.Format($@"EXEC[dbo].[AboutProduction] @sqlType = N'oneDataReport', @userid = N'0'");
+                    //sql = string.Format("select * from DataReport");
+                }
+                DataTable dt = SqlDbHelper.ExecuteDataTable(sql);
+             
+
+            if (dt.Rows.Count > 0)
+            {   
+                ViewBag.producetion = dt;
+            }
+            else
+            {
+                ViewBag.producetion = null;
+            }
+                #endregion
+
+                #region 选择区域
+                SqlParameter[] values = new SqlParameter[1];
+            values[0] = new SqlParameter("@strType", "process");
+            //获取工序信息
+            DataSet info = SqlDbHelper.RunProcedure("proc_ProcessSet", values, "process");
+            if (info.Tables[0]?.Rows.Count > 0)
+            {
+                ViewBag.pinfo = info.Tables[0];
+            }
+            else
+            {
+                ViewBag.pinfo = null;
+            }
+                #endregion
+
+                #region 选择项目
+                DataTable prodt = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjinfo'");
+                if (prodt.Rows.Count > 0)
+                {
+                    ViewBag.pjinfo = prodt;
+                }
+                else
+                {
+                    ViewBag.pjinfo = null;
+                }
+                #endregion
+
+                return View();
+            }
+            catch (Exception e)
+            {
+
+                throw e;
+            }
+        }
+
+        #region excel导入
+        /// <summary>
+        /// excel导入数据
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult ExcelToTable()
+        {
+            string path = Server.MapPath("~/Content/excel/");//设定上传的文件路径
+
+            if (!Directory.Exists(path))
+
+            {
+                Directory.CreateDirectory(path);
+
+            }
+
+            //判断是否已经选择上传文件
+
+            HttpPostedFileBase files = Request.Files["file"];
+
+            string filenName = files.FileName;
+            if (filenName.LastIndexOf("\\") > -1)//兼容IE谷歌
+            {
+                filenName = filenName.Substring(filenName.LastIndexOf("\\") + 1);
+            }
+            string file = path + filenName;
+            if (filenName == "")
+            {
+                return Content("<script>alert('请选择正确的excel文件');history.go(-1);</script>");
+            }
+            else if (filenName.Substring(filenName.Length - 4) == ".xls" || filenName.Substring(filenName.Length - 5) == ".xlsx")
+            {
+                files.SaveAs(file);//上传路径
+
+                //然后你就可以用filepath新增到数据库里面了。
+
+                DataTable dt = new DataTable();
+                IWorkbook workbook;
+                string fileExt = Path.GetExtension(file).ToLower();
+                using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                {
+                    //XSSFWorkbook 适用XLSX格式，HSSFWorkbook 适用XLS格式
+                    if (fileExt == ".xlsx") { workbook = new XSSFWorkbook(fs); } else if (fileExt == ".xls") { workbook = new HSSFWorkbook(fs); } else { workbook = null; }
+                    if (workbook == null) { return null; }
+                    ISheet sheet = workbook.GetSheetAt(0);
+
+                    //表头  
+                    IRow header = sheet.GetRow(sheet.FirstRowNum);
+                    List<int> columns = new List<int>();
+                    for (int i = 0; i < header.LastCellNum; i++)
+                    {
+                        object obj = GetValueType(header.GetCell(i));
+                        if (obj == null || obj.ToString() == string.Empty)
+                        {
+                            dt.Columns.Add(new DataColumn("Columns" + i.ToString()));
+                        }
+                        else
+                            dt.Columns.Add(new DataColumn(obj.ToString()));
+                        columns.Add(i);
+                    }
+                    //数据  
+                    for (int i = sheet.FirstRowNum + 1; i <= sheet.LastRowNum; i++)
+                    {
+                        DataRow dr = dt.NewRow();
+                        bool hasValue = false;
+                        foreach (int j in columns)
+                        {
+                            dr[j] = GetValueType(sheet.GetRow(i).GetCell(j));
+                            if (dr[j] != null && dr[j].ToString() != string.Empty)
+                            {
+                                hasValue = true;
+                            }
+                        }
+                        if (hasValue)
+                        {
+                            dt.Rows.Add(dr);
+
+                        }
+                    }
+                }
+                string sqlexcel = "";   //sql插入连接字符串
+                string sqldele = "";//sql删除
+                string a, b, c, d, e, h,g,x,k,l,m,n = "";  //获取的excel数据
+                int SucessInsert = 0; //成功插入的条数
+                int rows = 0;//excel表的列数
+                int num = 0;//插入数据库影响的行数
+
+                if (dt.Rows.Count > 0)
+                {
+
+                    //查询终端名称 
+                    DataTable terdt = SqlDbHelper.ExecuteDataTable("EXEC [proc_ExcelImport] @sqlType='getTer'");
+                    //查询工序名称 
+                    DataTable pocdt = SqlDbHelper.ExecuteDataTable("EXEC [proc_ExcelImport] @sqlType='getProc'");
+                    ////查询状态
+                    //DataTable statedt = SqlDbHelper.ExecuteDataTable("EXEC [proc_ExcelImport] @sqlType='getProc'");
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        try
+                        {
+                            a = dt.Rows[i]["订单内容"].ToString();
+                            b = dt.Rows[i]["订单数量"].ToString();
+                            d = dt.Rows[i]["工序"].ToString();
+                            h = dt.Rows[i]["备注"].ToString();
+                            c = dt.Rows[i]["终端"].ToString();
+                            e = "";//状态
+
+                        }
+                        catch (Exception)
+                        {
+
+                            return Content("<script>alert('您的excel表格式有误！');history.go(-1);</script>");
+                        }
+
+                        //验证该工序是否正确。并获取id
+                        for (int j = 0; j < pocdt.Rows.Count; j++)
+                        {
+                            if (pocdt.Rows[j]["ProcessName"].ToString() == d)
+                            {
+                                d = pocdt.Rows[j]["ProcessId"].ToString();
+                                if (SqlDbHelper.ExecuteDataTable($"EXEC [proc_ExcelImport] @sqlType='getState',@ProcessId={d}").Rows.Count > 0)
+                                {
+                                    e = SqlDbHelper.ExecuteDataTable($"EXEC [proc_ExcelImport] @sqlType='getState',@ProcessId={d}").Rows[0]["StateId"].ToString();  //默认状态
+                                }
+                                else
+                                {
+                                    e = "";
+                                }
+
+                                SucessInsert += 1;
+                            }
+                        }
+                        //验证该终端是否正确。并获取id
+                        for (int j = 0; j < terdt.Rows.Count; j++)
+                        {
+                            if (terdt.Rows[j]["TerminalName"].ToString() == c)
+                            {
+                                c = terdt.Rows[j]["TerminalID"].ToString();
+                                SucessInsert += 1;
+                            }
+                        }
+                        if (SucessInsert != 2|| string.IsNullOrWhiteSpace(e))//当某一行出现错误时
+                        {
+                            //删除添加的数据
+                            sqldele = string.Format("delete  from  ProductionPlan where ProductionPlanID in(select TOP {0} ProductionPlanID from ProductionPlan order by ProductionPlanID desc)", rows);
+                            //DALHelp.ExecuteNonQuery(sqldele, null);
+                            ServerOrLit.isNum(LoginController.connType, sqldele);
+                            return Content("<script>alert('导入失败！第" + (rows + 1) + " 行数据有误,请检查工序名和终端名是否正确，以及是否有默认状态！');history.go(-1);</script>");
+                        }
+                        else
+                        {
+                            sqlexcel = string.Format($"insert into ProductionPlan(ProductionPlanName,ProductionPlanVersion,PlanNum,RealNum,StartTime,State,ProcessId,TerminalID,Issue,[Clear]) values('{a}','{h}',{b},0,CONVERT(varchar(200), GETDATE(), 20),'{e}','{d}','{c}',0,0)");
+                            //num = DALHelp.ExecuteNonQuery(sqlexcel, null);
+                            num = ServerOrLit.isNum(LoginController.connType, sqlexcel);
+                            SucessInsert = 0;
+                            rows += 1;
+                        }
+
+                    }
+                };
+
+                if (num > 0)
+                {
+                    ViewBag.aa = 1;
+
+                    return Redirect("/ProducelineManager/Index");
+                }
+                else
+                {
+                    ViewBag.aa = 2;
+                    return Content("<script>alert('导入失败');history.go(-1);</script>");
+                }
+            }
+            else
+            {
+                return Content("<script>alert('导入失败!请选择excel格式的文件');history.go(-1);</script>");
+            }
+
+        }
+        /// <summary>
+        /// 获取单元格类型
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        private static object GetValueType(ICell cell)
+        {
+            if (cell == null)
+                return null;
+            switch (cell.CellType)
+            {
+                case CellType.Blank: //BLANK:  
+                    return null;
+                case CellType.Boolean: //BOOLEAN:  
+                    return cell.BooleanCellValue;
+                case CellType.Numeric: //NUMERIC:  
+                    return cell.NumericCellValue;
+                case CellType.String: //STRING:  
+                    return cell.StringCellValue;
+                case CellType.Error: //ERROR:  
+                    return cell.ErrorCellValue;
+                case CellType.Formula: //FORMULA:  
+                default:
+                    return "=" + cell.CellFormula;
+            }
+        }
+        #endregion
+
+       /// <summary>
+       /// 删除
+       /// </summary>
+       /// <param name="proId">计划id</param>
+       /// <param name="Yeshu">页数</param>
+       /// <returns></returns>
+        public ActionResult DeleteProduceline(string proId,int Yeshu)
+        {
+            Session["aa"] = Yeshu;
+            try
+            {
+                //string sqlstr = string.Format("delete from ProductionPlan where ProductionPlanID in({0})", proId);
+                string sqlstr = string.Format($"EXEC[dbo].[AboutProduction] @sqlType = N'DeletePro', @someProduID = N'{proId}'");
+                int info = SqlDbHelper.ExecuteNonQuery(sqlstr);
+            if (info > 0)
+            {
+                return PartialView("_Produce");
+            }
+            else
+            {
+                return Content("<script>alert('删除失败！');history.go(-1);</script>");
+            }
+            }
+            catch (Exception e)
+            {
+
+                return Content("<script>alert('删除失败！" + e.Message + "');history.go(-1);</script>"); 
+            }
+
+        }
+       
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <param name="allid">选中的计划id</param>
+        /// <param name="Yeshu">页数</param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult AllDelete(string allid,int Yeshu)
+        {
+            Session["aa"] = Yeshu;
+            var ids = allid.Substring(0, allid.LastIndexOf(','));
+            try
+            {
+            string mysql = string.Format($"EXEC[dbo].[AboutProduction] @sqlType = N'DeletePro', @someProduID = N'{ids}'");
+            //int info = DALHelp.ExecuteNonQuery(mysql, null);
+            int info = ServerOrLit.isNum(LoginController.connType, mysql);
+
+            if (info > 0)
+            {
+                return PartialView("_Produce");
+            }
+            else
+            {
+                return Content("<script>alert('批量删除失败！');history.go(-1);</script>");
+            }
+            }
+            catch (Exception e)
+            {
+
+                return Content("<script>alert('"+e.Message+"');history.go(-1);</script>");
+            }
+
+        }
+       
+        /// <summary>
+        /// 得到需要编辑的内容
+        /// </summary>
+        /// <param name="produID">计划id</param>
+        /// <param name="TrNum">表格数据的数量</param>
+        /// <returns></returns>
+        public ActionResult EditProducelineBySelect(int produID,int TrNum)
+        {
+            try
+            {
+            string sqlstr = string.Format($"EXEC[dbo].[AboutProduction] @sqlType = N'SelectPro', @produID = N'{produID}'");
+                //DataTable dt = DALHelp.ExecuteDataTable(sqlstr, null);
+                DataTable dt = ServerOrLit.isDataTable(LoginController.connType, sqlstr);
+            if (dt.Rows.Count > 0)
+            {
+                int produId = int.Parse(dt.Rows[0]["ProductionPlanID"].ToString());
+                string produName = dt.Rows[0]["ProductionPlanName"].ToString();
+                string produVer = dt.Rows[0]["ProductionPlanVersion"].ToString();
+                //string produNum = dt.Rows[0]["PlanNum"].ToString();
+
+
+                    //string produState = dt.Rows[0]["State"].ToString();
+                    string produTer = dt.Rows[0]["TerminalID"].ToString();
+                string produProc = dt.Rows[0]["ProcessId"].ToString();
+                    string produiIssus = dt.Rows[0]["Issue"].ToString();
+                    string produPlanStart = dt.Rows[0]["c46"].ToString();//计划开始时间
+                    string produPlanEnd= dt.Rows[0]["c47"].ToString();//计划结束时间
+                    string produRealStart = dt.Rows[0]["c48"].ToString();//实际开始时间
+                    string produRealEnd = dt.Rows[0]["c49"].ToString();//实际结束时间
+                    string produDiffTime= dt.Rows[0]["c50"].ToString();//时间差
+                    string Csum = "";//c1_c45的数据
+                for (int i  = 12; i  <= TrNum+1; i ++)
+                {
+                      Csum = Csum+ dt.Rows[0][i].ToString()+",";
+                }
+
+                return Content(produId + "," + produName + "," + produVer + "," + produProc  +","+ produTer +  "," + produiIssus + "," + produPlanStart + "," + produPlanEnd + "," + produRealStart + "," + produRealEnd + "," + produDiffTime + "," +Csum);
+            }
+            else
+            {
+                return Content("no");
+            }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+     
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="produName">计划名</param>
+        /// <param name="produVer">型号</param>
+        /// <param name="produTer">终端名</param>
+        /// <param name="processId">工序id</param>
+        /// <param name="produID">计划id</param>
+        /// <param name="ProcessIssue">发放状态</param>
+        /// <param name="ProPlanStart">开始时间</param>
+        /// <param name="ProPlanEnd">结束时间</param>
+        /// <param name="ProRealStart">确认开始时间</param>
+        /// <param name="ProRealEnd">确认完成时间</param>
+        /// <param name="Yeshu">页数</param>
+        /// <param name="FieldValue">新增字段</param>
+        /// <returns></returns>
+        public ActionResult EditProduceline(string produName, string produVer,string pronum, string produTer, int processId, int produID, int ProcessIssue, string ProPlanStart, string ProPlanEnd, string ProRealStart, string ProRealEnd, int Yeshu, string FieldValue)
+        {
+            Session["aa"] = Yeshu;
+            int? diffTime = null ;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(ProRealEnd)&&!string.IsNullOrWhiteSpace(ProRealStart) && !string.IsNullOrWhiteSpace(ProPlanEnd) && !string.IsNullOrWhiteSpace(ProPlanStart))
+                {
+                    TimeSpan ts = (Convert.ToDateTime(ProRealEnd) - Convert.ToDateTime(ProRealStart)) - (Convert.ToDateTime(ProPlanEnd) - Convert.ToDateTime(ProPlanStart));
+                    diffTime = ts.Days;  //差异时间
+                }
+                string strSql = string.Format($@"
+                  UPDATE dbo.ProductionPlan 
+                SET 
+                ProductionPlanName='{produName}', 
+                ProductionPlanVersion='{produVer}',
+                PlanNum='{pronum}',
+                ProcessId={processId},
+                TerminalID={produTer},
+                Issue={ProcessIssue}{FieldValue},
+                c46='{ProPlanStart}',
+                c47='{ProPlanEnd}',
+                c48='{ProRealStart}',
+                c49='{ProRealEnd}',
+                c50='{diffTime}'
+                WHERE ProductionPlanID={produID}");
+
+                //string strSql = string.Format($@"EXEC[dbo].[AboutProduction] 
+                //@sqlType = N'EditPor', 
+                //@produName = N'{produName}',
+                //@produVer = N'{produVer}', 
+                //@processId = {processId}, 
+                //@produTer = {produTer},
+                //@ProcessIssue = {ProcessIssue}, 
+                //@FieldValue = N'{FieldValue}', 
+                //@ProPlanStart = N'{ProPlanStart}', 
+                //@ProPlanEnd = N'{ProPlanEnd}', 
+                //@ProRealStart = N'{ProRealStart}', 
+                //@ProRealEnd = N'{ProRealEnd}', 
+                //@chayiTime = N'{diffTime}', 
+                //@produID = {produID}");
+                //int info = SqlDbHelper.ExecuteNonQuery(strSql);
+                int info = SqlDbHelper.ExecuteNonQuery(strSql);
+    
+          
+            if (info>0)
+            {
+                return PartialView("_Produce");
+            }
+            else
+            {
+                return Content("<script>alert('编辑失败！');history.go(-1);</script>");
+            }
+
+            }
+            catch (Exception e)
+            {
+
+                return Content("<script>alert('"+e.Message+"');history.go(-1);</script>");
+            }
+
+        }
+       
+        
+        /// <summary>
+        /// 添加
+        /// </summary>
+        /// <param name="produName">计划名</param>
+        /// <param name="producVersion">型号</param>
+        /// <param name="producTerid">终端名</param>
+        /// <param name="processId">工序id</param>
+        /// <param name="produID">计划id</param>
+        /// <param name="ProcessIssue">发放状态</param>
+        /// <param name="proStartTime">开始时间</param>
+        /// <param name="proEndTime">结束时间</param>
+        /// <param name="reaStartTime">确认开始时间</param>
+        /// <param name="reaEndTime">确认完成时间</param>
+        /// <param name="Yeshu">页数</param>
+        /// <param name="NameC">新增字段名</param>
+        /// <param name="SumC">新增字段id</param>
+        /// <returns></returns>
+        public ActionResult AddProduceline(string producName,string producVersion,string ProducGuige,string producTerid, string processId, string proStartTime, string proEndTime, string reaStartTime, string reaEndTime, int Yeshu,string NameC,string SumC)
+        {
+            int? diffTime = null;
+            if (!string.IsNullOrWhiteSpace(reaEndTime)&& !string.IsNullOrWhiteSpace(reaStartTime) && !string.IsNullOrWhiteSpace(proEndTime) && !string.IsNullOrWhiteSpace(proStartTime))
+            {
+                TimeSpan ts = (Convert.ToDateTime(reaEndTime) - Convert.ToDateTime(reaStartTime)) - (Convert.ToDateTime(proEndTime) - Convert.ToDateTime(proStartTime));
+                  diffTime = ts.Days;  //差异时间
+            }
+         
+            Session["aa"]= Yeshu;
+            try
+            {
+                string strSql = string.Format($@" 
+INSERT INTO dbo.ProductionPlan
+        ( ProductionPlanName ,
+          ProductionPlanVersion ,
+          PlanNum,
+          ProcessId ,
+          TerminalID ,
+          Issue ,
+          Clear 
+          {NameC},
+          c46 ,
+          c47 ,
+          c48 ,
+          c49 ,
+          c50
+        )
+VALUES  ( '{producName}' , -- ProductionPlanName - varchar(200)
+          '{producVersion}' , -- ProductionPlanVersion - varchar(200)
+           {ProducGuige},
+          {processId} , -- ProcessId - int
+          '{producTerid}' , -- TerminalID - varchar(200)
+          0 , -- Issue - int
+          0  -- Clear - int
+         {SumC},
+          '{proStartTime}' , -- c16 - varchar(200)
+          '{proEndTime}' , -- c17 - varchar(200)
+          '{reaStartTime}' , -- c18 - varchar(200)
+          '{reaEndTime}' , -- c19 - varchar(200)
+          '{diffTime}'  -- c20 - varchar(200)
+        )");
+                int info = SqlDbHelper.ExecuteNonQuery(strSql);
+
+             if (info > 0)
+            {
+                return PartialView("_Produce");
+            }
+            else
+            {
+                return Content("<script>alert('添加失败！');history.go(-1);</script>");
+            }
+            }
+            catch (Exception e)
+            {
+
+                return Content("<script>alert('"+e.Message+"');history.go(-1);</script>");
+            }
+        }
+        /// <summary>
+        /// 发放
+        /// </summary>
+        /// <param name="ProduID">计划id</param>
+        /// <param name="Yeshu">页数</param>
+        /// <returns></returns>
+        public ActionResult ProducelineIssue(string ProduID, int Yeshu) {
+            Session["aa"] = Yeshu;
+            try
+            {
+
+
+                //string sqlIssue = string.Format("Update ProductionPlan set Issue=1 where ProductionPlanID='{0}'", ProduID);
+                string sqlIssue = string.Format($"EXEC[dbo].[AboutProduction] @sqlType = N'IssuePro', @someProduID = N'{ProduID}'");
+                //int numIssue = DALHelp.ExecuteNonQuery(sqlIssue,null);
+                int numIssue = ServerOrLit.isNum(LoginController.connType, sqlIssue);
+
+            if (numIssue > 0)
+            {
+                return PartialView("_Produce");
+            }
+            else
+            {
+                return Content("<script>alert('发放失败！');history.go(-1);</script>");
+            }
+            }
+            catch (Exception e)
+            {
+
+                return Content("<script>alert('"+e.Message+"');history.go(-1);</script>");
+                
+            }
+        }
+        /// <summary>
+        /// 批量发放
+        /// </summary>
+        /// <param name="allid">所有计划id</param>
+        /// <param name="Yeshu">页数</param>
+        /// <returns></returns>
+        public ActionResult AllIssue(string allid, int Yeshu) {
+            Session["aa"] = Yeshu;
+            try
+            {
+
+          
+            var ids = allid.Substring(0, allid.LastIndexOf(','));
+            //string sqlall = string.Format("update Productionplan set Issue=1 where ProductionPlanID in ({0})", ids);
+                string sqlall = string.Format($"EXEC[dbo].[AboutProduction] @sqlType = N'IssuePro', @someProduID = N'{ids}'");
+                //int numsIss = DALHelp.ExecuteNonQuery(sqlall,null);
+                int numsIss = ServerOrLit.isNum(LoginController.connType, sqlall);
+
+            if (numsIss > 0)
+            {
+                return PartialView("_Produce");
+            }
+            else
+            {
+                return Content("<script>alert('批量发放失败！');history.go(-1);</script>");
+            }
+            }
+            catch (Exception e)
+            {
+
+                return Content("<script>alert('"+e.Message+"');history.go(-1);</script>");
+
+            }
+
+        }
+       /// <summary>
+       /// 组合查询
+       /// </summary>
+       /// <param name="line">终端id</param>
+       /// <param name="yeshu">页数</param>
+       /// <returns></returns>
+        [HttpGet]
+        public ActionResult SelectAll(string PJName, string PDName, string PJNo, string CuName, string SizeName, string line,string yeshu)
+        {
+            string sqltitle = "";
+            if (line=="0") 
+            {
+                  sqltitle = string.Format($"EXEC AboutSelect @type='NoTerminalId'");
+            }
+            else
+            {
+                sqltitle = string.Format($"EXEC AboutSelect @type='getAllocationName',@TerminalId={line}");
+
+            }
+
+            //string sqltitle = string.Format("SELECT  AllocationName,AllocationTitle,[Type] from Allocation WHERE IsActive=1 order by Serial asc");
+            DataTable dt2 = ServerOrLit.isDataTable(LoginController.connType, sqltitle);
+
+            if (dt2.Rows.Count > 0)
+            {
+                ViewBag.title = dt2;
+            }
+            else
+            {
+                ViewBag.title = null;
+            }
+
+            string userid;
+            string Role1;
+            if (Session["UserInfoID"] == null || Session["Role"] == null)
+            {
+                return Content("<script>top.location = '/Login/Index';</script>");
+            }
+            else
+            {
+                userid = Session["UserInfoID"].ToString();//登录人
+                Role1 = Session["Role"].ToString();
+            }
+            string Role = PeopleRole(userid, Role1);
+            string mysqls = "";            
+            if (Role == "管理员")
+            {
+                    //if (line == "0")
+                    //{
+                        //查询所有数据
+                        mysqls = string.Format($"select * from DataReport where ProductionPlanName LIKE '%{PJName  }%' AND ProductionPlanVersion  LIKE '%{PDName  }%'  AND PlanNum LIKE '%{SizeName }%' AND ProjectNo LIKE '%{PJNo }%' AND Customer LIKE '%{CuName }%'");
+                    //}
+                    //else
+                    //{
+                    //    mysqls = string.Format("select * from DataReport where TerminalID='{0}'", line);
+                    //}
+            }
+            else if (Role == "产线负责人")
+            {
+                 
+                    //if (line == "0")
+                    //{
+                        mysqls = string.Format($"select * from DataReport where TerminalID in (select TerminalID from Terminal where (UserInfoID LIKE '%,{userid},%'   OR UserInfoID LIKE '%,{userid}' OR UserInfoID LIKE '{userid},%' OR UserInfoID='{userid}')) and ProductionPlanName LIKE '%{PJName  }%' AND ProductionPlanVersion  LIKE '%{PDName  }%'  AND PlanNum LIKE '%{SizeName }%'  AND ProjectNo LIKE '%{PJNo }%' AND Customer LIKE '%{CuName }%'");
+                    //}
+                    //else
+                    //{
+                    //    mysqls = string.Format($"select * from DataReport where  TerminalID='{line}' and  (UserInfoID LIKE '%,{userid},%'   OR UserInfoID LIKE '%,{userid}' OR UserInfoID LIKE '{userid},%' OR UserInfoID='{userid}')");
+                    //}
+            }
+            //DataTable dt = DALHelp.ExecuteDataTable(mysqls, null); 
+            DataTable dt = ServerOrLit.isDataTable(LoginController.connType, mysqls);
+
+            if (dt.Rows.Count > 0)
+            {
+                ViewBag.producetion = dt;
+            }
+            else
+            {
+                ViewBag.producetion = null;
+                Session["datatable"] = null;
+            }
+            Session["aa"] = yeshu;
+            //清除ie浏览器分布视图缓存
+            Response.Buffer = true;
+            Response.ExpiresAbsolute = System.DateTime.Now.AddSeconds(-1);
+            Response.Expires = 0;
+            Response.CacheControl = "no-cache";
+            return PartialView("_Produce", dt);
+        }
+        
+        /// <summary>
+        /// 判断是否为管理员或产线负责人
+        /// </summary>
+        /// <param name="userid">用户id</param>
+        /// <param name="Role1">角色</param>
+        /// <returns></returns>
+        public string PeopleRole(string userid, string Role1)
+        {
+            string IsPeople = "";
+            //如果用户ID为2则是管理员
+            if (Role1 == Help.AppConfig.Role)
+            {
+                IsPeople = "管理员";
+            }
+            else
+            {
+                //如果此用户有负责的产线则为产线负责人
+                string sqlstr2 = string.Format($"SELECT * FROM dbo.Terminal WHERE   UserInfoID LIKE '%,{userid},%'   OR UserInfoID LIKE '%,{userid}' OR UserInfoID LIKE '{userid},%' OR UserInfoID='{userid}'");
+                //DataTable linedt = DALHelp.ExecuteDataTable(sqlstr2, null);
+                DataTable linedt = ServerOrLit.isDataTable(LoginController.connType, sqlstr2);
+
+                if (linedt.Rows.Count > 0)
+                {
+                    IsPeople = "产线负责人";
+                    ViewBag.Role = 1;
+                }
+            }
+            return IsPeople;
+        }
+
+
+       /// <summary>
+       /// 通过工序查出状态信息
+       /// </summary>
+       /// <param name="ProcessId">工序id</param>
+       /// <returns></returns>
+        public string GetProcessState(string ProcessId)
+        {
+            string userid;
+            string Role1;
+            if (Session["UserInfoID"] == null || Session["Role"] == null)
+            {
+                return null;
+            }
+            else
+            {
+                userid = Session["UserInfoID"].ToString();//登录人id
+                Role1 = Session["Role"].ToString();
+            }
+            string Role = PeopleRole(userid, Role1);
+            string sqlTerminal = "";
+            //if (Role == "管理员")
+            //{
+                sqlTerminal = string.Format($@"SELECT * FROM dbo.State WHERE ProcessId='{ProcessId}'");
+            //}
+            //else if (Role == "产线负责人")
+            //{
+            //    sqlTerminal = string.Format($@"select * from Terminal where ProcessId='{ProcessId}' and (UserInfoID LIKE '%,{userid},%'   OR UserInfoID LIKE '%,{userid}' OR UserInfoID LIKE '{userid},%' OR UserInfoID='{userid}')");
+            //}
+            DataTable Terminal = ServerOrLit.isDataTable(LoginController.connType, sqlTerminal);
+            string Json = "";
+            if (Terminal?.Rows.Count > 0)
+            {
+                Json = JsonConvert.SerializeObject(Terminal);
+            }
+            return Json;
+        }
+
+
+        /// <summary>
+        /// 通过工序id和状态id判断他是否有下一道工序
+        /// </summary>
+        /// <param name="ProcessId">工序id</param>
+        /// <param name="StateId">状态id</param>
+        /// <returns>PId + "," + PName + "," + StaId</returns>
+        public ActionResult JudgeSerial(string ProcessId, string StateId)
+        {
+            if (string.IsNullOrWhiteSpace(ProcessId))
+            {
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(StateId))
+            {
+                return null;
+            }
+            SqlParameter[] pars = new SqlParameter[2];
+            pars[0] = new SqlParameter("@strType", "judgeserial");
+            pars[1] = new SqlParameter("@ProcessId", ProcessId);
+            DataSet SId = SqlDbHelper.RunProcedure("proc_JudgeSerial", pars, "judgeserial");
+            if (SId?.Tables.Count > 0 && SId.Tables[0]?.Rows.Count > 0)
+            {
+                //先查询是否是当前工序的最后一个状态
+                if (StateId == SId.Tables[0].Rows[0]["StateId"].ToString())
+                {
+                    SqlParameter[] nextpro = new SqlParameter[2];
+                    nextpro[0] = new SqlParameter("@strType", "judgenextProId");
+                    nextpro[1] = new SqlParameter("@ProcessId", ProcessId);
+                    DataSet NextPId = SqlDbHelper.RunProcedure("proc_JudgeSerial", nextpro, "judgenextProId");
+                    //判断是否有下一个工序
+                    if (NextPId?.Tables.Count > 0 && NextPId.Tables[0]?.Rows.Count > 0)
+                    {
+                        if (string.IsNullOrWhiteSpace(NextPId.Tables[0].Rows[0]["NextProcessId"].ToString()) || NextPId.Tables[0].Rows[0]["NextProcessId"].ToString() == "0")
+                        {
+                            return Content("nonext");
+                        }
+                        else
+                        {
+                            SqlParameter[] nextproinfo = new SqlParameter[2];
+                            nextproinfo[0] = new SqlParameter("@strType", "nextProInfo");
+                            nextproinfo[1] = new SqlParameter("@ProcessId", NextPId.Tables[0].Rows[0]["NextProcessId"].ToString());
+                            DataSet NextPInfo = SqlDbHelper.RunProcedure("proc_JudgeSerial", nextproinfo, "nextProInfo");
+                            //查询下一个工序信息
+                            if (NextPInfo?.Tables.Count > 0 && NextPInfo.Tables[0]?.Rows.Count > 0)
+                            {
+                                string PId = NextPInfo.Tables[0].Rows[0]["ProcessId"].ToString();
+                                string PName = NextPInfo.Tables[0].Rows[0]["ProcessName"].ToString();
+                                string StaId = NextPInfo.Tables[0].Rows[0]["StateId"].ToString();
+                                return Content(PId + "," + PName + "," + StaId);
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        /// <summary>
+        /// 验证是否有下一道工序
+        /// </summary>
+        /// <param name="ProcessId">工序id</param>
+        /// <param name="StateId">状态id</param>
+        /// <returns>PId + "," + PName + "," + StaId</returns>
+        public bool JudgeSerials(string ProcessId, string StateId)
+        {
+            if (string.IsNullOrWhiteSpace(ProcessId))
+            {
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(StateId))
+            {
+                return false;
+            }
+            SqlParameter[] pars = new SqlParameter[2];
+            pars[0] = new SqlParameter("@strType", "judgeserial");
+            pars[1] = new SqlParameter("@ProcessId", ProcessId);
+            DataSet SId = SqlDbHelper.RunProcedure("proc_JudgeSerial", pars, "judgeserial");
+            if (SId?.Tables.Count > 0 && SId.Tables[0]?.Rows.Count > 0)
+            {
+                //先查询是否是当前工序的最后一个状态
+                if (StateId == SId.Tables[0].Rows[0]["StateId"].ToString())
+                {
+                    SqlParameter[] nextpro = new SqlParameter[2];
+                    nextpro[0] = new SqlParameter("@strType", "judgenextProId");
+                    nextpro[1] = new SqlParameter("@ProcessId", ProcessId);
+                    DataSet NextPId = SqlDbHelper.RunProcedure("proc_JudgeSerial", nextpro, "judgenextProId");
+                    //判断是否有下一个工序
+                    if (NextPId?.Tables.Count > 0 && NextPId.Tables[0]?.Rows.Count > 0)
+                    {
+                        if (string.IsNullOrWhiteSpace(NextPId.Tables[0].Rows[0]["NextProcessId"].ToString()) || NextPId.Tables[0].Rows[0]["NextProcessId"].ToString() == "0")
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            SqlParameter[] nextproinfo = new SqlParameter[2];
+                            nextproinfo[0] = new SqlParameter("@strType", "nextProInfo");
+                            nextproinfo[1] = new SqlParameter("@ProcessId", NextPId.Tables[0].Rows[0]["NextProcessId"].ToString());
+                            DataSet NextPInfo = SqlDbHelper.RunProcedure("proc_JudgeSerial", nextproinfo, "nextProInfo");
+                            //查询下一个工序信息
+                            if (NextPInfo?.Tables.Count > 0 && NextPInfo.Tables[0]?.Rows.Count > 0)
+                            {
+                                string PId = NextPInfo.Tables[0].Rows[0]["NextProcessId"].ToString();
+                                string PName = NextPInfo.Tables[0].Rows[0]["ProcessName"].ToString();
+                                string StaId = NextPInfo.Tables[0].Rows[0]["StateId"].ToString();
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 验证该状态是否为最后一条状态
+        /// </summary>
+        /// <param name="ProcessId">工序id</param>
+        /// <param name="StateId">状态id</param>
+        /// <returns></returns>
+        public bool CheckState(int ProcessId, int StateId) {
+
+          int  state =Convert.ToInt32( SqlDbHelper.ExecuteDataTable($"EXEC dbo.proc_UpdateProc @sqlType = N'checkState',@ProcessId ={ProcessId}").Rows[0]["StateId"]);
+            if (StateId==state)
+            {
+                return true;
+
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 返回生产计划表中指定的字段数据
+        /// </summary>
+        /// <param name="field">字段</param>
+        /// <param name="prodId">计划id</param>
+        /// <returns></returns>
+        public string GetFieldInfo(string field,int prodId) {
+            string sqls = string.Format($"SELECT * FROM dbo.ProductionPlan WHERE ProductionPlanID={prodId}");
+            DataTable dt = SqlDbHelper.ExecuteDataTable(sqls);
+            if (dt.Rows.Count>0)
+            {
+                return dt.Rows[0][field].ToString();
+            }
+            else
+            {
+                return null;
+            }
+           
+        }
+    }
+}

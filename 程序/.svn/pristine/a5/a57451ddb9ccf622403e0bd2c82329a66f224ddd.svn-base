@@ -1,0 +1,215 @@
+﻿using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ProductController : Controller
+    {
+        // GET: Product
+        public ActionResult Index()
+        {
+            ////获取产品信息
+            //DataTable info = SqlDbHelper.ExecuteDataTable("SELECT * FROM dbo.tb_Product");
+            //if (info?.Rows.Count > 0)
+            //{
+            //    for (int i = 0; i < info.Rows.Count; i++)
+            //    {
+            //        info.Rows[i]["ProductSizeNos"] = getFieldsName(info.Rows[i]["ProductSizeNos"].ToString());
+
+            //    }
+            //    ViewBag.pinfo = info;
+            //}
+            //else
+            //{
+            //    ViewBag.pinfo = null;
+            //}
+            //获取产品信息
+            DataTable info = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'sizecount'");
+            if (info?.Rows.Count > 0)
+            {
+                ViewBag.count = info.Rows[0].Field<int?>("Count");
+            }
+            else
+            {
+                ViewBag.count = 0;
+            }
+            return View();
+        }
+
+        public ActionResult SelectAll(string ProductName,string SizeName,string pagecount,string size)
+        {
+            DataTable pdinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'selectpdinfo',@ProductName='{ProductName}',@ProductSizeName='{SizeName}',@pagecount='{pagecount}',@size='{size}'");
+            if (pdinfo?.Rows.Count > 0)
+            {
+                ViewBag.pinfo = pdinfo;
+            }
+            else
+            {
+                ViewBag.pinfo = null;
+            }
+            return PartialView("_Product", pdinfo);
+        }
+
+        #region 添加产品
+        /// <summary>
+        /// 添加产品
+        /// </summary>
+        /// <param name="ProductName"></param>
+        /// <param name="SizeName"></param>
+        /// <returns></returns>
+        public ActionResult AddProduct(string ProductName, string SizeName)
+        {
+            #region 验证
+            if (string.IsNullOrWhiteSpace(ProductName.Trim()))
+            {
+                return Content("产品名不能为空！");
+            }
+            if (string.IsNullOrWhiteSpace(SizeName.Trim()))
+            {
+                return Content("规格名不能为空！");
+            }
+            #endregion
+            DataTable isin = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pdisin',@ProductName='{ProductName}',@ProductSizeName='{SizeName}'");
+            if (isin.Rows.Count > 0)
+            {
+                return Content("此产品对应的规格已存在");
+            }
+            else
+            {
+                int info = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'addpd',@ProductName='{ProductName}',@ProductSizeName='{SizeName}'");
+                if (info > 0)
+                {
+                    return Content("ok");
+                }
+                else
+                {
+                    return Content("添加失败");
+                }
+            }
+        }
+        #endregion
+
+        #region 删除产品
+        /// <summary>
+        /// 删除产品
+        /// </summary>
+        /// <param name="ProductSizeNos">规格id</param>
+        /// <returns></returns>
+        public ActionResult DelProduct(string ProductSizeNos)
+        {
+            if (string.IsNullOrWhiteSpace(ProductSizeNos))
+            {
+                return Content("产品id为空");
+            }
+
+            int delcstate = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'delpd',@ProductSizeNos='{ProductSizeNos}'");
+            if (delcstate > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        #region 获取需要编辑的产品信息
+        /// <summary>
+        ///  获取需要编辑的产品信息
+        /// </summary>
+        /// <param name="PId"></param>
+        /// <returns></returns>
+        public ActionResult GetUpdProductInfo(int PId)
+        {
+            if (string.IsNullOrWhiteSpace(PId.ToString()))
+            {
+                return Content("Id不能为空");
+            }
+
+            DataTable ProductInfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'getpd',@ProductSizeNo='{PId}'");
+            if (ProductInfo?.Rows.Count > 0)
+            {
+                string ProductSizeNo = ProductInfo.Rows[0]["ProductSizeNo"].ToString();
+                string ProductId = ProductInfo.Rows[0]["ProductId"].ToString();
+                string ProductName = ProductInfo.Rows[0]["ProductName"].ToString();
+                string ProductSizeName = ProductInfo.Rows[0]["ProductSizeName"].ToString();
+                return Content(ProductSizeNo + "@" + ProductId + "@" + ProductName + "@" + ProductSizeName);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        #endregion
+
+        #region 编辑产品
+        /// <summary>
+        /// 编辑产品
+        /// </summary>
+        /// <param name="SizeId"></param>
+        /// <param name="ProductId"></param>
+        /// <param name="ProductName"></param>
+        /// <param name="SizeName"></param>
+        /// <returns></returns>
+        public ActionResult EditProduct(string SizeId, string ProductId, string ProductName,string SizeName)
+        {
+            #region 验证
+            if (string.IsNullOrWhiteSpace(SizeId.Trim()))
+            {
+                return Content("规格id不能为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProductId.Trim()))
+            {
+                return Content("产品Id不能为空");
+            }
+            #endregion
+            DataTable isin = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pdisin',@ProductName='{ProductName}',@ProductSizeName='{SizeName}'");
+            if (isin.Rows.Count > 0)
+            {
+                return Content("此产品对应的规格已存在");
+            }
+            else
+            {
+                int info = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'updpd',@ProductSizeNo='{SizeId}',@ProductId='{ProductId}',@ProductName='{ProductName}',@ProductSizeName='{SizeName}'");
+                if (info > 0)
+                {
+                    return Content("ok");
+                }
+                else
+                {
+                    return Content("编辑失败");
+                }
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// 获取规格id对应的规格名称
+        /// </summary>
+        /// <param name="fieldsId"></param>
+        /// <returns></returns>
+        public string getFieldsName(string fieldsId)
+        {
+            string FieldsName = "";
+            string strSql = string.Format($"SELECT * FROM dbo.tb_ProductSize WHERE ProductSizeNo in({fieldsId})");
+            //string strSql = string.Format($"EXEC proc_ProcessSet @strType='GetProName',@someField={fieldsId}");
+            DataTable ds = SqlDbHelper.ExecuteDataTable(strSql);
+            if (ds?.Rows.Count > 0)
+            {
+                for (int i = 0; i < ds.Rows.Count; i++)
+                {
+                    FieldsName += ds.Rows[i]["ProductSizeName"] + ",";
+                }
+
+            }
+            return FieldsName.TrimEnd(',');
+        }
+    }
+}

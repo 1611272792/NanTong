@@ -1,0 +1,256 @@
+﻿using Newtonsoft.Json;
+using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ProductController : Controller
+    {
+        // GET: Product
+        public ActionResult Index()
+        {
+            //首页加载获取所有产品信息
+            DataTable pdinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'allpdinfo'");
+            if (pdinfo?.Rows.Count > 0)
+            {
+                ViewBag.AllPdInfo = pdinfo;
+            }
+            else
+            {
+                ViewBag.AllPdInfo = null;
+            }
+            //首页加载获取所有项目信息
+            DataTable pjinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjinfo'");
+            if (pjinfo?.Rows.Count > 0)
+            {
+                ViewBag.PjInfo = pjinfo;
+            }
+            else
+            {
+                ViewBag.PjInfo = null;
+            }
+            //首页加载获取所有项目信息
+            DataTable pjid = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjid'");
+            if (pjinfo?.Rows.Count > 0)
+            {
+                ViewBag.pjid = pjid;
+            }
+            else
+            {
+                ViewBag.pjid = null;
+            }
+
+            //总行数
+            string countsql = "";
+            countsql = string.Format($"EXEC dbo.[proc_Project] @strType='SelectPdCount'");
+
+            DataTable count = ServerOrLit.isDataTable(LoginController.connType, countsql);
+            if (count?.Rows.Count > 0)
+            {
+                ViewBag.count = count.Rows[0].Field<int>("Count");
+            }
+            else
+            {
+                ViewBag.count = 0;
+            }
+            return View();
+        }
+
+        #region 添加产品
+        /// <summary>
+        /// 添加产品
+        /// </summary>
+        /// <param name="ProjectId">项目Id</param>
+        /// <param name="ProductName">产品名称</param>
+        /// <returns>ok 添加成功， no 添加失败</returns>
+        public ActionResult AddProduct(string ProductNo, string ProductName, string ProjectId, string Project_Size, string Customer)
+        {
+            if (string.IsNullOrWhiteSpace(ProductNo))
+            {
+                return Content("项目编号为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProductName))
+            {
+                return Content("项目名称为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProjectId))
+            {
+                return Content("产品编号为空");
+            }
+            if (string.IsNullOrWhiteSpace(Project_Size))
+            {
+                return Content("产品规格为空");
+            }
+            if (string.IsNullOrWhiteSpace(Customer))
+            {
+                return Content("客户名称");
+            }
+            int add = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'addpd',@ProductNo='{ProductNo}',@ProductName='{ProductName}',@ProjectId='{ProjectId}',@ProjectId_Size='{Project_Size}',@Customer='{Customer}'");
+            if (add > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        #region 删除产品
+        /// <summary>
+        /// 删除产品
+        /// </summary>
+        /// <param name="ProductId">产品Id</param>
+        /// <returns>ok 删除成功， no 删除失败</returns>
+        public ActionResult DelProduct(string ProductId)
+        {
+            if (string.IsNullOrWhiteSpace(ProductId))
+            {
+                return Content("产品Id为空");
+            }
+            string ProductIds = ProductId.Substring(0, ProductId.Length - 1);
+            int del = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'delpd',@ProductIds='{ProductIds}'");
+            if (del > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        #region 获取需要编辑的内容
+        /// <summary>
+        /// 获取需要编辑的内容
+        /// </summary>
+        /// <param name="PdId">产品Id</param>
+        /// <returns>返回字符串</returns>
+        public ActionResult GetUpdProductInfo(int PdId)
+        {
+            DataTable info = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'getpd',@ProductId={PdId}");
+            if (info?.Rows.Count > 0)
+            {
+                int ProductId = info.Rows[0].Field<int>("ProductId");
+                string ProductNo = info.Rows[0].Field<string>("ProductNo");
+                string ProductName = info.Rows[0].Field<string>("ProductName");
+                int ProjectId = info.Rows[0].Field<int>("ProjectId");
+                string ProjectName = info.Rows[0].Field<string>("ProjectName");
+                int ProjectId_Size = info.Rows[0].Field<int>("ProjectId_Size");
+                string Customer = info.Rows[0].Field<string>("Customer");
+
+                return Content(ProductId + "," + ProductNo + "," + ProductName + "," + ProjectId + "," + ProjectName + "," + ProjectId_Size + "," + Customer);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        #endregion
+
+        #region 编辑产品信息
+        /// <summary>
+        /// 编辑产品信息
+        /// </summary>
+        /// <param name="ProductId">产品Id</param>
+        /// <param name="ProjectId">产品所属项目Id</param>
+        /// <param name="ProductName">产品名称</param>
+        /// <returns>ok 添加成功， no 添加失败</returns>
+        public ActionResult EditProductInfo(string ProductId, string ProductNo, string ProductName, string ProjectId, string ProjectId_Size, string Customer)
+        {
+            if (string.IsNullOrWhiteSpace(ProductId))
+            {
+                return Content("项目Id为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProductNo))
+            {
+                return Content("项目编号为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProductName))
+            {
+                return Content("项目名称为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProjectId))
+            {
+                return Content("产品编号为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProjectId_Size))
+            {
+                return Content("产品规格为空");
+            }
+            if (string.IsNullOrWhiteSpace(Customer))
+            {
+                return Content("客户名称");
+            }
+            int upd = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'updpd',@ProductId={ProductId},@ProductNo='{ProductNo}',@ProductName='{ProductName}',@ProjectId='{ProjectId}',@ProjectId_Size='{ProjectId_Size}',@Customer='{Customer}'");
+            if (upd > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        public ActionResult GetShareInfo(int ProjectId)
+        {
+            DataTable pjinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjpdinfo',@ProjectId={ProjectId}");
+            if (pjinfo?.Rows.Count > 0)
+            {
+                ViewBag.AllPdInfo = pjinfo;
+            }
+            else
+            {
+                ViewBag.AllPdInfo = null;
+            }
+            return PartialView("_Product");
+        }
+
+
+        public string GetSize(string ProjectName)
+        {
+            DataTable dt = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'ChooseSize',@ProjectName={ProjectName}");
+            string Json = "";
+            if (dt?.Rows.Count > 0)
+            {
+                Json = JsonConvert.SerializeObject(dt);
+            }
+            else
+            {
+                Json = null;
+            }
+            return Json;
+        }
+
+
+        [HttpGet]
+        public ActionResult SelectAll(string PJName, string PJSize, string PDNo, string PDName, string Customer, string pagecount, string size)
+        {
+
+            //分页
+            string mysqls = "";//总数据
+            mysqls = string.Format($"EXEC dbo.[proc_Project] @strType='SelectPdAll',@ProjectName='{PJName}',@ProjectSize='{PJSize}',@ProductNo='{PDNo}',@ProductName='{PDName}',@Customer='{Customer}',@pagecount={pagecount},@size={size}");
+
+            DataTable dt = ServerOrLit.isDataTable(LoginController.connType, mysqls);
+            if (dt?.Rows.Count > 0)
+            {
+                ViewBag.AllPdInfo = dt;
+            }
+            else
+            {
+                ViewBag.AllPdInfo = null;
+            }
+
+            return PartialView("_Product", dt);
+        }
+    }
+}

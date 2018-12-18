@@ -1,0 +1,224 @@
+﻿
+@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style>
+    .Buttons {
+        border-radius: 3px 4px;
+        background-color: #227dda;
+        border: 1px solid #227dda;
+        color: white;
+    }
+
+    th {
+        text-align: center;
+        vertical-align: central;
+    }
+
+    .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+        border-radius: 3px 4px;
+    }
+
+    #divshow {
+        display: none;
+    }
+
+    #barcon a {
+        text-decoration: none;
+    }
+
+    .barcon {
+        width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .barcon1 {
+        font-size: 17px;
+        float: left;
+        margin-top: 20px;
+    }
+
+    .barcon2 {
+        float: right;
+    }
+
+        .barcon2 ul {
+            margin: 20px 0;
+            padding-left: 0;
+            list-style: none;
+            text-align: center;
+        }
+
+        .barcon2 li {
+            display: inline;
+        }
+
+        .barcon2 a {
+            font-size: 16px;
+            font-weight: normal;
+            display: inline-block;
+            padding: 5px;
+            padding-top: 0;
+            color: black;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+            .barcon2 a:hover {
+                background-color: #eee;
+            }
+
+    .ban {
+        opacity: .4;
+    }
+
+    #reportta td {
+        padding-bottom: 5px;
+    }
+
+    .select {
+        -moz-user-select: none; /*火狐*/
+        -webkit-user-select: none; /*webkit浏览器*/
+        -ms-user-select: none; /*IE10*/
+        -khtml-user-select: none; /*早期浏览器*/
+        user-select: none;
+    }
+
+    .modal-header {
+        cursor: move;
+    }
+
+    table tr td {
+        padding-right: 5px;
+    }
+</style>
+
+
+
+<table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+    @if (ViewBag.title != null)
+    {
+        DataTable dt2 = ViewBag.title;
+        <tr>
+            @for (int i = 1; i < dt2.Rows.Count; i++){
+                @*if (dt2.Rows[i]["AllocationName"].ToString() == "Issue")
+                {
+                    <th style="text-align:center;font-size:18px;" hidden="hidden"></th>
+                }
+                else
+                {*@
+                    <th style="text-align:center;font-size:18px;">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                @*  }*@
+            }
+        </tr>
+    }
+    @if (ViewBag.selectdata != null)
+    {
+        DataTable dt = ViewBag.selectdata;
+        DataTable dt2 = ViewBag.title;
+        Session["datatable"] = ViewBag.extable;
+        <tbody id="adminTbody">
+            @for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                <tr>
+                    @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                    {
+                        if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID")
+                        {
+                            <td>
+                                @dt.Rows[i]["TerminalName"].ToString()
+                            </td>
+                        }
+                        @*else if (dt2.Rows[ii]["AllocationName"].ToString() == "StartTime")
+                        {
+                            <td>@DateTime.Parse(dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()).ToString("yyyy/MM/dd")</td>
+                        }*@
+                        @*else if (dt2.Rows[ii]["AllocationName"].ToString() == "State")
+                        {
+                            if (dt.Rows[i]["State"].ToString() == "0")
+                            {
+                                <td>未完成</td>
+                            }
+                            else if (dt.Rows[i]["State"].ToString() == "1")
+                            {
+                                <td>已完成</td>
+                            }
+                        }*@
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "Issue")
+                        {
+                            if (dt.Rows[i]["Issue"].ToString() == "0")
+                                {
+                                    <td>未发放</td>
+                                }
+                                else
+                                {
+                                    <td>已发放</td>
+                                }
+                            <td hidden="hidden"></td>
+                        }
+                        else
+                        {
+                            <td>@dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()</td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+        <tr>
+            @if (ViewBag.title != null)
+            {
+                DataTable dtn = ViewBag.title;
+                var num = dtn.Rows.Count;
+                <td colspan="@num">
+                    <div id="barcon" class="barcon">
+                        <input type="hidden" id="yeNums" value="" />
+                        <div id="barcon1" class="barcon1"></div>
+                        <div id="barcon2" class="barcon2">
+                            <ul>
+                                <li><a href="###" id="firstPage">首页</a></li>
+                                <li><a href="###" id="prePage">上一页</a></li>
+                                <li><a href="###" id="nextPage">下一页</a></li>
+                                <li><a href="###" id="lastPage">尾页</a></li>
+                                <li>
+                                    <select id="jumpWhere"></select>
+                                </li>
+                                <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            }
+        </tr>
+    }
+    else
+    {
+        DataTable dt2 = ViewBag.title;
+        <tr>
+            @if (ViewBag.title != null)
+            {
+                DataTable dtn = ViewBag.title;
+                var num = dtn.Rows.Count;
+                <td colspan="@num">
+                    <div id="barcon" class="barcon">
+                        <input type="hidden" id="yeNums" value="" />
+                        <div id="barcon1" class="barcon1"></div>
+                        <div id="barcon2" class="barcon2">
+                            <ul>
+                                <li><a href ="javascript:return false;" style="opacity: 0.5" id="firstPage">首页</a></li>
+                                <li><a href ="javascript:return false;" style="opacity: 0.5" id="prePage">上一页</a></li>
+                                <li><a href ="javascript:return false;" style="opacity: 0.5" id="nextPage">下一页</a></li>
+                                <li><a href ="javascript:return false;" style="opacity: 0.5" id="lastPage">尾页</a></li>
+                                <li>
+                                    <select id="jumpWhere" disabled="disabled"></select>
+                                </li>
+                                <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            }
+        </tr>
+    }
+</table>
+<script src="~/Scripts/diepage.js"></script>
+

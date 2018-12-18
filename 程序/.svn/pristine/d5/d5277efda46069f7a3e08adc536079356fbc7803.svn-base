@@ -1,0 +1,746 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>用户管理</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style>
+        .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .hovers {
+            background-color: #b5b5b5;
+        }
+
+        th {
+            text-align:center;
+        }
+           .rightColor {
+        color:green;
+        }
+        .errorColor {
+            color:red;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        @if (ViewBag.Role == 1)
+        {
+            <button class="btn btn-info" data-toggle="modal" data-target="#Add_Modal_User" style="display:none;">
+                <img class="buttonicon" src="~/Content/Icon/添加图标.png" />
+                添加
+            </button>
+            <button class="btn btn-danger" id="btn_UserDelete" style="display:none;">
+                <img class="buttonicon" src="~/Content/Icon/删除图标.png" />
+                批量删除
+            </button>
+        }
+        else
+        {
+            <button class="btn btn-info" data-toggle="modal" data-target="#Add_Modal_User">
+                <img class="buttonicon" src="~/Content/Icon/添加图标.png" />
+                添加
+            </button>
+            <button class="btn btn-danger" id="btn_UserDelete">
+                <img class="buttonicon" src="~/Content/Icon/删除图标.png" />
+                批量删除
+            </button>
+        }
+
+        @*显示用户信息*@
+        @if (ViewBag.user == null)
+        {
+            <table class="table table-bordered table-hover table1">
+                <tr>
+                    @if (ViewBag.Role == 1)
+                    {
+                        <th style="display:none;"><input type="checkbox" style="width:20px;height:20px;margin-left:118px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span style="display: block;float:right;margin-right: 80px;">全选</span></th>
+                    }
+                    else
+                    {
+                        <th style="width:300px;"><input type="checkbox" style="width:20px;height:20px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span style="display: block;float:right;margin-right: 80px;">全选</span></th>
+                    }
+                    <th>姓名</th>
+                    <th>账号</th>
+                    <th>操作</th>
+                </tr>
+            </table>
+        }
+        else
+        {
+            DataTable dt2 = ViewBag.user;
+            <table class="table table-bordered table-striped text-center table-hover table1" style="width:100%;margin-top:10px;">
+                <tr style="font-size:18px;vertical-align:middle">
+                    @if (ViewBag.Role == 1)
+                    {
+                        <th style="display:none"><input type="checkbox" style="width:20px;height:20px;margin-left:118px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span style="display: block;float:right;margin-right: 80px;">全选</span></th>
+                    }
+                    else
+                    {
+                        <th style="width:300px;"><input type="checkbox" style="width:20px;height:20px;margin-left:118px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span style="display: block;float:right;margin-right: 80px;">全选</span></th>
+                    }
+                    <th>姓名</th>
+                    <th>账号</th>
+                    <th>权限</th>
+                    <th>操作</th>
+                </tr>
+                @for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    <tr class="tr1">
+                        @if (ViewBag.Role == 1)
+                        {
+                            <td style="display:none;"><input type="checkbox" name="checkAll" class="check" value="@dt2.Rows[i]["UserInfoID"]" style="width:20px;height:20px;" /></td>
+                        }
+                        else
+                        {
+                            <td><input type="checkbox" name="checkAll" class="check" value="@dt2.Rows[i]["UserInfoID"]" style="width:20px;height:20px;" /></td>
+                        }
+                        <td>@dt2.Rows[i]["UserName"]</td>
+                        <td>@dt2.Rows[i]["LoginAccount"]</td>
+                        <td>
+                            @if (ViewBag.userGroup != null)
+                            {
+                                DataTable dt = ViewBag.userGroup;
+                                for (int j = 0; j < dt.Rows.Count; j++)
+                                {
+                                    if (dt2.Rows[i]["UserGroupsID"].ToString() == dt.Rows[j]["UserGroupsID"].ToString())
+                                    {
+                                        @dt.Rows[j]["UserGroupsName"].ToString()
+                                    }
+                                }
+                            }
+                        </td>
+                        <td>
+                            <a class="btn_Edit_UserManager" style="cursor:pointer;" data-toggle="modal" data-target="#Edit_Modal_User">编辑</a>
+                            <input type="hidden" value="@dt2.Rows[i]["UserInfoID"].ToString()" class="userid" />
+                            @if (ViewBag.Role == 1)
+                            {
+                                <a class="btn_delete_UserManager" style="display:none;cursor:pointer;">删除</a>
+                            }
+                            else
+                            {
+                                <a class="btn_delete_UserManager" style="cursor:pointer;">删除</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+    @*添加模态窗体*@
+    <div class="modal fade" id="Add_Modal_User" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close btn-default" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" style="color:white;">添加用户</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="form1">
+                        <table style="margin:0px auto;">
+                            <tr>
+                                <td>姓名：</td>
+                                <td><input type="text" class="form-control" id="UserName" data-toggle="tooltip" data-placement="right" title="必填" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')"/></td>
+                                <td>
+                                    <span></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>账号：</td>
+                                <td><input type="text" class="form-control" id="UserId" data-toggle="tooltip" data-placement="right" title="必填" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')"/></td>
+                                <td>
+                                    <span></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>密码：</td>
+                                <td><input type="password" class="form-control" id="UserPwd" data-toggle="tooltip" data-placement="right" title="必填且在6-12位之间(仅限数字英文下划线)" onkeyup="this.value=this.value.replace(/[^\w]/g,'')" onpaste="this.value=this.value.replace(/[^\w]/g,'')"/></td>
+                                <td>
+                                    <span></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>用户组：</td>
+                                <td>
+                                    @if (ViewBag.userGroup == null)
+                                    {
+                                        <input type="text" value="暂无可选" class="form-control" disabled="disabled" />
+                                    }
+                                    else
+                                    {
+                                        DataTable dt = ViewBag.userGroup;
+                                        <select class="form-control" id="UserGroupsID">
+                                            @for (int i = 0; i < dt.Rows.Count; i++)
+                                            {
+                                                <option value="@dt.Rows[i]["UserGroupsID"]">@dt.Rows[i]["UserGroupsName"]</option>
+                                            }
+
+                                        </select>
+                                    }
+
+                                </td>
+                                <td>
+                                    <span style="color:red;"></span>
+                                </td>
+                            </tr>
+                            @*<tr>
+                                    <td>卡号：</td>
+                                    <td><input type="text" class="form-control" id="IdCard" data-toggle="tooltip" data-placement="right" title="选填" /></td>
+                                    <td>
+                                        <span style="color:red;"></span>
+                                    </td>
+                                </tr>*@
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-primary" id="btn_Add_UserManager">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        添加
+                    </a>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    @*编辑模态窗体*@
+    <div class="modal fade" id="Edit_Modal_User" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" style="color:white;">编辑用户</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr hidden="hidden">
+                            <td>用户id：</td>
+                            <td><input type="text" class="form-control" id="Userid" hidden="hidden" /></td>
+                            <td>
+                                <span style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>姓名：</td>
+                            <td><input type="text" class="form-control" id="Username" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')"/></td>
+                            <td>
+                                <span style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>账号：</td>
+                            <td><input type="text" class="form-control" id="UserLogin" disabled="disabled" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')"/></td>
+                            <td>
+                                <span style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>密码：</td>
+                            <td>
+                                @*用户可以更改自己的密码*@
+                                @if (ViewBag.Role == 1)
+                                {
+                                    <input type="password" class="form-control" id="Userpwd" disabled="disabled" onkeyup="this.value=this.value.replace(/[^\w]/g,'')" onpaste="this.value=this.value.replace(/[^\w]/g,'')"/>
+                                }
+                                else
+                                {
+                                    <input type="password" class="form-control" id="Userpwd" data-toggle="tooltip" data-placement="right" title="必填且在6-12位之间" onkeyup="this.value=this.value.replace(/[^\w]/g,'')" onpaste="this.value=this.value.replace(/[^\w]/g,'')"/>                            
+                                }
+                            </td>
+                            <td>
+                                <span></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>用户组：</td>
+                            <td>
+                                @*管理员不能更改其他用户的密码但是可以更改其他用户权限*@
+                                @if (ViewBag.Role != 1)
+                                {
+                                    <select class="form-control" id="Select1">
+
+                                        @if (ViewBag.userGroup != null)
+                                        {
+                                            DataTable dt = ViewBag.userGroup;
+                                            for (int i = 0; i < dt.Rows.Count; i++)
+                                            {
+                                                <option value="@dt.Rows[i]["UserGroupsID"]">@dt.Rows[i]["UserGroupsName"]</option>
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            <option value="0" disabled="disabled">无</option>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <select class="form-control" id="Select1" disabled="disabled">
+
+                                        @if (ViewBag.userGroup != null)
+                                        {
+                                            DataTable dt = ViewBag.userGroup;
+                                            for (int i = 0; i < dt.Rows.Count; i++)
+                                            {
+                                                <option value="@dt.Rows[i]["UserGroupsID"]">@dt.Rows[i]["UserGroupsName"]</option>
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            <option value="0" disabled="disabled">无</option>
+                                        }
+                                    </select>
+                                }
+                            </td>
+                            <td>
+                                <span style="color:red;"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-primary" id="btn_Edit_ok">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        保存
+                    </a>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    @*详情模态窗体*@
+    <div class="modal fade" id="Detial_Modal_User" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close btn_User_detial" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel"  style="color:white;">查看详情</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr>
+                            <td>姓名：</td>
+                            <td><input type="text" class="form-control" id="Username2" disabled="disabled" /></td>
+                        </tr>
+                        <tr>
+                            <td>账号：</td>
+                            <td><input type="text" class="form-control" id="Userid2" disabled="disabled" /></td>
+                        </tr>
+                        <tr>
+                            <td>密码：</td>
+                            <td><input type="password" id="userPwd2" disabled="disabled" class="form-control" /></td>
+                        </tr>
+                        <tr>
+                            <td>用户组：</td>
+                            <td>
+                                <select class="form-control" id="Select2" disabled="disabled">
+                                    @*<option>11</option>*@
+                                    @if (ViewBag.userGroup != null)
+                                    {
+                                        DataTable dt = ViewBag.userGroup;
+                                        for (int i = 0; i < dt.Rows.Count; i++)
+                                        {
+                                            <option value="@dt.Rows[i]["UserGroupsID"]">@dt.Rows[i]["UserGroupsName"]</option>
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        <option value="0" disabled="disabled">无</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        @*<tr>
+                                <td>卡号：</td>
+                                <td><input type="text" class="form-control" id="Idcard2" disabled="disabled" /></td>
+                            </tr>*@
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn_User_detial" data-dismiss="modal">关闭</button>
+
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    <script src="~/Content/js/checkAlljs.js"></script>
+
+    <script>
+
+        //添加人员时验证
+        //人名：不为空、密码：6-12位，不为空、手机号码：必填，11位、邮箱：按邮箱格式、用户组、卡号：选填如果是刷卡式的按钮盒就是需要卡号，备注。
+        $(function () {
+            ////发送消息，测试
+            //$("#btn_ok").click(function () {
+            //    $.post("/UserManager/SendMessager", null, function (data) {
+            //        alert(data);
+            //    })
+            //})
+
+
+            //多个删除
+            $("#btn_UserDelete").click(function () {
+                var msg = "您真的确定要删除吗？\n\n请确认！";
+                if (confirm(msg) == true) {
+                    //确定删除
+                    var che = document.getElementsByClassName("check");
+                    var cheValue = "";//获取选中的id
+                    for (var i = 0; i < che.length; i++) {
+                        if (che[i].checked) {
+                            cheValue += che[i].value + ",";
+                        }
+                    }
+
+                    if (cheValue == "") {
+                        alert("请先选择删除项");
+                    } else {
+                        $.post("/UserManager/DeleteUserManager", { uid: cheValue }, function (data) {
+                            if (data == "删除成功") {
+                                document.location.reload();
+                            }
+                            else {
+                                alert(data);
+                            }
+                        })
+                    }
+                }
+            })
+
+            $("[data-toggle='tooltip']").tooltip();
+            //人名验证
+            $("#UserName").mouseover(function () {
+                $("#UserName").addClass("mouseovers");
+            })
+            $("#UserName").mouseout(function () {
+                $("#UserName").removeClass("mouseovers");
+            })
+            $("#UserName").focusout(function () {
+                var Username = $("#UserName").val();
+                if (Username == "" || Username == null) {
+                    $(this).parent("td").siblings("td").find("span").html("必填").removeClass().addClass("errorColor");
+                }
+                else {
+                    //$(this).parent("td").siblings("td").find("span").html("正确").removeClass().addClass("rightColor");
+                }
+            })
+            //密码
+            $("#UserPwd").mouseover(function () {
+                $("#UserPwd").addClass("mouseovers");
+                // alert("1");
+            })
+            $("#UserPwd").mouseout(function () {
+                $("#UserPwd").removeClass("mouseovers");
+            })
+            $("#UserPwd").focusout(function () {
+                var Userpwd = $("#UserPwd").val();
+                var regex = /^[a-zA-Z0-9._]{6,12}$/;
+                if (Userpwd == "") {
+                    $(this).parent("td").siblings("td").find("span").html("必填").removeClass().addClass("errorColor");
+
+                }
+                else if (!regex.test(Userpwd)) {
+                    //alert("11");
+                    $(this).parent("td").siblings("td").find("span").html("密码位数应在6-12位").removeClass().addClass("errorColor");
+                }
+                else {
+                    //$(this).parent("td").siblings("td").find("span").html("正确").removeClass().addClass("rightColor");
+                }
+            })
+            $("#Userpwd").focusout(function () {
+                var Userpwd = $("#Userpwd").val();
+                var regex = /^[a-zA-Z0-9._]{6,12}$/;
+                if (Userpwd == "") {
+                    $(this).parent("td").siblings("td").find("span").html("必填").removeClass().addClass("errorColor");
+
+                }
+                else if (!regex.test(Userpwd)) {
+                    //alert("11");
+                    $(this).parent("td").siblings("td").find("span").html("密码位数应在6-12位").removeClass().addClass("errorColor");
+                    //$("#UserPwd").next("span").html("密码位数应在6-12位");
+                }
+                else {
+                    $(this).parent("td").siblings("td").find("span").html("正确").removeClass().addClass("rightColor");
+                }
+            })
+            //电话
+            $("#UserPhone").mouseover(function () {
+                $("#UserPhone").addClass("mouseovers");
+                // alert("1");
+            })
+            $("#UserPhone").mouseout(function () {
+                $("#UserPhone").removeClass("mouseovers");
+            })
+            $("#UserPhone").focusout(function () {
+                var Userphone = $("#UserPhone").val();
+                var regex = /^1[3|4|5|7|8][0-9]{9}$/;
+                if (Userphone == "") {
+                    $(this).parent("td").siblings("td").find("span").html("必填").removeClass().addClass("errorColor");;
+
+                }
+                else if (!regex.test(Userphone)) {
+                    //alert("11");
+                    $(this).parent("td").siblings("td").find("span").html("手机号码应为11位").removeClass().addClass("errorColor");
+                }
+                else {
+                    $(this).parent("td").siblings("td").find("span").html("正确").removeClass().addClass("rightColor");
+                }
+            })
+            //邮箱
+            $("#UserEmail").mouseover(function () {
+                $("#UserEmail").addClass("mouseovers");
+                // alert("1");
+            })
+            $("#UserEmail").mouseout(function () {
+                $("#UserEmail").removeClass("mouseovers");
+            })
+            $("#UserEmail").focusout(function () {
+                var Useremail = $("#UserEmail").val();
+                var regex = new RegExp("^[a-zA-Z0-9]+([._\\-]?[a-zA-Z0-9])*@@([a-zA-Z0-9]+[-a-zA-Z0-9]*[a-zA-Z0-9]+.){1,63}[a-z0-9]+$");
+                //if (Useremail == "") {
+                //    $(this).parent("td").siblings("td").find("span").html("必填");
+
+                //}
+
+                if (!regex.test(Useremail)) {
+                    //alert("11");
+                    $(this).parent("td").siblings("td").find("span").html("邮箱格式不正确").removeClass().addClass("errorColor");
+                }
+                else {
+                    $(this).parent("td").siblings("td").find("span").html("正确").removeClass().addClass("rightColor");
+                }
+
+            })
+            //用户组
+            $("#UserGroupsID").mouseover(function () {
+                $("#UserGroupsID").addClass("mouseovers");
+                // alert("1");
+            })
+            $("#UserGroupsID").mouseout(function () {
+                $("#UserGroupsID").removeClass("mouseovers");
+            })
+            //卡号
+            $("#IdCard").mouseover(function () {
+                $("#IdCard").addClass("mouseovers");
+                // alert("1");
+            })
+            $("#IdCard").mouseout(function () {
+                $("#IdCard").removeClass("mouseovers");
+            })
+            //$("#IdCard").focusout(function () {
+            //    var Useremail = $("#IdCard").val();
+            //    var regex = new RegExp("^[a-zA-Z0-9]+([._\\-]?[a-zA-Z0-9])*@@([a-zA-Z0-9]+[-a-zA-Z0-9]*[a-zA-Z0-9]+.){1,63}[a-z0-9]+$");
+            //    if (Useremail == "") {
+            //        $(this).parent("td").siblings("td").find("span").html("必填");
+
+            //    }
+            //    else if (!regex.test(Useremail)) {
+            //        //alert("11");
+            //        $(this).parent("td").siblings("td").find("span").html("邮箱格式不正确");
+            //    }
+            //    else {
+            //        $(this).parent("td").siblings("td").find("span").html("正确");
+            //    }
+            //})
+            //备注
+            $("#UserNote").mouseover(function () {
+                $("#UserNote").addClass("mouseovers");
+                // alert("1");
+            })
+            $("#UserNote").mouseout(function () {
+                $("#UserNote").removeClass("mouseovers");
+            })
+
+            //添加用户
+            $("#btn_Add_UserManager").click(function () {
+                var regex_pwd = /^[a-zA-Z0-9._]{6,12}$/;//密码
+                var regex_phone = /^1[3|4|5|7|8][0-9]{9}$/;//电话
+                var regex_email = new RegExp("^[a-zA-Z0-9]+([._\\-]?[a-zA-Z0-9])*@@([a-zA-Z0-9]+[-a-zA-Z0-9]*[a-zA-Z0-9]+.){1,63}[a-z0-9]+$");
+                ////用户名
+                var userId2 = $("#UserId").val();
+                var userName2 = $("#UserName").val();
+                var userPwd2 = $("#UserPwd").val();
+                //var userPhone2 = $("#UserPhone").val();
+                //var userEmail2 = $("#UserEmail").val();
+                var userGroupsID2 = $("#UserGroupsID").val();
+                //var userNote2 = $("#UserNote").val();
+                var idCard2 = $("#IdCard").val();
+                if (userId2 == "" || userName2 == "" || userPwd2 == "" || userGroupsID2 == "") {
+                    alert("验证没有通过");
+                    return false;
+                }
+                else if (!regex_pwd.test(userPwd2)) {
+                    alert("验证没有通过")
+                    return false;
+                }
+
+                else {
+                    //$("#btn_Add_UserManager").val("添加中...");
+                    //$("#btn_Add_UserManager").disabled = true;
+                    $.post("/UserManager/AddUserManager", { userId: userId2, userName: userName2, userPwd: userPwd2, idCard: idCard2, userGroupsID: userGroupsID2 }, function (data) {
+                        if (data != "添加成功") {
+                            alert(data);
+                            //$("#btn_Add_UserManager").val("添加");
+                            //$("#btn_Add_UserManager").disabled = false;
+                        }
+                        else if (data == "此用户已存在，请重新注册！") {
+                            alert("此用户已存在，请重新注册！");
+                        }
+                        else {
+                            //alert(data);
+                            //$("#btn_Add_UserManager").val("添加");
+                            //$("#btn_Add_UserManager").disabled = false;
+                            document.location.reload();
+                        }
+
+                    })
+                }
+                //alert(userGroupsID2);
+
+            })
+
+
+            //得到需要的修改内容
+            $(".btn_Edit_UserManager").click(function () {
+                var userid = $(this).parent("td").children(".userid").val();
+                //alert(userid);
+                $.post("/UserManager/UserManagerEditBySelect", { uid: userid }, function (data) {
+                    if (data == "no") {
+                        alert("操作错误");
+
+                    }
+                    else {
+
+                        var info = data.split(",");
+                        //alert(info[2]);
+                        $("#Userid").val(info[0]);
+                        $("#Username").val(info[1]);
+                        $("#UserLogin").val(info[2]);
+                        $("#Userpwd").val(info[3]);
+                        $("#Select1").val(info[4]);
+                        $("#card_edit").val(info[5]);
+                    }
+
+                })
+            });
+            //修改
+            $("#btn_Edit_ok").click(function () {
+                //通过用户的id进行修改，管理员只能修改用户的组
+                var regex_pwd = /^[a-zA-Z0-9._]{6,12}$/;//密码
+                //id
+                var uid = $("#Userid").val();
+                var userpwd = $("#Userpwd").val();
+                var username = $("#Username").val();
+                //用户的组
+                var usergroupid = $("#Select1").val();
+                var card = $("#card_edit").val();
+                if (!regex_pwd.test(userpwd)) {
+                    alert("验证没有通过")
+                    return false;
+                }
+                else
+                {
+                    $.post("/UserManager/UserManagerEdit", { userid: uid, username: username, userpwd: userpwd, usergid: usergroupid, card: card }, function (data) {
+                        if (data == "修改成功") {
+                            document.location.reload();
+                        }
+                        else {
+                            alert(data);
+                        }
+                    })
+                }              
+            })
+            //单个删除
+            $(".btn_delete_UserManager").click(function () {
+                var userid = $(this).parent("td").children(".userid").val();
+                userid += ",";
+                var msg = "您真的确定要删除吗？\n\n请确认！";
+                if (confirm(msg) == true) {
+                    $.post("/UserManager/DeleteUserManager", { uid: userid }, function (data) {
+                        if (data == "删除成功") {
+                            document.location.reload();
+                        }
+                        else {
+                            alert(data);
+                        }
+                    })
+                }
+                else {
+
+                }
+
+            })
+            //查看详情
+            $(".table1 tr.tr1").dblclick(function () {
+                var userid = $(this).children("td").children(".userid").val();
+                $(this).addClass("hovers");
+
+                $.post("/UserManager/UserManagerDetial", { uid: userid }, function (data) {
+                    if (data == "no") {
+                        alert("未找到相关信息");
+                        document.location.reload();
+                    }
+                    else {
+                        var info = data.split(",");
+                        //id
+                        $("#Userid2").val(info[1]);
+                        $("#Username2").val(info[0]);
+                        $("#userPwd2").val(info[2]);
+                        //$("#Useremail2").val(info[4]);
+                        $("#Select2").val(info[3]);
+                        //$("#Usernote2").val(info[6]);
+                        $("#Idcard2").val(info[4]);
+                        $("#Detial_Modal_User").modal("show");
+
+                    }
+
+                })
+            })
+            $(".btn_User_detial").click(function () {
+                document.location.reload();
+            })
+
+            $(".btn-default").click(function(){
+                $("#UserName").val("");
+                $("#UserId").val("");
+                $("#UserPwd").val("");
+            })
+        })
+
+
+        ////单个删除
+        //function UserManagerDelete(userid){
+        //    userid+=",";
+
+        //}
+
+
+    </script>
+</body>
+</html>

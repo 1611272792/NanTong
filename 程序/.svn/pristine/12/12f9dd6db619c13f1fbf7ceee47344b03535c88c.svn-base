@@ -1,0 +1,41 @@
+﻿@using System.Data;
+@*显示*@
+<div id="showInfo">
+    <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+        <tr style="font-size:18px;vertical-align:middle">
+          @*  <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>*@
+            <th hidden="hidden">信息ID</th>
+            <th>终端名</th>
+            <th>通知信息</th>
+            <th>颜色</th>
+            <th>字体大小</th>
+            <th>发布人</th>
+            <th>发布时间</th>
+            <th>操作</th>
+        </tr>
+        @if (ViewBag.infoShow != null)
+            {
+                DataTable dt2 = ViewBag.infoShow;
+
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                <tr class="tr1">
+                   @* <td><input type="checkbox" name="cks" class="ckstyle check" value="@dt2.Rows[i]["InformID"]" /></td>*@
+                    <td hidden="hidden">@dt2.Rows[i]["InformID"]</td>
+                    <td>@dt2.Rows[i]["TerminalName"]</td>
+                    <td style="overflow:hidden;white-space:normal;text-overflow:ellipsis">@dt2.Rows[i]["Content"]</td>
+                    <td>
+                        <div style="background-color:@dt2.Rows[i]["Color"];width:70px;height:25px;margin:0px auto;"></div>
+                    </td>
+                    <td>@dt2.Rows[i]["Size"]</td>
+                    <td>@dt2.Rows[i]["UserName"]</td>
+                    <td>@dt2.Rows[i]["InformTime"]</td>
+
+                    <td>
+                        <a onclick="ProductionLineEdit(@dt2.Rows[i]["InformID"])" href="#" data-toggle="modal" data-target="#bianjiProduction">编辑</a>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</div>

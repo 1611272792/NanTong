@@ -1,0 +1,2124 @@
+﻿@using System.Data;
+@using XP_PPS_Model;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap-datetimepicker-master/sample in bootstrap v3/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <script src="~/Content/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link href="~/Content/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+
+    <link href="~/CSS/webuploader.css" rel="stylesheet" />
+    <script src="~/Scripts/webuploader.js"></script>
+    <link href="~/CSS/style.css" rel="stylesheet" />
+    <link href="~/CSS/demo.css" rel="stylesheet" />
+    <link href="~/CSS/font-awesome.css" rel="stylesheet" />
+
+    <style type="text/css">
+
+                * {
+                    margin: 0px;
+                    padding: 0px;
+                }
+                /*.uploader {
+                    width:300px;
+                }*/
+                table tr td {
+              max-width:300px;
+             word-break:break-all;
+             word-wrap:break-word;
+                }
+
+                .form-control {
+                margin-top:2px;
+                }
+                th {
+                    text-align: center;
+                }
+
+                .ckstyle {
+                    width: 20px;
+                    height: 20px;
+                }
+                 .mouseovers {
+                    border-color: #0094ff;
+                }
+
+                .modal-header-backgcolo {
+                    background-color: #2684e6;
+                }
+
+                .hovers {
+                    background-color: #b5b5b5;
+                }
+
+              #formfile {
+            width: 100%;
+            /*display: inline;
+            float: right;*/
+            margin-top:-5px;
+           margin-right: 100px;
+        }
+                 .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+                     border-radius: 3px 4px;
+                 }
+
+                 #divshow {
+                     display: none;
+                 }
+
+                 #barcon a {
+                     text-decoration: none;
+                 }
+
+                 .barcon {
+                     width: 1000px;
+                     margin: 0 auto;
+                     text-align: center;
+                 }
+
+                 .barcon1 {
+                     font-size: 17px;
+                     float: left;
+                     margin-top: 20px;
+                 }
+
+                 .barcon2 {
+                     float: right;
+                 }
+
+                     .barcon2 ul {
+                         margin: 20px 0;
+                         padding-left: 0;
+                         list-style: none;
+                         text-align: center;
+                     }
+
+                     .barcon2 li {
+                         display: inline;
+                     }
+
+                     .barcon2 a {
+                         font-size: 16px;
+                         font-weight: normal;
+                         display: inline-block;
+                         padding: 5px;
+                         padding-top: 0;
+                         color: black;
+                         border: 1px solid #ddd;
+                         background-color: #fff;
+                     }
+
+                         .barcon2 a:hover {
+                             background-color: #eee;
+                         }
+
+                 .ban {
+                     opacity: .4;
+                 }
+
+                 #reportta td {
+                     padding-bottom: 5px;
+                 }
+
+                 .select {
+                     -moz-user-select: none; /*火狐*/
+                     -webkit-user-select: none; /*webkit浏览器*/
+                     -ms-user-select: none; /*IE10*/
+                     -khtml-user-select: none; /*早期浏览器*/
+                     user-select: none;
+                 }
+
+                 .modal-header {
+                     cursor: move;
+                 }
+
+                 table tr td {
+                     padding-right: 5px;
+                 }
+
+                         #fileUpload {
+                    display:block;
+                    margin-left:60px;
+                }
+
+                        .uploader {
+                    position: relative;
+                    display: inline-block;
+                    overflow: hidden;
+                    cursor: default;
+                    padding: 0;
+                    margin: 10px 0px;
+                    -moz-box-shadow: 0px 0px 5px #ddd;
+                    -webkit-box-shadow: 0px 0px 5px #ddd;
+                    box-shadow: 0px 0px 5px #ddd;
+                    -moz-border-radius: 5px;
+                    -webkit-border-radius: 5px;
+                    border-radius: 5px;
+                }
+
+                .filename {
+                    float: left;
+                    display: inline-block;
+                    outline: 0 none;
+                    height: 32px;
+                    width: 180px;
+                    margin: 0;
+                    padding: 8px 10px;
+                    overflow: hidden;
+                    cursor: default;
+                    border: 1px solid;
+                    border-right: 0;
+                    font: 9pt/100% Arial, Helvetica, sans-serif;
+                    color: #777;
+                    text-shadow: 1px 1px 0px #fff;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    -moz-border-radius: 5px 0px 0px 5px;
+                    -webkit-border-radius: 5px 0px 0px 5px;
+                    border-radius: 5px 0px 0px 5px;
+                    background: #f5f5f5;
+                    background: -moz-linear-gradient(top, #fafafa 0%, #eee 100%);
+                    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fafafa), color-stop(100%,#f5f5f5));
+                    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fafafa', endColorstr='#f5f5f5',GradientType=0);
+                    border-color: #ccc;
+                    -moz-box-shadow: 0px 0px 1px #fff inset;
+                    -webkit-box-shadow: 0px 0px 1px #fff inset;
+                    box-shadow: 0px 0px 1px #fff inset;
+                    -moz-box-sizing: border-box;
+                    -webkit-box-sizing: border-box;
+                    box-sizing: border-box;
+                }
+
+                .button {
+                    float: left;
+                    height: 32px;
+                    display: inline-block;
+                    outline: 0 none;
+                    padding: 8px 12px;
+                    margin: 0;
+                    cursor: pointer;
+                    border: 1px solid;
+                    font: bold 9pt/100% Arial, Helvetica, sans-serif;
+                    -moz-border-radius: 0px 5px 5px 0px;
+                    -webkit-border-radius: 0px 5px 5px 0px;
+                    border-radius: 0px 5px 5px 0px;
+                    -moz-box-shadow: 0px 0px 1px #fff inset;
+                    -webkit-box-shadow: 0px 0px 1px #fff inset;
+                    box-shadow: 0px 0px 1px #fff inset;
+                }
+
+
+                .uploader input[type=file] {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    border: 0;
+                    padding: 0;
+                    margin: 0;
+                    height: 30px;
+                    cursor: pointer;
+                    filter: alpha(opacity=0);
+                    -moz-opacity: 0;
+                    -khtml-opacity: 0;
+                    opacity: 0;
+                }
+
+                input[type=button]::-moz-focus-inner {
+                    padding: 0;
+                    border: 0 none;
+                    -moz-box-sizing: content-box;
+                }
+
+                input[type=button]::-webkit-focus-inner {
+                    padding: 0;
+                    border: 0 none;
+                    -webkit-box-sizing: content-box;
+                }
+
+                input[type=text]::-moz-focus-inner {
+                    padding: 0;
+                    border: 0 none;
+                    -moz-box-sizing: content-box;
+                }
+
+                input[type=text]::-webkit-focus-inner {
+                    padding: 0;
+                    border: 0 none;
+                    -webkit-box-sizing: content-box;
+                }
+                /* Blue Color Scheme ------------------------ */
+                .blue .button {
+                    color: #fff;
+                    text-shadow: 1px 1px 0px #09365f;
+                    background: #064884;
+                    background: -moz-linear-gradient(top, #3b75b4 0%, #064884 100%);
+                    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3b75b4), color-stop(100%,#064884));
+                    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#3b75b4', endColorstr='#064884',GradientType=0);
+                    border-color: #09365f;
+                }
+
+                .blue:hover .button {
+                    background: #3b75b4;
+                    background: -moz-linear-gradient(top, #064884 0%, #3b75b4 100%);
+                    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#064884), color-stop(100%,#3b75b4));
+                    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#064884', endColorstr='#3b75b4',GradientType=0);
+                }
+                .thf {
+                font-size:18px;
+                text-align:center;
+                }
+                #tb1{
+                width:100%;
+                }
+
+    </style>
+
+</head>
+
+
+<body @*onload="load()"*@>
+    <p>
+        <a class="btn btn-info Buttons" id="Producetianjia" data-toggle="modal" data-target="#ProductionLinetianjia">
+            <img class="buttonicon" src="~/Content/Icon/添加图标.png">
+            添加
+        </a>
+        <a class="btn btn-info Buttons" onclick="ProductionLineAllIssue()">
+            <img class="buttonicon" src="~/Content/Icon/添加图标.png">
+            批量发放
+        </a>
+        <a class="btn btn-danger Buttons" onclick="ProductionLineAllDele()" data-toggle="modal" data-target="#ProductionLineAllDelete">
+            <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+            批量删除
+        </a>
+
+    </p>
+    @*excel导入数据库*@
+    @*<form class="form-horizontal" role="form" action="/ProducelineManager/ExcelToTable" method="post" enctype="multipart/form-data" id="formfile" >
+            <table id="tb1" >
+                <tr>
+                    <td style="width:300px">
+                        <div class="uploader blue">
+                            <input type="text" class="filename" readonly />
+                            <input type="button" name="file" class="button" value="选择文件" />
+                            <input type="file" id="fileUpload" name="file" size="30" />
+                        </div>
+                    </td>
+                    <td>
+                        <input type="submit"  value="导入" class="btn btn-info Buttons" id="daoru" style="background-image: url('../../Content/Icon/导入.png'); background-position: 20%,50%; background-repeat: no-repeat; width: 70px; padding-left: 30px;margin-left: 5px;margin-top:-5px;" />&nbsp;(请选择.xlsx，.xls文件)<a href="~/Content/excel/down/Demo.xls">&nbsp;&nbsp;导入模板下载</a>
+                    </td>
+                </tr>
+            </table>
+        </form>*@
+   区域id <span id="quyuId"></span>
+    <div id="zuhe">
+
+        @if (ViewBag.pinfo == null)
+        {
+            <label>区域：</label>
+            <select class="form-control" style="margin-right:20px;width:150px;display:inline;"  id="Select_ProcessId">
+                <option value="0">请选择</option>
+            </select>
+        }
+        else
+        {
+            DataTable lp = ViewBag.pinfo;
+            <label>区域：</label>
+            <select class="form-control" style="margin-right:20px;width:150px;display:inline;" id="Select_ProcessId" onchange="GetTerminalInfo(0)">
+                <option value="0">请选择</option>
+                @for (int i = 0; i < lp.Rows.Count; i++)
+                {
+                    <option value="@lp.Rows[i]["ProcessId"]">@lp.Rows[i]["ProcessName"]</option>
+                }
+            </select>
+
+
+        }
+        @*终端*@
+        <label>终端：</label>
+        <select id="Select88" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            <option value="0">请选择</option>
+        </select>
+
+        <button type="button" id="SelectDataDiffs" class="btn btn-info Buttons" onclick="all2()" style="margin-top:2px;">
+            <img class="buttonicon" src="~/Content/Icon/select.png">
+            查询
+        </button>
+    </div>
+    @*<div id="clock" style="position:  absolute;top: 50px;right:0%;color:red"></div>
+        <script type="text/javascript">
+                function showRealTime(clock){
+                    var d = new Date();
+                    var year = d.getFullYear();
+                    var month = d.getMonth() + 1;
+                    var date = d.getDate();
+                    var days = new Array("日","一","二","三","四","五","六");
+                    var day = d.getDay();
+                    var hour = (d.getHours() < 10) ? ("0" + d.getHours()) : d.getHours();
+                    var min = (d.getMinutes() < 10) ? ("0" + d.getMinutes()) : d.getMinutes();
+                    var sec = (d.getSeconds() < 10) ? ("0" + d.getSeconds()) : d.getSeconds();
+                    var now = year + "年" + month + "月" + date + "日<br>星期" + days[day] + "<br>" + hour + ":" + min + ":" + sec;
+                    clock.innerHTML = "" + now;
+                }
+        </script>*@
+
+
+
+
+
+
+    @*显示*@
+    <div id="dsidiv">
+        <table class="table table-bordered table-hover text-center table-striped" style="margin-top:10px">
+            <tr class="active">
+                @if (ViewBag.title != null)
+                {
+                    <th class="thf" style="width:200px;"><input id="Checkbox3" onchange="GetAll()" class="ckstyle" type="checkbox" style="margin-left: 67px;" /><span style="display: block;float:right;margin-right: 30px;position:relative;right: 10px;">全选</span></th>
+                    <th class="thf">序号</th>
+                    DataTable dt2 = ViewBag.title;
+                    for (int i = 1; i < dt2.Rows.Count; i++)
+                    {
+                        if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                        {
+                            <th class="thf" hidden="hidden">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                        }
+                        else
+                        {
+                            <th class="thf">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                        }
+
+                    }
+                    <th class="thf">操作</th>
+                }
+            </tr>
+            @if (ViewBag.producetion == null)
+            {
+            }
+            else
+            {
+                DataTable dt2 = ViewBag.title;
+                DataTable dt = ViewBag.producetion;
+                <tbody id="adminTbody">
+                    @for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        <tr>
+                            <td><input type="checkbox" name="cks" class="ckstyle check" value="@dt.Rows[i]["ProductionPlanID"]" /></td>
+                            <td><b style="color:red">@(i + 1)</b></td>
+                            @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                            {
+                                if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[ii]["AllocationName"].ToString() == "ProcessId")
+                                {
+                                    <td hidden="hidden"></td>
+                                }
+                                else
+                                {
+                                    if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID")
+                                    {
+                                        <td class="@dt2.Rows[ii]["AllocationName"]">
+                                            @dt.Rows[i]["TerminalName"].ToString()
+                                        </td>
+                                    }
+                                    else if (dt2.Rows[ii]["AllocationName"].ToString() == "Issue")
+                                    {
+                                        <td class="@dt2.Rows[ii]["AllocationName"]">
+                                            @if (dt.Rows[i]["Issue"].ToString() == "0")
+                                            {
+                                            <span>未发放</span>
+                                            }
+                                            else
+                                            {
+                                            <span>已发放</span>
+                                            }
+                                        </td>
+                                    }
+                                    else if (dt2.Rows[ii]["AllocationName"].ToString() == "ProductionPlanID")
+                                    {
+                                        <td class="@dt2.Rows[ii]["AllocationName"]">
+                                            @dt.Rows[i]["ProductionPlanID"].ToString()
+                                        </td>
+                                    }
+                                    else if (dt2.Rows[ii]["AllocationName"].ToString() == "ProductionPlanName")
+                                    {
+                                        <td class="@dt2.Rows[ii]["AllocationName"]">
+                                            @dt.Rows[i]["ProductionPlanName"].ToString()
+                                        </td>
+                                    }
+                                    else if (dt2.Rows[ii]["AllocationName"].ToString() == "ProductionPlanVersion")
+                                    {
+                                        <td class="@dt2.Rows[ii]["AllocationName"]">
+                                            @dt.Rows[i]["ProductionPlanVersion"].ToString()
+                                        </td>
+                                    }
+                                    else if (dt2.Rows[ii]["AllocationName"].ToString() == "c50")
+                                    {
+                                        <td class="@dt2.Rows[ii]["AllocationName"]">
+                                            @dt.Rows[i]["c50"].ToString()
+                                        </td>
+                                    }
+                                    else
+                                    {
+
+                                        if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "1")
+                                        {
+                                            <td class="@dt2.Rows[ii]["AllocationName"]" @*onclick="QTTest(this)" data-toggle="modal" data-target="#AddQTTest"*@>
+                                                <span style="color:blue" data-PlanId="@dt.Rows[i]["ProductionPlanID"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">未开始</span>
+                                            </td>
+                                        }
+                                        else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "2")
+                                        {
+                                            <td class="@dt2.Rows[ii]["AllocationName"]" onclick="QTTest(this)" onmouseover="this.style.cursor = 'pointer'" data-toggle="modal" data-target="#AddQTTest">
+                                                <span style="color:red" data-PlanId="@dt.Rows[i]["ProductionPlanID"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">进行中</span>
+                                            </td>
+                                        }
+                                        else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "3")
+                                        {
+                                            <td class="@dt2.Rows[ii]["AllocationName"]" onclick="QTTest(this)" onmouseover="this.style.cursor = 'pointer'" data-toggle="modal" data-target="#AddQTTest">
+                                                <span style="color:lightgreen" data-PlanId="@dt.Rows[i]["ProductionPlanID"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">已完成</span>
+                                            </td>
+                                        }
+                                        else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "0")
+                                        {
+                                            <td class="@dt2.Rows[ii]["AllocationName"]" @*onclick="QTTest(this)" data-toggle="modal" data-target="#AddQTTest"*@>
+                                                <span style="color:gray" data-PlanId="@dt.Rows[i]["ProductionPlanID"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">无</span>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                                @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()
+                                            </td>
+                                        }
+
+                                    }
+
+                                }
+                            }
+
+                            <td>
+                                <a onclick="ProductionLineIssue(@dt.Rows[i]["ProductionPlanID"])" href="#">发放</a>
+                                <a onclick="ProductionLineEdit(@dt.Rows[i]["ProductionPlanID"])" href="#" data-toggle="modal" data-target="#bianjiProduction">编辑</a>
+                                <a onclick="ProductionLineDelete(@dt.Rows[i]["ProductionPlanID"])" href="#" data-toggle="modal" data-target="#ProductionLineshanchu">删除</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            }
+
+            <tr>
+                @if (ViewBag.producetion != null)
+                {
+                    DataTable dt2 = ViewBag.title;
+                    int nums = dt2.Rows.Count + 2;
+                    <td colspan="@nums">
+                        <div id="barcon" class="barcon">
+                            <input type="hidden" id="yeNums" value="@ViewBag.nowPage" />
+                            <div id="barcon1" class="barcon1"></div>
+                            <div id="barcon2" class="barcon2">
+                                <ul>
+                                    <li><a href="###" id="firstPage">首页</a></li>
+                                    <li><a href="###" id="prePage">上一页</a></li>
+                                    <li><a href="###" id="nextPage">下一页</a></li>
+                                    <li><a href="###" id="lastPage">尾页</a></li>
+                                    <li>
+                                        <select id="jumpWhere"></select>
+                                    </li>
+                                    <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                }
+                else
+                {
+                    DataTable dt2 = ViewBag.title;
+                    int nums = dt2.Rows.Count + 2;
+                    <td colspan="@nums">
+                        <div id="barcon" class="barcon">
+                            <input type="hidden" id="yeNums" value="@ViewBag.nowPage" />
+                            <div id="barcon1" class="barcon1"></div>
+                            <div id="barcon2" class="barcon2">
+                                <ul>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="firstPage">首页</a></li>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="prePage">上一页</a></li>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="nextPage">下一页</a></li>
+                                    <li><a href="javascript:return false;" style="opacity: 0.5" id="lastPage">尾页</a></li>
+                                    <li>
+                                        <select id="jumpWhere" disabled="disabled"></select>
+                                    </li>
+                                    <li><a href="javascript:return false;" style="opacity: 0.2" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+
+                }
+            </tr>
+        </table>
+    </div>
+    @*删除*@
+    <div class="modal fade" id="ProductionLineshanchu" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header  modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除操作</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info Buttons chanxiandele">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*编辑*@
+    <div class="modal fade" id="bianjiProduction" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">编辑操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;" id="editTable">
+                        @if (ViewBag.title != null || ViewBag.title != "")
+                        {
+                            DataTable dt2 = ViewBag.title;
+                            for (int i = 0; i < dt2.Rows.Count; i++)
+                            {
+                                if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanID")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <input id="edit_ProductionPlanID" style="background-color:#f6ebeb;" class="form-control" type="text" hidden="hidden" />
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanName")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            @*<input id="edit_ProductionPlanName" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />*@
+                                            <select id="edit_ProductionPlanName" style="margin-right:20px;width:150px;display:inline;" class="form-control" onchange="SelectPD(this.options[this.options.selectedIndex].value)">
+                                                @if (ViewBag.pjinfo == null)
+                                                {
+                                                    <option value="">暂无项目</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="0">请选择</option>
+                                                    DataTable pj = ViewBag.pjinfo;
+                                                    for (int ii = 0; ii < pj.Rows.Count; ii++)
+                                                    {
+                                                        <option value="@pj.Rows[ii]["ProjectId"]">@pj.Rows[ii]["ProjectName"]</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanVersion")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            @* <input id="edit_ProductionPlanVersion" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />*@
+                                            <select id="edit_ProductionPlanVersion" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+                                                <option value="0">请选择</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "PlanNum")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <input id="edit_PlanNum" class="form-control" type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "RealNum")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <input id="edit_RealNum" class="form-control" type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "StartTime")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <input class="form-control" id="edit_StartTime" type="text" />
+
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "EndTime")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <input class="form-control" id="edit_EndTime" type="text" />
+
+                                        </td>
+                                    </tr>
+                                }
+
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            @if (ViewBag.pinfo == null)
+                                            {
+                                                <select>
+                                                    <option value="0">请选择</option>
+                                                </select>
+                                            }
+                                            else
+                                            {
+                                                DataTable lp = ViewBag.pinfo;
+
+                                                <select class="form-control" style="margin-right:20px;width:100%;display:inline;" id="edit_ProcessId" onchange="GetTerminalInfo(2),GetStateInfo(0)" disabled="disabled">
+                                                    <option value="0">请选择</option>
+                                                    @for (int j = 0; j < lp.Rows.Count; j++)
+                                                    {
+                                                        <option value="@lp.Rows[j]["ProcessId"]">@lp.Rows[j]["ProcessName"]</option>
+                                                    }
+                                                </select>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <select id="edit_TerminalID" style="margin-right:20px;width:100%;display:inline;" class="form-control">
+                                                <option value="0">请选择</option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "State")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <select id="edit_State" style="margin-right:20px;width:100%;display:inline;" class="form-control" onchange="JudgeSerial()">
+                                                <option value="0">请选择</option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                }
+
+
+
+                                for (int z = 1; z <= 50; z++)
+                                {
+                                    if (dt2.Rows[i]["AllocationName"].ToString() == "c" + z)
+                                    {
+                                        if (dt2.Rows[i]["Type"].ToString() == "pro")
+                                        {
+                                            <tr>
+                                                <td>@dt2.Rows[i]["AllocationTitle"].ToString()：</td>
+                                                <td>
+                                                    <select class="form-control" style="margin-right:20px;width:100%;display:inline;" id="@dt2.Rows[i]["AllocationName"]" tag="@dt2.Rows[i]["AllocationName"].ToString()">
+                                                        <option value="1">未开始</option>
+                                                        <option value="2">进行中</option>
+                                                        <option value="3">已完成</option>
+                                                        <option value="0">无</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+
+                                        }
+                                        else if (dt2.Rows[i]["AllocationName"].ToString() == "c50")
+                                        {
+                                            <tr hidden="hidden">
+                                                <td>@dt2.Rows[i]["AllocationTitle"].ToString()：</td>
+                                                <td><input id="@dt2.Rows[i]["AllocationName"]" class="form-control" tag="@dt2.Rows[i]["AllocationName"].ToString()" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" /></td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td>@dt2.Rows[i]["AllocationTitle"].ToString()：</td>
+                                                <td><input id="@dt2.Rows[i]["AllocationName"]" class="form-control" tag="@dt2.Rows[i]["AllocationName"].ToString()" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" /></td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    </table>
+                    <span id="edit_issue" hidden="hidden"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="Edit_Clear">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info" id="bianji_Production">
+                        <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*添加*@
+    <div class="modal fade" id="ProductionLinetianjia" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">添加产线操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;" id="addTable">
+                        @if (ViewBag.title != null || ViewBag.title != "")
+                        {
+                            DataTable dt2 = ViewBag.title;
+                            for (int i = 0; i < dt2.Rows.Count; i++)
+                            {
+                                if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanID")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <input id="add_ProductionPlanID" readonly="readonly" style="background-color:#f6ebeb;" class="form-control" type="text" />
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanName")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            @* <input id="add_ProductionPlanName" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />*@
+                                            <select id="add_ProductionPlanName" style="margin-right:20px;width:150px;display:inline;" class="form-control" onchange="SelectPD(this.options[this.options.selectedIndex].value,0)">
+                                                @if (ViewBag.pjinfo == null)
+                                                {
+                                                    <option value="">暂无项目</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="0">请选择</option>
+                                                    DataTable pj = ViewBag.pjinfo;
+                                                    for (int ii = 0; ii < pj.Rows.Count; ii++)
+                                                    {
+                                                        <option value="@pj.Rows[ii]["ProjectId"]">@pj.Rows[ii]["ProjectName"]</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanVersion")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            @*   <input id="add_ProductionPlanVersion" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />*@
+                                            <select id="add_ProductionPlanVersion" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+                                                <option value="0">请选择</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "PlanNum")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <input id="add_PlanNum" class="form-control" type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+
+                                        </td>
+                                    </tr>
+                                }
+
+
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            @if (ViewBag.pinfo == null)
+                                            {
+
+                                                <select class="form-control" style="margin-right:20px;width:100%;display:inline;">
+                                                    <option value="0">请选择</option>
+                                                </select>
+                                            }
+                                            else
+                                            {
+                                                DataTable lp = ViewBag.pinfo;
+
+                                                <select class="form-control" style="margin-right:20px;width:100%;display:inline;" id="add_ProcessId" onchange="GetTerminalInfo(1),GetStateInfo(1)">
+                                                    <option value="0">请选择</option>
+                                                    @for (int j = 0; j < lp.Rows.Count; j++)
+                                                    {
+                                                        <option value="@lp.Rows[j]["ProcessId"]">@lp.Rows[j]["ProcessName"]</option>
+                                                    }
+                                                </select>
+
+
+                                            }
+
+
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID")
+                                {
+                                    <tr hidden="hidden">
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <select id="add_TerminalID" style="margin-right:20px;width:100%;display:inline;" class="form-control">
+                                                <option value="0">请选择</option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                }
+                                else if (dt2.Rows[i]["AllocationName"].ToString() == "State")
+                                {
+                                    <tr>
+                                        <td>
+                                            @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                        </td>
+                                        <td>
+                                            <select id="add_State" style="margin-right:20px;width:100%;display:inline;" class="form-control" disabled="disabled">
+                                                <option value="0">请选择</option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                }
+
+                                for (int z = 1; z <= 50; z++)
+                                {
+                                    if (dt2.Rows[i]["AllocationName"].ToString() == "c" + z)
+                                    {
+                                        if (dt2.Rows[i]["Type"].ToString() == "pro")
+                                        {
+                                            <tr>
+                                                <td>@dt2.Rows[i]["AllocationTitle"].ToString()：</td>
+                                                <td>
+                                                    <select class="form-control" style="margin-right:20px;width:100%;display:inline;" id="c_@dt2.Rows[i]["AllocationName"]" tag="@dt2.Rows[i]["AllocationName"].ToString()">
+                                                        <option value="0"> 无 </option>
+                                                        <option value="1">未开始</option>
+                                                        <option value="2">进行中</option>
+                                                        <option value="3">已完成</option>
+
+                                                    </select>
+                                                </td>
+                                            </tr>
+
+                                        }
+                                        else if (dt2.Rows[i]["AllocationName"].ToString() == "c50")
+                                        {
+                                            <tr hidden="hidden">
+                                                <td>@dt2.Rows[i]["AllocationTitle"].ToString()：</td>
+                                                <td><input id="c_@dt2.Rows[i]["AllocationName"]" class="form-control" tag="@dt2.Rows[i]["AllocationName"].ToString()" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" /></td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td>@dt2.Rows[i]["AllocationTitle"].ToString()：</td>
+                                                <td><input id="c_@dt2.Rows[i]["AllocationName"]" class="form-control" tag="@dt2.Rows[i]["AllocationName"].ToString()" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" /></td>
+                                            </tr>
+                                        }
+
+
+                                    }
+                                }
+                            }
+                        }
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" onclick="ProductionAdd()" class="btn btn-info Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal">
+        <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+            <div class="progress progress-striped active" style="margin-bottom: 0;">
+                <div class="progress-bar" style="width: 100%;"></div>
+            </div>
+            <h5 style="color:black"> <strong>数据加载中，请稍后…！</strong> </h5>
+        </div>
+    </div><!-- /.modal -->
+    @*批量删除*@
+    <div class="modal fade" id="ProductionLineAllDelete" tabindex="-1" data-show="false" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除操作</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info chanpiliang Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*添加质检*@
+    <div class="modal fade" id="AddQTTest" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">添加质检信息</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;width:450px;" class="tc_table_cp" border="0">
+                        <tr>
+                            <td width="104">图片上传：</td>
+                            <td colspan="3">
+                                <div id="fileList">
+
+                                </div>
+                                <div class="cp_img_jia" id="filePicker"></div>
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="margin:0px auto;width:450px;" id="addTable">
+                        <tr style="height:60px;">
+                            <td>
+                                质检结果:
+                            </td>
+                            <td style="width:345px;">
+                                <select class="form-control" id="QualityResult" style="margin-right:20px;width:100%;display:inline;">
+                                    <option value="0">合格</option>
+                                    <option value="1">不合格</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                质检内容:
+                            </td>
+                            <td style="width:345px;">
+                                <textarea type="textarea" style="height:80px;" class="form-control" value="" hidden id="QualityContent"></textarea>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" id="ctlBtn" class="btn btn-info Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <span id="shit"></span>
+    <span id="motai1"></span>
+    <span id="motai2"></span>
+    <span id="motai3"></span>
+
+    <input type="hidden" id="excel" value="@ViewBag.aa" />
+    <script>
+        //通过工序查出状态
+        function GetStateInfo(num) {
+            if (num == 0) {
+                var ProcessId = $("#edit_ProcessId").val();
+            } else if (num == 1) {
+                var ProcessId = $("#add_ProcessId").val();
+            }
+            else if (num == 2) {
+                var ProcessId = $("#Nextedit_ProcessId").val();
+            }
+            $.ajaxSettings.async = false;
+            $.post("/ProducelineManager/GetProcessState", { ProcessId: ProcessId }, function (data) {
+
+                var str = '';
+                if (data != "" && data != null) {
+                    var json = eval('(' + data + ')');
+                    for (var o in json) {
+                        str += '<option value="' + json[o].StateId + '">' + json[o].StateName + '</option>';
+                    }
+                    if (num == 0) {
+                        $("#edit_State").find("option").remove();
+                        $("#edit_State").append(str);
+                    } else if (num == 1) {
+                        $("#add_State").find("option").remove();
+                        $("#add_State").append(str);
+                    }
+                    else if (num == 2) {
+                        $("#Nextedit_State").find("option").remove();
+                        $("#Nextedit_State").append(str);
+                    }
+
+
+                }
+                else {
+                    if (num == 0) {
+                        str = '<option value="">暂无状态</option>';
+                        $("#edit_State").find("option").remove();
+                        $("#edit_State").append(str);
+                    } else if (num == 1) {
+                        str = '<option value="">暂无状态</option>';
+                        $("#add_State").find("option").remove();
+                        $("#add_State").append(str);
+                    }
+                    else if (num == 2) {
+                        $("#Nextedit_State").find("option").remove();
+                        $("#Nextedit_State").append(str);
+                    }
+                }
+            })
+            $.ajaxSettings.async = true;
+
+        }
+        //通过工序查出终端
+        function GetTerminalInfo(num) {
+            if (num == 0) {
+                var ProcessId = $("#Select_ProcessId").val();
+            } else if (num == 1) {
+                var ProcessId = $("#add_ProcessId").val();
+            } else if (num == 2) {
+                var ProcessId = $("#edit_ProcessId").val();
+            } else if (num == 3) {
+                var ProcessId = $("#Nextedit_ProcessId").val();
+            }
+
+            //alert(ProcessId);
+            $.ajaxSettings.async = false;
+            $.post("/Report/GetProcessTerminal", { ProcessId: ProcessId }, function (data) {
+
+                var str = '';
+                if (data != "" && data != null) {
+                    var json = eval('(' + data + ')');
+                    for (var o in json) {
+                        str += '<option value="' + json[o].TerminalID + '">' + json[o].TerminalName + '</option>';
+                    }
+                    if (num == 0) {
+                        $("#Select88").find("option").remove();
+                        $("#Select88").append(str);
+                    } else if (num == 1) {
+                        $("#add_TerminalID").find("option").remove();
+                        $("#add_TerminalID").append(str);
+                    } else if (num == 2) {
+                        $("#edit_TerminalID").find("option").remove();
+                        $("#edit_TerminalID").append(str);
+                    } else if (num == 3) {
+                        $("#Nextedit_TerminalID").find("option").remove();
+                        $("#Nextedit_TerminalID").append(str);
+                    }
+
+                }
+                else {
+                    if (num == 0) {
+                        str = '<option value="0">暂无终端</option>';
+                        $("#Select88").find("option").remove();
+                        $("#Select88").append(str);
+                    } else if (num == 1) {
+                        str = '<option value="">暂无终端</option>';
+                        $("#add_TerminalID").find("option").remove();
+                        $("#add_TerminalID").append(str);
+                    }
+                    else if (num == 2) {
+                        str = '<option value="">暂无终端</option>';
+                        $("#edit_TerminalID").find("option").remove();
+                        $("#edit_TerminalID").append(str);
+                    }
+                    else if (num == 3) {
+                        str = '<option value="">暂无终端</option>';
+                        $("#Nextedit_TerminalID").find("option").remove();
+                        $("#Nextedit_TerminalID").append(str);
+                    }
+
+                }
+            })
+            $.ajaxSettings.async = true;
+        }
+
+        //根据项目选择产品
+        function SelectPD(ProjectId, num) {
+            if (ProjectId == "" || ProjectId == null) {
+                alert("请选择项目");
+            }
+            $.ajaxSettings.async = false;
+            $.post("/QualityTest/GetProductSelInfo", { ProjectId: ProjectId }, function (data) {
+                var str = '';
+                if (data != "" && data != null) {
+                    var json = eval('(' + data + ')');
+                    //str = '<option value="0">全部项目</option>'
+                    for (var o in json) {
+                        str += '<option value="' + json[o].ProductId + '">' + json[o].ProductName + '</option>';
+                    }
+                    if (num == 0) {
+                        $("#add_ProductionPlanVersion").find("option").remove();
+                        $("#add_ProductionPlanVersion").append(str);
+                    } else {
+                        $("#edit_ProductionPlanVersion").find("option").remove();
+                        $("#edit_ProductionPlanVersion").append(str);
+                    }
+
+                }
+                else {
+                    if (num == 0) {
+                        str = '<option value="0">暂无项目</option>';
+                        $("#add_ProductionPlanVersion").find("option").remove();
+                        $("#add_ProductionPlanVersion").append(str);
+                    } else {
+                        str = '<option value="0">暂无项目</option>';
+                        $("#edit_ProductionPlanVersion").find("option").remove();
+                        $("#edit_ProductionPlanVersion").append(str);
+                    }
+
+                }
+            })
+            $.ajaxSettings.async = true;
+        }
+
+        $("#Edit_Clear").click(function () {
+            $("#Nextedit_State").find("option").remove();
+            $("#Nextedit_TerminalID").find("option").remove();
+            $("#nt").fadeOut(500);
+        })
+
+
+        $("input[type=file]").change(function () { $(this).parents(".uploader").find(".filename").val($(this).val()); });
+        $("input[type=file]").each(function () {
+            if ($(this).val() == "") { $(this).parents(".uploader").find(".filename").val("未选中文件"); }
+        });
+
+        //文本框取消清空
+        $(".btn-default,.close,#Producetianjia").click(function () {
+            //编辑
+            $("#editTable input").val("");
+            //添加
+            $("#addTable input").val("");
+
+        })
+
+
+
+
+        //开始时间控件
+        $("#edit_StartTime,#add_StartTime,#starttime1,#c_c46,#c_c47,#c_c48,#c_c49,#c46,#c47,#c48,#c49").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+        //结束时间控件
+        $("#edit_EndTime,#endtime1").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+
+        //发放
+        function ProductionLineIssue(produid) {
+            //var ss = $("#starttime1").val();//当前组合查询信息
+            //var gg = $("#endtime1").val();
+            var line = $("#Select88").val();
+            //var version = $("#Select99").val();
+            var yeshu = $("#yeNums").val();//当前页数
+            $.post("/ProducelineManager/ProducelineIssue", { ProduID: produid, Yeshu: yeshu }, function (data) {
+
+                $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+                    alert("发放成功");
+                });
+
+
+            })
+        }
+        //批量发放
+        function ProductionLineAllIssue() {
+            var b = document.getElementsByName("cks");
+            var r = 0;
+            var cheValue = "";
+            var line = $("#Select88").val();
+            var yeshu = $("#yeNums").val();//当前页数
+            for (var i = 0; i < b.length; i++) {
+                if (b[i].checked == true) {
+                    cheValue += b[i].value + ",";
+                }
+                else {
+                    r++;
+                }
+
+            }
+            if (r == b.length) {
+                alert("请先选中要发放的数据");
+
+            } else {
+                $.post("/ProducelineManager/AllIssue", { allid: cheValue, Yeshu: yeshu }, function (data) {
+
+                    $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+                        alert("批量发放成功");
+                    });
+
+                });
+            }
+        }
+
+        //编辑,得到需要编辑的信息
+        function ProductionLineEdit(produid) {
+          
+            var trnum = $("#editTable").find("tr").length;//计算tr的数量17
+            $.ajax({
+                type: "Post",
+                url: "/ProducelineManager/EditProducelineBySelect",
+                data: { produID: produid, TrNum: trnum },
+                beforeSend: function () {
+                    showModal();
+                },
+                success: function (data) {
+                    var info = data.split(",");
+                    $("#edit_ProductionPlanID").val(info[0]);
+                    $("#edit_ProductionPlanName").val(info[1]);
+                    SelectPD(info[1], 1);
+                    $("#edit_ProductionPlanVersion").val(info[2]);
+                    $("#edit_ProcessId").val(info[3]);
+                    GetTerminalInfo(2);
+                    $("#edit_TerminalID").val(info[4]);
+                    GetStateInfo(0);
+
+                    $("#edit_issue").text(info[5]);
+                    $("#c46").val(info[6]);
+                    $("#c47").val(info[7]);
+                    $("#c48").val(info[8]);
+                    $("#c49").val(info[9]);
+                    $("#c50").val(info[10]);
+                    for (var i = 1; i <= trnum - 10; i++) {
+                        $("#c" + i).val(info[i + 10]);
+                    }
+                    hideModal();
+                }
+            })
+            //$.post("/ProducelineManager/EditProducelineBySelect", { produID: produid, TrNum: trnum }, function (data) {
+            //    var info = data.split(",");
+            //    $("#edit_ProductionPlanID").val(info[0]);
+            //    $("#edit_ProductionPlanName").val(info[1]);
+            //    SelectPD(info[1], 1);
+            //    $("#edit_ProductionPlanVersion").val(info[2]);
+            //    $("#edit_ProcessId").val(info[3]);
+            //    GetTerminalInfo(2);
+            //    $("#edit_TerminalID").val(info[4]);
+            //    GetStateInfo(0);
+
+            //    $("#edit_issue").text(info[5]);
+            //    $("#c46").val(info[6]);
+            //    $("#c47").val(info[7]);
+            //    $("#c48").val(info[8]);
+            //    $("#c49").val(info[9]);
+            //    $("#c50").val(info[10]);
+            //    for (var i = 1; i <= trnum - 10; i++) {
+            //        $("#c" + i).val(info[i + 10]);
+            //    }
+            //})
+
+
+        }
+        //编辑
+        $(function () {
+            $("#bianji_Production").click(function () {
+
+                if ($("#edit_ProductionPlanName").val() == "" || $("#edit_ProductionPlanVersion").val() == "") {//|| $("#edit_ProcessId").val() == "" || $("#edit_TerminalID").val() == "0" || $("#edit_State").val() == "0" || $("#edit_ProcessId").val() == "0"
+                    alert("不能为空，请输入合适的值！");
+                } else if ($("#c46").val() > $("#c47").val() || $("#c48").val() > $("#c49")) {
+                    alert("开始时间不能大于结束时间！");
+                }
+                else {
+                    var produname = $("#edit_ProductionPlanName").val();
+                    var produver = $("#edit_ProductionPlanVersion").val();
+
+                    var yeshu = $("#yeNums").val();//当前页数
+                    var line = $("#Select88").val();
+
+
+                    var produter = 0 // $("#edit_TerminalID").val();
+                    var produid = $("#edit_ProductionPlanID").val();
+                    var ProcessId = 0 // $("#edit_ProcessId").val();
+                    var processIssue = $("#edit_issue").text();
+                    var proPlanStart = $("#c46").val();
+                    var proPlanEnd = $("#c47").val();
+                    var proRealStart = $("#c48").val();
+                    var proRealEnd = $("#c49").val();
+                    //var proDiffTime = $("#c20").val();
+                    var i = $("#editTable").find("tr").length;//计算tr的数量
+                    var sumC = "";   //所有c字段的内容
+                    if (i > 10) {
+                        for (var j = 1; j <= i - 10; j++) {
+                            sumC = sumC + "," + $("#c" + j).attr("tag") + "='" + $("#c" + j).val() + "'";
+                        }
+                    }
+                    $.ajax({
+                        type:"Post",
+                        url: "/ProducelineManager/EditProduceline",
+                        data: { produName: produname, produVer: produver, produTer: produter, processId: ProcessId, produID: produid, ProcessIssue: processIssue, ProPlanStart: proPlanStart, ProPlanEnd: proPlanEnd, ProRealStart: proRealStart, ProRealEnd: proRealEnd, Yeshu: yeshu, FieldValue: sumC },
+                        beforeSend: function (data) {
+                            showModal();
+                        },
+                        success: function (data) {
+                            $("#bianjiProduction").modal('hide');
+                            //alert("yeshu:" + yeshu);
+                            $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+
+                            });
+                            hideModal();
+                        }
+                    })
+                    //$.post("/ProducelineManager/EditProduceline", { produName: produname, produVer: produver, produTer: produter, processId: ProcessId, produID: produid, ProcessIssue: processIssue, ProPlanStart: proPlanStart, ProPlanEnd: proPlanEnd, ProRealStart: proRealStart, ProRealEnd: proRealEnd, Yeshu: yeshu, FieldValue: sumC }, function (data) {
+
+                    //    $("#bianjiProduction").modal('hide');
+                    //    //alert("yeshu:" + yeshu);
+                    //    $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+
+                    //    });
+
+
+                    //})
+                }
+
+            })
+
+        })
+
+
+        //批量删除
+        function ProductionLineAllDele() {
+            var line = $("#Select88").val();
+            var yeshu = $("#yeNums").val();//当前页数
+            var b = document.getElementsByName("cks");
+
+            var r = 0;
+            var cheValue = "";
+            for (var i = 0; i < b.length; i++) {
+                //alert("状态：" + b[i].checked);
+                if (b[i].checked == true) {
+                    cheValue += b[i].value + ",";
+                    //alert(b[i].value);
+                }
+                else {
+                    r++;
+                }
+            }
+            if (r == b.length) {
+                alert("请先选中要删除的数据");
+                $("#ProductionLineAllDelete").modal("hide");
+            } else {
+                $("#ProductionLineAllDelete").modal("show");
+                $(".chanpiliang").click(function () {
+                    $.post("/ProducelineManager/AllDelete", { allid: cheValue, Yeshu: yeshu }, function (data) {
+                        $("#ProductionLineAllDelete").modal("hide");
+                        $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+
+                        });
+                        ;
+                    });
+                });
+
+            }
+        }
+
+        //添加
+        function ProductionAdd() {
+
+            if ($("#add_ProductionPlanName").val() == "" || $("#add_ProductionPlanVersion").val() == "" || $("#add_ProductionPlanName").val() == "0" || $("#add_ProductionPlanVersion").val() == "0") {// || $("#add_TerminalID").val() == "" || $("#add_ProcessId").val() == ""
+                alert("请输入项目名和产品名!");
+            }
+            else if ($("#c_c46").val() > $("#c_c47").val() || $("#c_c48").val() > $("#c_c49").val()) {
+                alert("开始时间不能大于结束时间");
+            }
+            else {
+                debugger;
+                var Producname = $("#add_ProductionPlanName").val();
+                var Producversion = $("#add_ProductionPlanVersion").val();
+                var Producterid = $("#add_TerminalID").val();
+                var ProcessId = $("#add_ProcessId").val();
+                var line = $("#Select88").val();
+                var yeshu = $("#yeNums").val();//当前页数
+                var ProStartTime = $("#c_c46").val();//计划开始时间
+                var ProEndTime = $("#c_c47").val();//计划结束时间
+                var ReaStartTime = $("#c_c48").val();//实际开始时间
+                var ReaEndTime = $("#c_c49").val();//实际结束时间
+
+                if (yeshu == "") {
+                    yeshu = 0;
+                }
+                var i = $("#addTable").find("tr").length;//计算tr的数量   17
+                var sumC = "";   //所有c字段的内容
+                if (i > 10) {
+                    for (var j = 1; j <= i - 10; j++) {
+                        sumC = sumC + ",'" + $("#c_c" + j).val() + "'";
+                    }
+                }
+                var nameC = "";   //所有c字段的名称
+
+                if (i > 10) {
+                    for (var j = 1; j <= i - 10; j++) {
+                        nameC = nameC + "," + $("#c_c" + j).attr("tag");
+                    }
+                }
+                $.ajax({
+                    type:"Post",
+                    url: "/ProducelineManager/AddProduceline",
+                    data: { producName: Producname, producVersion: Producversion, producTerid: Producterid, processId: ProcessId, proStartTime: ProStartTime, proEndTime: ProEndTime, reaStartTime: ReaStartTime, reaEndTime: ReaEndTime, Yeshu: yeshu, NameC: nameC, SumC: sumC },
+                    beforeSend: function (data) {
+                        showModal();
+                    },
+                    success: function (data) {
+                        $("#ProductionLinetianjia").modal('hide')
+                        $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+                        });
+                        hideModal();
+                    }
+                })
+                //$.post("/ProducelineManager/AddProduceline", { producName: Producname, producVersion: Producversion, producTerid: Producterid, processId: ProcessId, proStartTime: ProStartTime, proEndTime: ProEndTime, reaStartTime: ReaStartTime, reaEndTime: ReaEndTime, Yeshu: yeshu, NameC: nameC, SumC: sumC }, function (data) {
+                //    $("#ProductionLinetianjia").modal('hide');
+                //    $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+
+                //    });
+                //})
+
+            }
+
+
+        }
+        //删除
+        function ProductionLineDelete(id) {
+            $(".chanxiandele").click(function () {
+
+
+                var line = $("#Select88").val();
+
+                var yeshu = $("#yeNums").val();//当前页数
+                $.post("/ProducelineManager/DeleteProduceline", { proId: id, Yeshu: yeshu }, function (data) {
+                    $("#ProductionLineshanchu").modal('hide');
+                    $("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=" + yeshu, function (data) {
+
+                    });
+
+                });
+            });
+        }
+        //全选
+        function GetAll() {
+            var che = document.getElementById("Checkbox3");
+            var ischeck = che.checked;
+            if (che.checked == ischeck) {
+                var a = document.getElementsByName("cks");
+                for (var i = 0; i < a.length; i++) {
+                    a[i].checked = ischeck;
+                }
+            }
+        }
+
+
+        $("#SelectDataDiff").click(function () {
+
+            var ss = $("#starttime").val();
+            var gg = $("#endtime").val();
+            if (ss != "" && gg == "") {
+                alert("结束日期不能为空！");
+            }
+            else if (ss == "" && gg != "") {
+                alert("开始日期不能为空！");
+            }
+            else if (ss == "" && gg == "") {
+                //$.post("/ProducelineManager/SelectData", { aa: ss, bb: gg }, function (data) {
+                //    alert("成功")
+                //})
+                alert("没有");
+                $("#dsidiv").load("/ProducelineManager/SelectData?aa=" + ss + "&&bb=" + gg);
+            }
+            else {
+                if (ss > gg) {
+                    alert("开始日期不能大于结束日期！");
+                }
+                else {
+                    //$.post("/ProducelineManager/SelectData", { aa: ss, bb: gg }, function (data) {
+                    //    alert("成功")
+                    //})
+                    alert("有");
+                    $("#dsidiv").load("/ProducelineManager/SelectData?aa=" + ss + "&&bb=" + gg);
+                }
+            }
+        })
+
+        //选择时间改变时
+        function TimeChange() {
+            var sele = $("#Select22").val();
+            if (sele == "日期") {
+                $("#SelectDataDiff").unbind('click');
+                //alert("日期");
+                $("#TimeZu").show();
+                $("#Select8").hide();
+                $("#Select9").hide();
+                //根据日期查询
+                $("#SelectDataDiff").click(function () {
+                    //alert("日期2");
+                    var ss = $("#starttime").val();
+                    var gg = $("#endtime").val();
+                    if (ss != "" && gg == "") {
+                        alert("结束日期不能为空！");
+                    }
+                    else if (ss == "" && gg != "") {
+                        alert("开始日期不能为空！");
+                    }
+                    else if (ss == "" && gg == "") {
+                        $("#dsidiv").load("/ProducelineManager/SelectData?aa=" + ss + "&&bb=" + gg);
+                    }
+                    else {
+                        if (ss > gg) {
+                            alert("开始日期不能大于结束日期！");
+                        }
+                        else {
+                            $("#dsidiv").load("/ProducelineManager/SelectData?aa=" + ss + "&&bb=" + gg);
+                        }
+                    }
+                })
+            }
+            else if (sele == "产线") {
+                $("#SelectDataDiff").unbind('click');
+                $("#TimeZu").hide();
+                $("#Select8").show();
+                $("#Select9").hide();
+                //根据产线
+                $("#SelectDataDiff").click(function () {
+                    var line = $("#Select8").val();
+                    $("#dsidiv").load("/ProducelineManager/SelectLine?line=" + line, function (data) {
+                    });
+                })
+            }
+            else {
+                $("#SelectDataDiff").unbind('click');
+                $("#TimeZu").hide();
+                $("#Select8").hide();
+                $("#Select9").show();
+                //根据产线
+                $("#SelectDataDiff").click(function () {
+                    var version = $("#Select9").val();
+                    $("#dsidiv").load("/ProducelineManager/SelectVersion?version=" + version, function (data) {
+                    });
+                })
+            }
+        }
+
+        //加载动画
+        function showModal() {
+            $('#myModal').modal({ backdrop: 'static', keyboard: false });
+        }
+        function hideModal() {
+            $('#myModal').modal('hide');
+        }
+
+        //组合查询
+        function all2() {
+            $("#quyuId").text($("#Select_ProcessId").val())
+            var line = $("#Select88").val();
+            $.ajax({
+                type:"Get",
+                url: "/ProducelineManager/SelectAll",
+                data:{line:line,
+                yeshu:1
+                },
+                beforeSend: function () {
+                    showModal();
+                },
+                success: function (data) {
+                    $("#dsidiv").html(data);
+                    hideModal();
+                }
+            })
+            //$("#dsidiv").load("/ProducelineManager/SelectAll?line=" + line + "&&yeshu=1", function (data) {
+            //});
+           
+        }
+
+
+        //判断状态的顺序
+        function JudgeSerial() {
+
+            var ProcessId = $("#edit_ProcessId").val();
+            var StateId = $("#edit_State").val();
+
+            $.post("/ProducelineManager/JudgeSerial", { ProcessId: ProcessId, StateId: StateId }, function (data) {
+                //alert(data);
+                $("#nt").hide();
+                //$("#shit").text(data);
+                if (data == "noend") {
+                    //alert(data);
+                    $("#nt").fadeOut(500);
+                } else if (data == "nonext") {
+                    //alert(data);
+                    $("#nt").fadeOut(500);
+                }
+                else if (data == "ProcessIdIsNull") {
+                    //alert(data);
+                    $("#nt").fadeOut(500);
+                }
+                else if (data == "StateIdIsNull") {
+                    //alert(data);
+                    $("#nt").fadeOut(500);
+                }
+                else if (data == null || data == "") {
+                    //alert(data);
+                    $("#nt").fadeOut(500);
+                }
+                else {
+                    //alert("已为您调整工序，请选择终端")
+                    //$("#NextTerminal").modal("show");
+                    //$("#Nextedit_ProcessId").val(info[0]);
+                    //GetTerminalInfo(3);
+                    //GetStateInfo(2);
+                    //$("#Nextedit_State").val(info[2]);
+
+                    $("#nt").fadeIn(500);
+                    var info = data.split(",");
+                    var zero = info[0];
+                    $("#Nextedit_ProcessId").val(zero);
+                    GetTerminalInfo(3);
+                    GetStateInfo(2);
+                    $("#Nextedit_State").val(info[2]);
+                }
+
+            })
+
+        }
+
+        //分页
+        /*动态生成用户函数
+        num为生成的用户数量
+        */
+        function dynamicAddUser(num) {
+        }
+        $(function () {
+            dynamicAddUser(80);
+
+            goPage(1, 10);
+            var tempOption = "";
+            for (var i = 1; i <= totalPage; i++) {
+                tempOption += '<option value=' + i + '>' + i + '</option>'
+            }
+            $("#jumpWhere").html(tempOption);
+        })
+
+        /**
+         * 分页函数
+         * pno--页数
+         * psize--每页显示记录数
+         * 分页部分是从真实数据行开始，因而存在加减某个常数，以确定真正的记录数
+         * 纯js分页实质是数据行全部加载，通过是否显示属性完成分页功能
+        **/
+
+        var pageSize = 0;//每页显示行数
+        var currentPage_ = 1;//当前页全局变量，用于跳转时判断是否在相同页，在就不跳，否则跳转。
+        var totalPage;//总页数
+        function goPage(pno, psize) {
+            var itable = document.getElementById("adminTbody");
+            //console.log("itable:"+itable);
+
+            if (itable == null) {
+                var tempStr = "共<span style='color:red;'>0</span>条记录 分<span style='color:red;'>0</span>页 当前第<span style='color:red;'>1</span>页";
+
+                document.getElementById("barcon1").innerHTML = tempStr;
+            } else {
+                var num = itable.rows.length;//表格所有行数(所有记录数)
+
+                pageSize = psize;//每页显示行数
+                //总共分几页
+                if (num / pageSize > parseInt(num / pageSize)) {
+                    totalPage = parseInt(num / pageSize) + 1;
+                } else {
+                    totalPage = parseInt(num / pageSize);
+                }
+                var currentPage = pno;//当前页数
+                currentPage_ = currentPage;
+                var startRow = (currentPage - 1) * pageSize + 1;
+                var endRow = currentPage * pageSize;
+                endRow = (endRow > num) ? num : endRow;
+                //遍历显示数据实现分页
+                /*for(var i=1;i<(num+1);i++){
+                    var irow = itable.rows[i-1];
+                    if(i>=startRow && i<=endRow){
+                        irow.style.display = "";
+                    }else{
+                        irow.style.display = "none";
+                    }
+                }*/
+
+                $("#adminTbody tr").hide();
+                for (var i = startRow - 1; i < endRow; i++) {
+                    $("#adminTbody tr").eq(i).show();
+                }
+
+                var tempStr = "共<span style='color:red;'>" + num + "</span>条记录 分<span style='color:red;'>" + totalPage + "</span>页 当前第<span style='color:red;'>" + currentPage + "</span>页";
+                document.getElementById("barcon1").innerHTML = tempStr;
+                //document.getElementById("yeNums").value="2";
+                $("#yeNums").val(currentPage);
+                var y = $("#yeNums").val();
+
+                if (currentPage > 1) {
+                    $("#firstPage").on("click", function () {
+                        goPage(1, psize);
+                    }).removeClass("ban");
+                    $("#prePage").on("click", function () {
+                        goPage(currentPage - 1, psize);
+                    }).removeClass("ban");
+                } else {
+                    $("#firstPage").off("click").addClass("ban");
+                    $("#prePage").off("click").addClass("ban");
+                }
+
+                if (currentPage < totalPage) {
+                    $("#nextPage").on("click", function () {
+                        goPage(currentPage + 1, psize);
+                    }).removeClass("ban")
+                    $("#lastPage").on("click", function () {
+                        goPage(totalPage, psize);
+                    }).removeClass("ban")
+                } else {
+                    $("#nextPage").off("click").addClass("ban");
+                    $("#lastPage").off("click").addClass("ban");
+                }
+
+                $("#jumpWhere").val(currentPage);
+            }
+        }
+        function jumpPage() {
+            var num = parseInt($("#jumpWhere").val());
+            if (num != currentPage_) {
+                goPage(num, pageSize);
+            }
+        }
+
+
+
+        var applicationPath = window.applicationPath === "" ? "" : window.applicationPath || "../../";
+        var PhotoUrlArray = new Array();
+        function PhotoUrl(id, filePath) {
+            this.id = id;
+            this.filePath = filePath;
+        }
+        $(function () {
+            var $ = jQuery,
+            $list = $('#fileList'),
+            // 优化retina, 在retina下这个值是2
+            ratio = window.devicePixelRatio || 1,
+            // 缩略图大小
+            thumbnailWidth = 90 * ratio,
+            thumbnailHeight = 90 * ratio,
+
+            // Web Uploader实例
+            uploader;
+            uploader = WebUploader.create({
+                // 选完文件后，是否自动上传。
+                auto: false,
+
+                fileNumLimit: 3,
+
+                disableGlobalDnd: true,
+                // swf文件路径
+                swf: applicationPath + '/Script/Uploader.swf',
+
+                // 文件接收服务端。
+                server: applicationPath + '/QualityTest/UpLoadProcess',
+
+                // 选择文件的按钮。可选。
+                // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+                pick: '#filePicker',
+
+                //只允许选择图片
+                accept: {
+                    title: 'Images',
+                    extensions: 'gif,jpg,jpeg,bmp,png',
+                    mimeTypes: 'image/*'
+                }             
+            });
+
+            // 当有文件添加进来的时候
+            uploader.on('fileQueued', function (file) {
+                var $li = $(
+                        '<div id="' + file.id + '" class="cp_img">' +
+                            '<img>' +
+                        '<div class="cp_img_jian"></div></div>'
+                        ),
+                    $img = $li.find('img');
+
+
+                // $list为容器jQuery实例
+                $list.append($li);
+
+                // 创建缩略图
+                // 如果为非图片文件，可以不用调用此方法。
+                // thumbnailWidth x thumbnailHeight 为 100 x 100
+                uploader.makeThumb(file, function (error, src) {
+                    if (error) {
+                        $img.replaceWith('<span>不能预览</span>');
+                        return;
+                    }
+
+                    $img.attr('src', src);
+                }, thumbnailWidth, thumbnailHeight);
+                //alert(uploader.getFiles('inited').length);
+                if (uploader.getFiles('inited').length >= 3) {
+                    $('.cp_img_jia').hide();
+                }
+            });
+
+            // 文件上传过程中创建进度条实时显示。
+            uploader.on('uploadProgress', function (file, percentage) {
+                var $li = $('#' + file.id),
+                    $percent = $li.find('.progress span');
+
+                // 避免重复创建
+                if (!$percent.length) {
+                    $percent = $('<p class="progress"><span></span></p>')
+                            .appendTo($li)
+                            .find('span');
+                }
+
+                $percent.css('width', percentage * 100 + '%');
+            });
+
+            // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+            uploader.on('uploadSuccess', function (file, response) {
+                $('#' + file.id).addClass('upload-state-done');
+                
+                PhotoUrlArray.push(new PhotoUrl(response.id, response.filePath));
+                //alert("aa-" + uploader.getFiles().length)
+                //alert("bb-" + uploader.getFiles('progress').length)上传中
+                if (uploader.getFiles('progress').length == 0) {
+                    //alert(PhotoUrlArray.length)
+                    //alert($("#motai1").val());
+                    //if ($('#QualityContent').val()=="") {
+                    //    alert("填写质检内容");
+                    //}
+                    $.post("/QualityTest/AddQTTest", { ProjectId: $("#motai1").val(), ProductId: $("#motai2").val(), ProcessId: $("#quyuId").text(), AllocationId: $("#motai3").val(), QualityResult: $('#QualityResult').val(), QualityContent: $('#QualityContent').val(), PhotoUrlArray: PhotoUrlArray }, function (data) {
+                        if (data == "ok") {
+                            $("#AddQTTest").modal("hide");
+                            document.location.reload();
+                        } else {
+                            alert("失败");
+                        }
+                    })
+                    PhotoUrlArray = new Array();
+                }
+            });
+
+            // 文件上传失败，显示上传出错。
+            uploader.on('uploadError', function (file) {
+                var $li = $('#' + file.id),
+                    $error = $li.find('div.error');
+
+                // 避免重复创建
+                if (!$error.length) {
+                    $error = $('<div class="error"></div>').appendTo($li);
+                }
+
+                $error.text('上传失败');
+            });
+
+            // 完成上传完了，成功或者失败，先删除进度条。
+            uploader.on('uploadComplete', function (file) {
+                $('#' + file.id).find('.progress').remove();
+            });
+
+            //所有文件上传完毕
+            uploader.on("uploadFinished", function () {
+                //提交表单
+
+            });
+
+            //开始上传
+           
+            $("#ctlBtn").click(function () {
+                if ($('#QualityContent').val() == "")
+                {
+                    alert("质检内容必填");
+                    return false;
+                }
+                if (uploader.getFiles().length > 0) {
+                    uploader.upload();
+                } else {
+                    //alert($("#motai1").val());
+                    $.post("/QualityTest/AddQTTest", { ProjectId: $("#motai1").val(), ProductId: $("#motai2").val(), ProcessId: $("#quyuId").text(), AllocationId: $("#motai3").val(), QualityResult: $('#QualityResult').val(), QualityContent: $('#QualityContent').val(), PhotoUrlArray: PhotoUrlArray }, function (data) {
+                        if (data == "ok") {
+                            $("#AddQTTest").modal("hide");
+                            document.location.reload();
+                        } else {
+                            alert("失败");
+                        }
+                    })
+                }
+                
+            })
+
+            //显示删除按钮
+            $("#fileList").on("mouseover", ".cp_img", function () {
+                $(this).children(".cp_img_jian").css('display', 'block');
+            });
+            //隐藏删除按钮
+            $("#fileList").on("mouseout", ".cp_img", function () {
+                $(this).children(".cp_img_jian").css('display', 'none');
+            });
+            //执行删除方法
+            $list.on("click", ".cp_img_jian", function () {
+                var Id = $(this).parent().attr("id");
+                console.log(uploader.getFile(Id, true));
+                uploader.removeFile(uploader.getFile(Id, true));
+                //PhotoUrlArray
+                $(this).parent().remove();
+                //如果文件小于三张则可以上传
+                if (uploader.getFiles('inited').length < 3) {
+                    $('.cp_img_jia').fadeIn(300);
+                }
+            });
+
+        });
+
+
+        function QTTest(e) {
+            //alert(1);
+            //alert($(e).find("span").text());
+            //alert($(e).find("span").attr("data-ProjectId"))
+            //alert($(e).find("span").attr("data-ProductId"))
+            //alert($(e).find("span").attr("data-AllocationId"))
+            if ($(e).find("span").text() == "未开始" || $(e).find("span").text() == "无" || $(e).find("span").text() == null || $(e).find("span").text() == "") {
+                alert("此工序暂时不能质检");
+                return false;
+            }
+            else {
+
+                //$("#ctlBtn").click(function () {
+                    //uploader.upload();
+                $("#motai1").val($(e).find("span").attr("data-ProjectId"));
+                $("#motai2").val($(e).find("span").attr("data-ProductId"));
+                $("#motai3").val($(e).find("span").attr("data-AllocationId"));
+                    //var ProductId = $(e).find("span").attr("data-ProductId");
+                    //var AllocationId = $(e).find("span").attr("data-AllocationId");
+                    //$.post("/QualityTest/AddQTTest", { ProjectId: ProjectId, ProductId: ProductId, AllocationId: AllocationId, PhotoUrlArray: PhotoUrlArray }, function (data) {
+
+                    //})
+                //})
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+
+  
+
+
+    </script>
+</body>
+</html>

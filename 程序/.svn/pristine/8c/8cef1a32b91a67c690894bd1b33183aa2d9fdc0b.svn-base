@@ -1,0 +1,481 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>工序管理</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/UI/bootstrap-paginator.min.js"></script>
+    <script src="~/Content/page/front-endPage.js"></script>
+    <script src="~/nfine/cololr/js.js"></script>
+    <link href="~/nfine/cololr/css.css" rel="stylesheet" />
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style type="text/css">
+        * {
+            margin: 0px;
+            /*padding: 0px;*/
+        }
+
+        .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .form-control {
+            margin-top: 2px;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .timetext, .seletext, #Select22, #Select33, #Select88, #Select8, #Select9 {
+            border-radius: 3px 4px;
+        }
+
+        .seletext, #Select22, #Select33, #Select8, #Select9 {
+            line-height: 26px;
+            height: 26px;
+        }
+
+        #divshow {
+            display: none;
+        }
+
+        th {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .ckstyle {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+
+</head>
+<body>
+    
+    <p>
+        <a class="btn btn-info Buttons" id="Producetianjia" data-toggle="modal" data-target="#AddProcess">
+            <img class="buttonicon" src="~/Content/Icon/添加图标.png">
+            添加
+        </a>
+        <a class="btn btn-danger Buttons" onclick="ProductionLineAllDele()" data-toggle="modal" data-target="#ProductionLineAllDelete">
+            <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+            批量删除
+        </a>
+    </p>
+    <div>
+        @if (ViewBag.pinfo == null)
+        {
+            <table class="table table-bordered table-hover table1">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+                    <th>编号</th>
+                    <th>区域名称</th>
+                    <th hidden="hidden">下一道工序选择</th>
+                    <th>工序</th>
+                    <th>操作</th>
+                </tr>
+            </table>
+        }
+        else
+        {
+            DataTable lp = ViewBag.pinfo;
+            <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+                    <th>编号</th>
+                    <th>区域名称</th>
+                    <th hidden="hidden">下一道工序选择</th>
+                     <th>工序</th>
+                    <th>操作</th>
+                </tr>
+                @for (int i = 0; i < lp.Rows.Count; i++)
+                {
+                    <tr class="tr1">
+                        <td><input type="checkbox" name="cks" class="ckstyle check" value="@lp.Rows[i]["ProcessId"]" /></td>
+                        <td>@lp.Rows[i]["XH"]</td>
+                        <td>@lp.Rows[i]["ProcessName"]</td>
+                        <td hidden="hidden">@lp.Rows[i]["NextProcessName"]</td>
+                        <td>@lp.Rows[i]["FieldsId"]</td>
+                        <td>
+                            <a onclick="GetUpdProcessInfo(@lp.Rows[i]["ProcessId"])" href="#" data-toggle="modal" data-target="#UpdProcess">编辑</a>
+                            <a onclick="DelProcess(@lp.Rows[i]["ProcessId"])" href="#" data-toggle="modal" data-target="#DelOneProcess">删除</a>
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+
+    @*添加*@
+    <div class="modal fade" id="AddProcess" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">添加状态操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;" id="addTable">
+
+
+                        <tr>
+                            <td>区域名称：</td>
+                            <td>
+                                <input id="add_ProcessName" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                        <tr hidden="hidden">
+                            <td>下一道工序选择：</td>
+                            <td>
+                                <select class="form-control" style="display:inline" id="add_NextProcessId">
+                                    @if (ViewBag.pinfo == null)
+                                    {
+                                        <option value="0">暂无其他工序</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="0">暂无</option>
+                                        DataTable lp = ViewBag.pinfo;
+                                        for (int i = 0; i < lp.Rows.Count; i++)
+                                        {
+                                            <option value="@lp.Rows[i]["ProcessId"]">@lp.Rows[i]["ProcessName"]</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>工序选择：</td>
+                            <td style="height:33px;">
+                                @if (ViewBag.pro != null)
+                                {
+                                    DataTable dt = ViewBag.pro;
+                                    <ul style="margin-top:10px;text-align:left;">
+                                        @for (int i = 0; i < dt.Rows.Count; i++)
+                                        {
+                                            <li style="width: 33.3%;float:left;list-style-type:none;margin-left: -30px;margin-right: 30px;"><input id="proID" type="checkbox" style="width:20px;height:20px;" name="teminals" value="@dt.Rows[i]["AllocationID"].ToString()">&nbsp;<span style="position:relative;bottom:5px;">@dt.Rows[i]["AllocationTitle"].ToString()</span></li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+
+                                }
+                            </td>
+
+                        </tr>
+
+
+
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-primary" id="btn_add_Process">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        添加
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*删除*@
+    <div class="modal fade" id="DelOneProcess" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除状态</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="Del_Sure btn btn-info">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*批量删除*@
+    <div class="modal fade" id="ProductionLineAllDelete" tabindex="-1" data-show="false" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除操作</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info chanpiliang Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*编辑*@
+    <div class="modal fade" id="UpdProcess" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">编辑工序</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr hidden="hidden">
+                            <td>工序Id：</td>
+                            <td>
+                                <input id="edit_ProcessId" readonly="readonly" style="background-color:#f6ebeb;" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>区域名称：</td>
+                            <td>
+                                <input id="edit_ProcessName" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                        <tr hidden="hidden">
+                            <td>下一道工序选择：</td>
+                            <td>
+                                <select class="form-control" style="display:inline" id="edit_NextProcessId">
+                                    @if (ViewBag.pinfo == null)
+                                    {
+                                        <option value="0">暂无其他工序</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="0">暂无</option>
+                                        DataTable lp = ViewBag.pinfo;
+                                        for (int i = 0; i < lp.Rows.Count; i++)
+                                        {
+                                            <option value="@lp.Rows[i]["ProcessId"]">@lp.Rows[i]["ProcessName"]</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>工序选择：</td>
+                            <td style="height:33px;">
+                                @if (ViewBag.pro != null)
+                                {
+                                    DataTable dt = ViewBag.pro;
+                                    <ul style="margin-top:10px;text-align:left;">
+                                        @for (int i = 0; i < dt.Rows.Count; i++)
+                                        {
+                                            <li style="width: 33.3%;float:left;list-style-type:none;margin-left: -30px;margin-right: 30px;"><input id="proID" type="checkbox" style="width:20px;height:20px;" name="editteminals" value="@dt.Rows[i]["AllocationID"].ToString()">&nbsp;<span style="position:relative;bottom:5px;">@dt.Rows[i]["AllocationTitle"].ToString()</span></li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+
+                                }
+                            </td>
+
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default aaa" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info" id="Edit_Process">
+                        <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //添加区域
+        $("#btn_add_Process").click(function () {
+            debugger;
+            var ProcessName = $("#add_ProcessName").val();
+            var NextProcessId = $("#add_NextProcessId").val();
+            var fieldsID = "";
+            elements = document.getElementsByName("teminals");
+            for (var i = 0; i < elements.length; i++) {
+                if (elements[i].checked) {
+                    fieldsID += "," + elements[i].value;
+                }
+            }
+            $.post("/ProcessSet/AddProcess", { ProcessName: ProcessName, NextProcessId: NextProcessId,FieldsID:fieldsID }, function (data) {
+                if (data == "ok") {
+                    document.location.reload();
+                }
+                 else {
+                    alert(data);
+                }
+            })
+        })
+
+        //删除区域状态
+        function DelProcess(ProcessId) {
+            debugger;
+            if (ProcessId == null || ProcessId == "") {
+                alert("ProcessId Is Null");
+            }
+            var cheValue = ProcessId + ",";
+            $(".Del_Sure").click(function () {
+                $.post("/ProcessSet/DelProcess", { ProcessId: cheValue }, function (data) {
+                    if (data == "ok") {
+                        //alert("删除成功！");
+                        document.location.reload();
+                    }
+                    else {
+                        alert("删除失败！");
+                    }
+                });
+            });
+        }
+
+        //多选删除
+        function ProductionLineAllDele() {
+            debugger;
+            var b = document.getElementsByName("cks");
+            //console.log(b);
+            var r = 0;
+            var cheValue = "";
+            for (var i = 0; i < b.length; i++) {
+                //alert("状态：" + b[i].checked);
+                if (b[i].checked == true) {
+                    cheValue += b[i].value + ",";
+                    //alert(b[i].value);
+                }
+                else {
+                    r++;
+                }
+            }
+            if (r == b.length) {
+                alert("请先选中要删除的数据");
+                $("#ProductionLineAllDelete").modal("hide");
+            } else {
+                $("#ProductionLineAllDelete").modal("show");
+                $(".chanpiliang").click(function () {
+                    $.post("/ProcessSet/DelProcess", { ProcessId: cheValue }, function (data) {
+                        if (data == "ok") {
+                            //alert("批量删除成功！");
+                            document.location.reload();
+                        }
+                        else {
+                            alert("批量删除失败！");
+                        }
+                    });
+                });
+
+            }
+        }
+
+        //获取需要需要编辑的信息
+        function GetUpdProcessInfo(ProcessId) {
+            //alert(StateId)
+            if (ProcessId == null || ProcessId == "") {
+                alert("ProcessId Is Null");
+            }
+            $.post("/ProcessSet/GetUpdProcessInfo", { PId: ProcessId }, function (data) {
+                //debugger;
+                var info = data.split(".");
+                $("#edit_ProcessId").val(info[0]);
+                $("#edit_ProcessName").val(info[1]);
+                $("#edit_NextProcessId option[value='" + ProcessId + "']").remove();
+                $("#edit_NextProcessId").val(info[2]);
+                //给多选框赋予选中的状态
+         
+                var strs = info[3].split(",");
+                var checkobj = document.getElementsByName("editteminals");
+                for (var i = 0; i < checkobj.length; i++) {
+                    for (var j = 0; j < strs.length; j++) {
+                        if (checkobj[i].value == strs[j]) {
+                            checkobj[i].checked = true;
+                            break;
+                        }
+                        else {
+                            checkobj[i].checked = false;
+                        }
+                    }
+                }
+            })
+        }
+
+        //编辑
+        $("#Edit_Process").click(function () {
+            var ProcessId = $("#edit_ProcessId").val();
+            var ProcessName = $("#edit_ProcessName").val();
+            var NextProcessId = $("#edit_NextProcessId").val();
+            var fieldsID = "";
+            elements = document.getElementsByName("editteminals");
+            for (var i = 0; i < elements.length; i++) {
+                if (elements[i].checked) {
+                    fieldsID += "," + elements[i].value;
+                }
+            }
+            $.post("/ProcessSet/EditProcess", { ProcessId: ProcessId, ProcessName: ProcessName, NextProcessId: NextProcessId, FieldsID: fieldsID }, function (data) {
+                if (data == "ok") {
+                    document.location.reload();
+                }
+                else if (data == "no") {
+                    alert("编辑失败");
+                    document.location.reload();
+                } else {
+                    alert(data);
+                }
+            })
+        })
+
+        $(".aaa").click(function () {
+            document.location.reload();
+        })
+
+
+        //全选
+        function GetAll() {
+            var che = document.getElementById("Checkbox3");
+            var ischeck = che.checked;
+            if (che.checked == ischeck) {
+                var a = document.getElementsByName("cks");
+                for (var i = 0; i < a.length; i++) {
+                    a[i].checked = ischeck;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

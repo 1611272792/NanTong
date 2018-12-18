@@ -1,0 +1,176 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem_WebApi.Models
+{
+    public class LineData
+    {
+        private int productionPlanID;
+        public int ProductionPlanID
+        {
+            get { return productionPlanID; }
+            set { productionPlanID = value; }
+        }
+
+        private string productionPlanName;
+        public string ProductionPlanName
+        {
+            get { return productionPlanName; }
+            set { productionPlanName = value; }
+        }
+
+        private string productionPlanVersion;
+        public string ProductionPlanVersion
+        {
+            get { return productionPlanVersion; }
+            set { productionPlanVersion = value; }
+        }
+
+        private string customer;
+        public string Customer
+        {
+            get { return customer; }
+            set { customer = value; }
+        }
+
+        private string projectNo;
+        public string ProjectNo
+        {
+            get { return projectNo; }
+            set { projectNo = value; }
+        }
+
+        private string planNum;
+        public string PlanNum
+        {
+            get { return planNum; }
+            set { planNum = value; }
+        }
+
+
+        private string realNum;
+        public string RealNum
+        {
+            get { return realNum; }
+            set { realNum = value; }
+        }
+
+        private string startTime;
+        public string StartTime
+        {
+            get { return startTime; }
+            set { startTime = value; }
+        }
+
+        private string endTime;
+        public string EndTime
+        {
+            get { return endTime; }
+            set { endTime = value; }
+        }
+
+        //private int state;
+        //public int State
+        //{
+        //    get { return state; }
+        //    set { state = value; }
+        //}
+
+        //private int processId;
+        //public int ProcessId
+        //{
+        //    get { return processId; }
+        //    set { processId = value; }
+        //}
+
+        //private string terminalID;
+        //public string TerminalID
+        //{
+        //    get { return terminalID; }
+        //    set { terminalID = value; }
+        //}
+
+        //private int issue;
+        //public int Issue
+        //{
+        //    get { return issue; }
+        //    set { issue = value; }
+        //}
+
+        //private int clear;
+        //public int Clear
+        //{
+        //    get { return clear; }
+        //    set { clear = value; }
+        //}
+
+        public string c1 { get; set; }
+        public string c2 { get; set; }
+        public string c3 { get; set; }
+        public string c4 { get; set; }
+        public string c5 { get; set; }
+        public string c6 { get; set; }
+        public string c7 { get; set; }
+        public string c8 { get; set; }
+        public string c9 { get; set; }
+        public string c10{ get; set; }
+        public string c11 { get; set; }
+        public string c12 { get; set; }
+        public string c13 { get; set; }
+        public string c14 { get; set; }
+        public string c15 { get; set; }
+        public string c16 { get; set; }
+        public string c17 { get; set; }
+        public string c18 { get; set; }
+        public string c19 { get; set; }
+        public string c20 { get; set; }
+        public string c21 { get; set; }
+        public string c22 { get; set; }
+        public string c23 { get; set; }
+        public string c24 { get; set; }
+        public string c25 { get; set; }
+        public string c26 { get; set; }
+        public string c27 { get; set; }
+        public string c28 { get; set; }
+        public string c29 { get; set; }
+        public string c30 { get; set; }
+        public string c31 { get; set; }
+        public string c32 { get; set; }
+        public string c33 { get; set; }
+        public string c34 { get; set; }
+        public string c35{ get; set; }
+        public string c36 { get; set; }
+        public string c37 { get; set; }
+        public string c38 { get; set; }
+        public string c39 { get; set; }
+        public string c40 { get; set; }
+        public string c41 { get; set; }
+        public string c42 { get; set; }
+        public string c43 { get; set; }
+        public string c44 { get; set; }
+        public string c45 { get; set; }
+        public string c46 { get; set; }
+        public string c47 { get; set; }
+        public string c48 { get; set; }
+        public string c49 { get; set; }
+        public string c50 { get; set; }
+
+
+
+    }
+
+    public class GetProductLineData : ActionResult
+    {
+        public int StateCode { get; set; }
+        public string ReaSon { get; set; }
+        public List<LineData> LineData { get; set; } = new List<LineData>();
+
+        public override void ExecuteResult(ControllerContext context)
+        {
+
+        }
+    }
+}

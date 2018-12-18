@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <TextView
+        android:textSize="18sp"
+        android:textColor="#fff"
+        android:id="@+id/fieldName_tv"
+        android:text="12321"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+        <Spinner
+            android:background="@drawable/et_bg"
+            android:entries="@array/state"
+            android:id="@+id/state_sp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+</LinearLayout>

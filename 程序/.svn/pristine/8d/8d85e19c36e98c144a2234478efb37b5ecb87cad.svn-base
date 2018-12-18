@@ -1,0 +1,392 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>通知发放管理</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/js/checkAlljs.js"></script>
+    <script src="~/nfine/cololr/js.js"></script>
+    <link href="~/nfine/cololr/css.css" rel="stylesheet" />
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style type="text/css">
+        .mouseovers {
+            border-color: #0094ff;
+        }
+         .form-control {
+        margin-top:2px;
+        }
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .hovers {
+            background-color: #b5b5b5;
+        }
+        .ckstyle {
+            width: 20px;
+            height: 20px;
+        }
+        #message,edit_inform{
+        resize:none;
+        
+        }
+        th {
+        text-align:center;
+        }
+       .thf {
+        font-size:18px;
+        text-align:center;
+        }
+    </style>
+</head>
+<body>
+    <div hidden="hidden" id="userGroup">@Session["Role"].ToString()</div>
+    <p id="updAllInfo">
+        <a class="btn btn-info Buttons" name="name" data-toggle="modal" data-target="#Edit_Modal_ALlocation">
+            <img class="buttonicon" src="~/Content/Icon/添加图标.png">
+            更新通知
+        </a>
+    </p>
+    <label>区域：</label>
+    <select id="select_PorcID" class="form-control" style="width:130px;display:inline" onchange="selectPorc()">
+        <option value="0" selected="selected">查看全部</option>
+        @if (ViewBag.dt != null)
+            {
+
+                DataTable dt = ViewBag.dt;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+
+                <option value="@dt.Rows[i]["ProcessId"].ToString()">@dt.Rows[i]["ProcessName"].ToString()</option>
+
+            }
+        }
+        else
+        {
+        }
+    </select>
+    @*根据区域更新*@
+    <div class="modal fade" id="Edit_Modal_ALlocation" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" style="color:white">通知信息</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr>
+                            <td>通知信息：</td>
+                            <td><textarea name="message" id="message" rows="3" cols="40" style="width:445px;"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td>字体大小(px)：</td>
+                            <td>
+                                <select name="fontsize" id="fontsize" class="form-control">
+                                    
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="25">25</option>
+                                    <option value="30">30</option>
+                                    <option value="35">35</option>
+                                    <option value="40">40</option>
+                                    <option value="45">45</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>选择颜色：</td>
+
+                            <td>
+                                <input type="text" id="colors" class="form-control demo" data-control="hue" value="#000000">
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td>选择区域：</td>   @*遍历工序，显示在网页上*@
+                            <td style="height:33px;">
+                               @if (ViewBag.dt != null)
+                               {
+                                   DataTable dt = ViewBag.dt;
+                                <select class="form-control" style="margin-right:20px;width:150px;display:inline;" id="add_Proc">
+                                    <option value="0">请选择</option>
+                                    @for (int j = 0; j < dt.Rows.Count; j++)
+                                    {
+                                        <option value="@dt.Rows[j]["ProcessId"]">@dt.Rows[j]["ProcessName"]</option>
+                                    }
+                                </select>
+
+                               }
+                               else
+                               {
+
+                               }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" id="btn" class="btn btn-info Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+        @*显示*@
+    <div id="showInfo">
+        <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+            <tr style="font-size:18px;vertical-align:middle">
+                @*<th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>*@
+                <th hidden="hidden">信息ID</th>
+                <th>终端名</th>
+                <th>通知信息</th>
+                <th>颜色</th>
+                <th>字体大小</th>
+                <th>发布人</th>
+                <th>发布时间</th>
+                <th>操作</th>
+            </tr>
+            @if (ViewBag.infoShow != null)
+            {
+                DataTable dt2 = ViewBag.infoShow;
+
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    <tr class="tr1">
+                       @* <td><input type="checkbox" name="cks" class="ckstyle check" value="@dt2.Rows[i]["InformID"]" /></td>*@
+                        <td hidden="hidden">@dt2.Rows[i]["InformID"]</td>
+                        <td>@dt2.Rows[i]["TerminalName"]</td>
+                        <td style="overflow:hidden;white-space:normal;text-overflow:ellipsis">@dt2.Rows[i]["Content"]</td>
+                        <td>
+                            <div style="background-color:@dt2.Rows[i]["Color"];width:70px;height:25px;margin:0px auto;"></div>
+                        </td>
+                        <td>@dt2.Rows[i]["Size"]</td>
+                        <td>@dt2.Rows[i]["UserName"]</td>
+                        <td>@dt2.Rows[i]["InformTime"]</td>
+
+                        <td>
+                            <a onclick="ProductionLineEdit(@dt2.Rows[i]["InformID"])" href="#" data-toggle="modal" data-target="#bianjiProduction">编辑</a>
+                            <a onclick="ProductionLineClean(@dt2.Rows[i]["InformID"])" href="#">清空</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    </div>
+        @*编辑*@
+        <div class="modal fade" id="bianjiProduction" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header modal-header-backgcolo">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" style="color:white">编辑通知信息操作</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table style="margin:0px auto;">
+                            <tr hidden="hidden">
+                                <td>信息ID：</td>
+                                <td>
+                                    <input id="edit_infromID" readonly="readonly" style="background-color:#f6ebeb;" class="form-control" type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>通知信息：</td>
+                                <td>
+                                    <textarea id="edit_inform" class="form-control" rows="3" cols="40" style="width:466px;"></textarea>
+                                </td>
+                            </tr>
+                            <tr hidden="hidden">
+                                <td>发布人：</td>
+                                <td>
+                                    <input id="edit_user" class="form-control" type="text" readonly="readonly" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>颜色：</td>
+                                <td><input type="text" id="edit_color" class="demo form-control" name="colors" data-control="hue"></td>
+                            </tr>
+                            <tr>
+                                <td>字体大小(px)：</td>
+                                <td>
+                                    @*<input class="form-control" id="edit_fontsize" type="text" />*@
+                                    <select name="fontsize" id="edit_fontsize" class="form-control">
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="25">25</option>
+                                        <option value="30">30</option>
+                                        <option value="35">35</option>
+                                        <option value="40">40</option>
+                                        <option value="45">45</option>
+                                        <option value="50">50</option>
+                                    </select> 
+                                </td>
+                            </tr>
+                            <tr hidden="hidden">
+                                <td>终端id：</td>
+                                <td style="height:33px;">
+                                <span id="eidt_terid"></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                            取消
+                        </button>
+                        <button type="button" class="btn btn-info" id="bianji_Production">
+                            <img class="buttonicon" src="~/Content/Icon/save.png">
+                            保存
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+   
+    <script>
+        $(function () {
+       
+            if ($("#userGroup").text()!= "管理员") {
+                $("#updAllInfo").hide();
+            }
+        })
+
+        //更新
+        $(function () {
+
+            $("#btn").click(function () {
+
+                var message = document.getElementById("message").value;
+                var fontsize = document.getElementById("fontsize").value;
+                var colors = document.getElementById("colors").value;
+                var ProID = $("#add_Proc").val();
+                var date = new Date();
+                var mon = date.getMonth() + 1;
+                var day = date.getDate();
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var seconds = date.getSeconds();
+                var nowDay = date.getFullYear() + "-" + (mon < 10 ? "0" + mon : mon) + "-" + (day < 10 ? "0" + day : day) + " " + (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+                if (ProID == "") {
+                    alert("保存失败，区域不能为空！");
+                }
+                else {
+                    $.post("/Inform/addInform", { proID: ProID, content: message, color: colors, size: fontsize, dataTime: nowDay }, function (data) {
+                        //alert(data);
+                        document.location.reload();
+                    })
+                }
+
+            })
+        })
+
+        //清空
+        function  ProductionLineClean(informID){
+            $.post("/Inform/CleanInfo",{ InformID: informID }, function (data) {
+                if (data=="清除成功") {
+                    alert(data);
+                    document.location.reload();
+                }else {
+                    alert(data);
+                }
+            
+            })
+        
+        }
+        //编辑,得到需要编辑的信息
+        function ProductionLineEdit(produid) {
+
+            $.post("/Inform/EditInformBySelect", { produID: produid }, function (data) {
+    
+                var info = data.split(".");
+                $("#edit_infromID").val(info[0]);
+                $("#edit_user").val(info[1]);
+                $("#eidt_terid").text(info[2]);
+                $("#edit_inform").val(info[3]);
+                document.getElementById("edit_color").style.backgroundColor = info[4];
+                $("#edit_color").val(info[4]);//.slice(1)
+                $("#edit_fontsize").val(info[5]);
+
+            })
+        }
+        $(function () {
+           
+                //编辑
+            $("#bianji_Production").click(function () {
+                //debugger;
+             
+                    if ($("#edit_terID").val() == "" || $("#edit_inform").val() == "" || $("#edit_color").val() == "" || $("#edit_fontsize").val() == "" || $("#edit_EndTime").val() == "") {
+                        alert("不能为空，请输入合适的值！");
+                    } else {
+                 
+                        var informTer = $("#eidt_terid").text();
+                        var infromID = $("#edit_infromID").val();
+                        var infoname = $("#edit_user").val();
+                        var informs = $("#edit_inform").val();
+                        var inforcolor = $("#edit_color").val();
+                        var infofont = $("#edit_fontsize").val();
+
+                        $.post("/Inform/EditProduceline", { TerID: informTer, informID: infromID, informName: infoname, inform: informs, color: inforcolor, fontsize: infofont}, function (data) {
+                            //alert(data);
+                            document.location.reload();
+                        })
+                    }
+                })
+            })
+
+            //颜色选择器
+            $(document).ready(function () {
+                $('.demo').each(function () {
+                    $(this).minicolors({
+                        control: $(this).attr('data-control') || 'hue',
+                        defaultValue: $(this).attr('data-defaultValue') || '',
+                        inline: $(this).attr('data-inline') === 'true',
+                        letterCase: $(this).attr('data-letterCase') || 'lowercase',
+                        opacity: $(this).attr('data-opacity'),
+                        position: $(this).attr('data-position') || 'bottom left',
+                        change: function (hex, opacity) {
+                            if (!hex)
+                                return;
+                            if (opacity)
+                                hex += ', ' + opacity;
+                            try {
+                                console.log(hex);
+                            } catch (e) {
+                            }
+                        },
+                        theme: 'bootstrap'
+                    });
+
+                });
+
+            });
+
+
+            //根据工序显示不同页面
+            function selectPorc() {
+                var PorcID = $("#select_PorcID").val();
+                $("#showInfo").load("/Inform/ShowInfo?procId=" + PorcID);
+            }
+    </script>
+</body>
+
+</html>

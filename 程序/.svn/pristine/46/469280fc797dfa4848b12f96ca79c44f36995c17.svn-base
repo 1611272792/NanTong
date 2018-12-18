@@ -1,0 +1,120 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using XP_PPS_DAL;
+using System.Data.SQLite;
+using System.Data;
+using ProductionPlanSystem.Help;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class LogoInfoController : BaseController
+    {
+        // GET: LogoInfo
+        public ActionResult Index()
+        {
+            //if (Session["UserId"] == null)
+            //{
+            //    return Content("<script>top.location = '/Login/Index';</script>");
+            //}
+            //else
+            //{
+                //DbType.Int32,4
+                string sql = "Select * from FirmInfo";
+                //DataTable sum = DALHelp.ExecuteDataTable(sql, null);
+                DataTable sum = ServerOrLit.isDataTable(LoginController.connType, sql);
+
+                if (sum.Rows?.Count > 0)
+                {
+                    Session["CompanyName"] = sum.Rows[0]["CompanyName"];
+                    Session["LogoUrl"] = sum.Rows[0]["LogoUrl"].ToString();
+                    Session["FirmInfoID"] = sum.Rows[0]["FirmInfoID"].ToString();
+                }
+                else
+                {
+                    //如果没有图片则给在数据库添加一个
+                    int id = 1;
+                    string url = "nopng.png";
+                    string cname = "讯鹏科技";
+                    string addsql = string.Format("insert into FirmInfo (FirmInfoID,LogoUrl,CompanyName) values ({0},'{1}','{2}')",id,url,cname);
+                    //int add = DALHelp.ExecuteNonQuery(addsql, null);
+                    int add = ServerOrLit.isNum(LoginController.connType, addsql);
+
+                    if (add > 0)
+                    {
+                        Session["CompanyName"] = cname;
+                        Session["LogoUrl"] = url;
+                        Session["FirmInfoID"] = id;
+                    }
+                    else
+                    {
+                        Session["CompanyName"] = null;
+                        Session["LogoUrl"] = null;
+                        Session["FirmInfoID"] = null;
+                    }
+                }
+                return View();
+            //}
+        }
+
+        [HttpPost]
+        public ActionResult Index(HttpPostedFileBase imgUrl, string CompanyName, string FirmInfoID)
+        {
+            string aa = "";
+            //if (imgUrl == null)
+            //{
+            //    aa = "selecct";
+            //}
+            //else             
+            if (imgUrl == null && CompanyName != null)//当图片路径为空公司名称不为空的时候只修改公司名称
+            {
+                string company = string.Format("update FirmInfo set CompanyName='{0}' where FirmInfoID='{1}'", CompanyName, FirmInfoID);
+                int dt = ServerOrLit.isNum(LoginController.connType, company);
+                //int dt = DALHelp.ExecuteNonQuery(company, null);
+                if (dt > 0)
+                {
+                    aa = "cok";
+                }
+                else
+                {
+                    aa = "cbuok";
+                }
+            }
+            else
+            {
+                string filename = imgUrl.FileName;
+                if (filename.LastIndexOf("\\") > -1)//
+                {
+                    filename = filename.Substring(filename.LastIndexOf("\\") + 1);
+                }
+                string[] a = filename.Split('.');
+                //BMP（位图）、JPG、JPEG、PNG、GIF
+                if (a[1] == "jpg" || a[1] == "gif" || a[1] == "png" || a[1] == "JPEG" || a[1] == "BMP")
+                { 
+                    imgUrl.SaveAs(Server.MapPath("~/Content/Images/") + filename);
+                    string filenames = "/Content/Images/" + filename;
+                    string photosql = string.Format("update FirmInfo set LogoUrl='{0}',CompanyName='{1}' where FirmInfoID='{2}'", filenames, CompanyName, FirmInfoID);
+                    //int info = DALHelp.ExecuteNonQuery(photosql, null);
+                    int info = ServerOrLit.isNum(LoginController.connType, photosql);
+
+                    if (info > 0)
+                    {
+                        aa = "ok";
+                    }
+                    else
+                    {
+                        aa = "no";
+                    }
+                }
+                else
+                {
+                    aa = "buok";
+                }
+            }
+            ViewBag.mess = aa;
+            return View();
+        }
+    }
+}

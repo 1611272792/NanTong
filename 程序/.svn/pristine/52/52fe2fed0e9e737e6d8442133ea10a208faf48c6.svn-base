@@ -1,0 +1,249 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using XP_PPS_DAL;
+using ProductionPlanSystem_WebApi.Models;
+using System.Web.Mvc;
+using System.IO;
+using System.Text;
+using System.Data;
+using ProductionPlanSystem.Help;
+using ProductionPlanSystem.Controllers;
+
+namespace ProductionPlanSystem_WebApi.Controllers
+{
+    public class GetProductLineDataController : ApiController
+    {
+        [System.Web.Mvc.HttpGet]
+        //接口3 获取产线数据
+        public ActionResult GetProductLineData(int ProductLineID, string AndroidID)
+        {
+            GetProductLineData gpl = new GetProductLineData();
+            try
+            {
+                string sqlld = string.Format("select * from ProductionPlan where TerminalID={0} and Issue=1 and Clear=0 and RealNum=0", ProductLineID);
+                //DataTable dt = DALHelp.ExecuteDataTable(sqlld, null);
+                DataTable dt = ServerOrLit.isDataTable(LoginController.connType, sqlld);
+                //WriteLog("dt" + dt.Rows.Count);
+                if (dt?.Rows.Count > 0)
+                {
+                    string macsql = string.Format("select Mac,Time from Terminal where TerminalID={0}", ProductLineID);
+                    //DataTable mac = DALHelp.ExecuteDataTable(macsql, null);
+                    DataTable mac = ServerOrLit.isDataTable(LoginController.connType, macsql);
+                    //如果Mac为空可以获取数据`
+                    if (mac != null)
+                    {
+                        if (mac.Rows[0]["Mac"].ToString() == "" || mac.Rows[0]["Mac"] == null)
+                        {
+                            string timenow = Convert.ToDateTime(DateTime.Now.ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                            string addmac = string.Format("update Terminal set Mac='{0}',Time='{1}' where TerminalID={2}", AndroidID, timenow, ProductLineID);
+                            //int add = DALHelp.ExecuteNonQuery(addmac, null);
+                            int add = ServerOrLit.isNum(LoginController.connType, addmac);
+                            if (add > 0)
+                            {
+                                gpl.StateCode = 100;
+                                gpl.ReaSon = "";
+                                gpl.State = GetListState(ProductLineID);
+                                for (int i = 0; i < dt.Rows.Count; i++)
+                                {
+                                    //如果结束时间不为空就按DateTIme格式化
+                                    if (dt.Rows[i]["EndTime"].ToString().Equals("") || dt.Rows[i]["EndTime"] == null)
+                                    {
+                                        //WriteLog("dt:" + dt.Rows[i]["EndTime"].ToString());
+                                        if (LoginController.connType == "sqlserver")
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = dt.Rows[i]["EndTime"].ToString(), State = int.Parse(dt.Rows[i]["State"].ToString()), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                        else
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = dt.Rows[i]["EndTime"].ToString(), State = (int)dt.Rows[i].Field<long>("State"), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (LoginController.connType == "sqlserver")
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = Convert.ToDateTime(dt.Rows[i]["EndTime"].ToString()).ToString("yyyy-MM-dd HH:mm:ss"), State = int.Parse(dt.Rows[i]["State"].ToString()), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                        else
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = Convert.ToDateTime(dt.Rows[i]["EndTime"].ToString()).ToString("yyyy-MM-dd HH:mm:ss"), State = (int)dt.Rows[i].Field<long>("State"), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                gpl.StateCode = 100;
+                                gpl.ReaSon = "没有获取到数据！！";
+                                gpl.LineData = new List<LineData>();
+                            }
+                        }
+                        else if (mac.Rows[0]["Mac"] != null && mac.Rows[0]["Mac"].ToString() != "")
+                        {
+                            //如果mac不为空但是mac相等时也可以获取
+                            if (mac.Rows[0]["Mac"].ToString() == AndroidID)
+                            {
+                                gpl.StateCode = 100;
+                                gpl.ReaSon = "";
+                                gpl.State = GetListState(ProductLineID);
+                                for (int i = 0; i < dt.Rows.Count; i++)
+                                {
+                                    //如果结束时间不为空就按DateTIme格式化
+                                    if (dt.Rows[i]["EndTime"].ToString().Equals("") || dt.Rows[i]["EndTime"] == null)
+                                    {
+                                        //WriteLog("dt:" + dt.Rows[i]["EndTime"].ToString());
+                                        if (LoginController.connType == "sqlserver")
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = dt.Rows[i]["EndTime"].ToString(), State = int.Parse(dt.Rows[i]["State"].ToString()), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                        else
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = dt.Rows[i]["EndTime"].ToString(), State = (int)dt.Rows[i].Field<long>("State"), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (LoginController.connType == "sqlserver")
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = Convert.ToDateTime(dt.Rows[i]["EndTime"].ToString()).ToString("yyyy-MM-dd HH:mm:ss"), State = int.Parse(dt.Rows[i]["State"].ToString()), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                        else
+                                        {
+                                            gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = Convert.ToDateTime(dt.Rows[i]["EndTime"].ToString()).ToString("yyyy-MM-dd HH:mm:ss"), State = (int)dt.Rows[i].Field<long>("State"), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                        }
+                                    }
+                                }
+                                string timenow = Convert.ToDateTime(DateTime.Now.ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                                string upmac = string.Format("update Terminal set Mac='{0}',Time='{1}' where TerminalID={2}", AndroidID, timenow, ProductLineID);
+                                int add = ServerOrLit.isNum(LoginController.connType, upmac);
+                            }
+                            //如果mac不相等但是间隔时间大于5分钟也可以获取
+                            else if (mac.Rows[0]["Mac"].ToString() != AndroidID)
+                            {
+                                DateTime accessTime;
+                                TimeSpan ts = TimeSpan.FromDays(1);
+                                if (DateTime.TryParse(mac.Rows[0]["Time"].ToString(), out accessTime))
+                                {
+                                    ts = DateTime.Now - accessTime;
+                                }
+                                if (ts.TotalMinutes > 5)
+                                {
+                                    gpl.StateCode = 100;
+                                    gpl.ReaSon = "";
+                                    gpl.State = GetListState(ProductLineID);
+                                    for (int i = 0; i < dt.Rows.Count; i++)
+                                    {
+                                        //如果结束时间不为空就按DateTIme格式化
+                                        if (dt.Rows[i]["EndTime"].ToString().Equals("") || dt.Rows[i]["EndTime"] == null)
+                                        {
+                                            //WriteLog("dt:" + dt.Rows[i]["EndTime"].ToString());
+                                            if (LoginController.connType == "sqlserver")
+                                            {
+                                                gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = dt.Rows[i]["EndTime"].ToString(), State = int.Parse(dt.Rows[i]["State"].ToString()), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                            }
+                                            else
+                                            {
+                                                gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = dt.Rows[i]["EndTime"].ToString(), State = (int)dt.Rows[i].Field<long>("State"), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (LoginController.connType == "sqlserver")
+                                            {
+                                                gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = Convert.ToDateTime(dt.Rows[i]["EndTime"].ToString()).ToString("yyyy-MM-dd HH:mm:ss"), State = int.Parse(dt.Rows[i]["State"].ToString()), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                            }
+                                            else
+                                            {
+                                                gpl.LineData.Add(new LineData() { ProductionPlanID = dt.Rows[i]["ProductionPlanID"].ToString(), ProductionPlanName = dt.Rows[i]["ProductionPlanName"].ToString(), ProductionPlanVersion = dt.Rows[i]["ProductionPlanVersion"].ToString(), PlanNum = dt.Rows[i]["PlanNum"].ToString(), RealNum = dt.Rows[i]["RealNum"].ToString(), StartTime = Convert.ToDateTime(dt.Rows[i]["StartTime"].ToString()).ToString("yyyy-MM-dd"), EndTime = Convert.ToDateTime(dt.Rows[i]["EndTime"].ToString()).ToString("yyyy-MM-dd HH:mm:ss"), State = (int)dt.Rows[i].Field<long>("State"), TerminalID = dt.Rows[i]["TerminalID"].ToString(), c1 = dt.Rows[i]["c1"].ToString(), c2 = dt.Rows[i]["c2"].ToString(), c3 = dt.Rows[i]["c3"].ToString(), c4 = dt.Rows[i]["c4"].ToString(), c5 = dt.Rows[i]["c5"].ToString(), c6 = dt.Rows[i]["c6"].ToString(), c7 = dt.Rows[i]["c7"].ToString(), c8 = dt.Rows[i]["c8"].ToString(), c9 = dt.Rows[i]["c9"].ToString(), c10 = dt.Rows[i]["c10"].ToString(), c11 = dt.Rows[i]["c11"].ToString(), c12 = dt.Rows[i]["c12"].ToString(), c13 = dt.Rows[i]["c13"].ToString(), c14 = dt.Rows[i]["c14"].ToString(), c15 = dt.Rows[i]["c15"].ToString(), c16 = dt.Rows[i]["c16"].ToString(), c17 = dt.Rows[i]["c17"].ToString(), c18 = dt.Rows[i]["c18"].ToString(), c19 = dt.Rows[i]["c19"].ToString(), c20 = dt.Rows[i]["c20"].ToString() });
+                                            }
+                                        }
+                                    }
+                                    string timenow = Convert.ToDateTime(DateTime.Now.ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                                    string upmac = string.Format("update Terminal set Mac='{0}',Time='{1}' where TerminalID={2}", AndroidID, timenow, ProductLineID);
+                                    int add = ServerOrLit.isNum(LoginController.connType, upmac);
+                                }
+                                else
+                                {
+                                    gpl.StateCode = 104;
+                                    gpl.ReaSon = "此产线已被占用！！";
+                                    gpl.LineData = new List<LineData>();
+                                }
+                            }
+                            else
+                            {
+                                gpl.StateCode = 104;
+                                gpl.ReaSon = "此产线已被占用！！";
+                                gpl.LineData = new List<LineData>();
+                            }
+                        }
+                        else
+                        {
+                            gpl.StateCode = 104;
+                            gpl.ReaSon = "此产线已被占用！！";
+                            gpl.LineData = new List<LineData>();
+                        }
+                    }
+                }
+                else
+                {
+                    gpl.StateCode = 100;
+                    gpl.ReaSon = "没有获取到数据！！";
+                    gpl.LineData = new List<LineData>();
+                }
+            }
+            catch (Exception ex)
+            {
+                gpl.StateCode = 104;
+                gpl.ReaSon = ex.Message;
+                gpl.LineData = new List<LineData>();
+            }
+            return gpl;
+        }
+
+        private void WriteLog(string strmsg)
+        {
+            strmsg = $"{strmsg}\r\n";
+            using (FileStream fs = File.Open("D:\\77.txt", FileMode.Append, FileAccess.Write, FileShare.Write))
+            {
+                byte[] bys = Encoding.Default.GetBytes(strmsg);
+                fs.Write(bys, 0, bys.Length);
+                fs.Close();
+            }
+        }
+
+        #region 通过终端Id获取对应的工序的状态
+        /// <summary>
+        /// 通过终端Id获取对应的工序的状态
+        /// </summary>
+        /// <param name="ProductLineID">终端Id</param>
+        /// <returns></returns>
+        public List<State> GetListState(int ProductLineID)
+        {
+            string statesql = string.Format($@"select * from dbo.[State] where ProcessId=(select ProcessId from Terminal where TerminalID={ProductLineID})");
+            DataTable stateinfo = ServerOrLit.isDataTable(LoginController.connType, statesql);
+            List<State> ls = new List<State>();
+            if (stateinfo?.Rows.Count > 0)
+            {
+                for (int i = 0; i < stateinfo?.Rows.Count; i++)
+                {
+                    State si = new State();
+                    si.StateId = int.Parse(stateinfo.Rows[i]["StateId"].ToString());
+                    si.StateName = stateinfo.Rows[i]["StateName"].ToString();
+                    si.StateColor = stateinfo.Rows[i]["StateColor"].ToString();
+                    ls.Add(si);
+                }
+                return ls;
+            }
+            else
+            {
+                ls = new List<State>();
+            }
+            return ls;
+        }
+        #endregion
+    }
+}

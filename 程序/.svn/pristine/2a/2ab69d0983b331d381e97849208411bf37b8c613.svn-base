@@ -1,0 +1,322 @@
+﻿@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<script src="~/Scripts/diepage.js"></script>
+
+
+@*显示*@
+<div id="dsidiv">
+    <table class="table table-bordered table-hover text-center table-striped" style="margin-top:10px">
+        <tr class="active">
+    @if (ViewBag.title != null)
+            {
+        <th class="thf" style="width:200px;"><input id="Checkbox3" onchange="GetAll()" class="ckstyle" type="checkbox" style="margin-left: 67px;" /><span style="display: block;float:right;margin-right: 30px;position:relative;right: 10px;">全选</span></th>
+                <th class="thf">序号</th>
+        DataTable dt2 = ViewBag.title;
+        for (int i = 1; i < dt2.Rows.Count; i++)
+        {
+            if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+            {
+                <th class="thf" hidden="hidden">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+            }
+            else
+            {
+                <th class="thf">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+            }
+
+        }
+        <th class="thf">操作</th>
+    }
+</tr>
+@if (ViewBag.producetion == null)
+            {
+            }
+            else
+            {
+                DataTable dt2 = ViewBag.title;
+                DataTable dt = ViewBag.producetion;
+    <tbody id="adminTbody">
+        @for (int i = 0; i < dt.Rows.Count; i++)
+        {
+            <tr>
+                <td><input type="checkbox" name="cks" class="ckstyle check" value="@dt.Rows[i]["ProductionPlanID"]" /></td>
+                <td><b style="color:red">@(i + 1)</b></td>
+                @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                {
+                    if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[ii]["AllocationName"].ToString() == "ProcessId")
+                    {
+                        <td hidden="hidden"></td>
+                    }
+                    else
+                    {
+
+                        if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @dt.Rows[i]["TerminalName"].ToString()
+                            </td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "Issue")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @if (dt.Rows[i]["Issue"].ToString() == "0")
+                                {
+                                    <span>未发放</span>
+                                }
+                                else if (dt.Rows[i]["Issue"].ToString() == "1")
+                                {
+                                    <span>已发放</span>
+                                }
+                                else
+                                {
+                                    <span>结束</span>
+                                }
+                            </td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "ProductionPlanID")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @dt.Rows[i]["ProductionPlanID"].ToString()
+                            </td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "ProductionPlanName")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @dt.Rows[i]["ProductionPlanName"].ToString()
+                            </td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "ProductionPlanVersion")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @dt.Rows[i]["ProductionPlanVersion"].ToString()
+                            </td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "PlanNum")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @dt.Rows[i]["PlanNum"].ToString()
+                            </td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "c50")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @dt.Rows[i]["c50"].ToString()
+                            </td>
+                        }
+                        else
+                        {
+
+                            if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "1")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]" @*onclick="QTTest(this)" data-toggle="modal" data-target="#AddQTTest"*@>
+                                    <span style="color:blue" data-PlanId="@dt.Rows[i]["ProductionPlanID"]" data-ProSize="@dt.Rows[i]["pdd"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">未开始</span>
+                                </td>
+                            }
+                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "2")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]" onclick="QTTest(this)" onmouseover="this.style.cursor = 'pointer'" data-toggle="modal" data-target="#AddQTTest">
+                                    <span style="color:red" data-PlanId="@dt.Rows[i]["ProductionPlanID"]"  data-ProSize="@dt.Rows[i]["pdd"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">进行中</span>
+                                </td>
+                            }
+                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "3")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]" onclick="QTTest(this)" onmouseover="this.style.cursor = 'pointer'" data-toggle="modal" data-target="#AddQTTest">
+                                    <span style="color:lightgreen" data-PlanId="@dt.Rows[i]["ProductionPlanID"]"  data-ProSize="@dt.Rows[i]["pdd"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">已完成</span>
+                                </td>
+                            }
+                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "0")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]" @*onclick="QTTest(this)" data-toggle="modal" data-target="#AddQTTest"*@>
+                                    <span style="color:gray" data-PlanId="@dt.Rows[i]["ProductionPlanID"]"  data-ProSize="@dt.Rows[i]["pdd"]" data-ProjectId="@dt.Rows[i]["ProductionPlanNameId"]" data-ProductId="@dt.Rows[i]["ProductionPlanVersionId"]" data-AllocationId="@dt2.Rows[ii]["AllocationID"]">--</span>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()
+                                </td>
+                            }
+
+                        }
+
+                    }
+                }
+                 
+
+                <td>
+                    <a onclick="ProductionLineIssue(@dt.Rows[i]["ProductionPlanID"])" href="#">发放</a>
+                    <a onclick="ProductionLineEdit(@dt.Rows[i]["ProductionPlanID"])" href="#" data-toggle="modal" data-target="#bianjiProduction">编辑</a>
+                    <a onclick="ProductionLineDelete(@dt.Rows[i]["ProductionPlanID"])" href="#" data-toggle="modal" data-target="#ProductionLineshanchu">删除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+}
+
+        <tr>
+            @if (ViewBag.producetion != null)
+            {
+                DataTable dt2 = ViewBag.title;
+                int nums = dt2.Rows.Count + 2;
+                <td colspan="@nums">
+                    <div id="barcon" class="barcon">
+                        <input type="hidden" id="yeNums" value="@ViewBag.nowPage" />
+                        <div id="barcon1" class="barcon1"></div>
+                        <div id="barcon2" class="barcon2">
+                            <ul>
+                                <li><a href="###" id="firstPage">首页</a></li>
+                                <li><a href="###" id="prePage">上一页</a></li>
+                                <li><a href="###" id="nextPage">下一页</a></li>
+                                <li><a href="###" id="lastPage">尾页</a></li>
+                                <li>
+                                    <select id="jumpWhere"></select>
+                                </li>
+                                <li><a href="###" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            }
+            else
+            {
+                DataTable dt2 = ViewBag.title;
+                int nums = dt2.Rows.Count + 2;
+                <td colspan="@nums">
+                    <div id="barcon" class="barcon">
+                        <input type="hidden" id="yeNums" value="@ViewBag.nowPage" />
+                        <div id="barcon1" class="barcon1"></div>
+                        <div id="barcon2" class="barcon2">
+                            <ul>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="firstPage">首页</a></li>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="prePage">上一页</a></li>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="nextPage">下一页</a></li>
+                                <li><a href="javascript:return false;" style="opacity: 0.5" id="lastPage">尾页</a></li>
+                                <li>
+                                    <select id="jumpWhere" disabled="disabled"></select>
+                                </li>
+                                <li><a href="javascript:return false;" style="opacity: 0.2" id="jumpPage" onclick="jumpPage()">跳转</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+
+            }
+        </tr>
+    </table>
+
+ 
+</div>
+
+
+
+
+
+
+
+<script>
+    //分页
+    /*动态生成用户函数
+    num为生成的用户数量
+    */
+    function dynamicAddUser(num) {
+    }
+    $(function () {
+        dynamicAddUser(80);
+        var nowPages =@Session["aa"].ToString();
+        goPage(nowPages, 10);
+        var tempOption = "";
+        for (var i = 1; i <= totalPage; i++) {
+            tempOption += '<option value=' + i + '>' + i + '</option>'
+        }
+        $("#jumpWhere").html(tempOption);
+    })
+
+    /**
+     * 分页函数
+     * pno--页数
+     * psize--每页显示记录数
+     * 分页部分是从真实数据行开始，因而存在加减某个常数，以确定真正的记录数
+     * 纯js分页实质是数据行全部加载，通过是否显示属性完成分页功能
+    **/
+
+    var pageSize = 0;//每页显示行数
+    var currentPage_ = 1;//当前页全局变量，用于跳转时判断是否在相同页，在就不跳，否则跳转。
+    var totalPage;//总页数
+    function goPage(pno, psize) {
+        //debugger;
+        var itable = document.getElementById("adminTbody");
+        //console.log("itable:"+itable);
+
+        if (itable == null) {
+            var tempStr = "共<span style='color:red;'>0</span>条记录 分<span style='color:red;'>0</span>页 当前第<span style='color:red;'>1</span>页";
+
+            document.getElementById("barcon1").innerHTML = tempStr;
+        } else {
+            var num = itable.rows.length;//表格所有行数(所有记录数)
+
+            pageSize = psize;//每页显示行数
+            //总共分几页
+            if (num / pageSize > parseInt(num / pageSize)) {
+                totalPage = parseInt(num / pageSize) + 1;
+            } else {
+                totalPage = parseInt(num / pageSize);
+            }
+            var currentPage = pno;//当前页数
+            currentPage_ = currentPage;
+            var startRow = (currentPage - 1) * pageSize + 1;
+            var endRow = currentPage * pageSize;
+            endRow = (endRow > num) ? num : endRow;
+            //遍历显示数据实现分页
+            /*for(var i=1;i<(num+1);i++){
+                var irow = itable.rows[i-1];
+                if(i>=startRow && i<=endRow){
+                    irow.style.display = "";
+                }else{
+                    irow.style.display = "none";
+                }
+            }*/
+
+            $("#adminTbody tr").hide();
+            for (var i = startRow - 1; i < endRow; i++) {
+                $("#adminTbody tr").eq(i).show();
+            }
+
+            var tempStr = "共<span style='color:red;'>" + num + "</span>条记录 分<span style='color:red;'>" + totalPage + "</span>页 当前第<span style='color:red;'>" + currentPage + "</span>页";
+            document.getElementById("barcon1").innerHTML = tempStr;
+            //document.getElementById("yeNums").value="2";
+            $("#yeNums").val(currentPage);
+            var y = $("#yeNums").val();
+
+            if (currentPage > 1) {
+                $("#firstPage").on("click", function () {
+                    goPage(1, psize);
+                }).removeClass("ban");
+                $("#prePage").on("click", function () {
+                    goPage(currentPage - 1, psize);
+                }).removeClass("ban");
+            } else {
+                $("#firstPage").off("click").addClass("ban");
+                $("#prePage").off("click").addClass("ban");
+            }
+
+            if (currentPage < totalPage) {
+                $("#nextPage").on("click", function () {
+                    goPage(currentPage + 1, psize);
+                }).removeClass("ban")
+                $("#lastPage").on("click", function () {
+                    goPage(totalPage, psize);
+                }).removeClass("ban")
+            } else {
+                $("#nextPage").off("click").addClass("ban");
+                $("#lastPage").off("click").addClass("ban");
+            }
+
+            $("#jumpWhere").val(currentPage);
+        }
+    }
+    function jumpPage() {
+        var num = parseInt($("#jumpWhere").val());
+        if (num != currentPage_) {
+            goPage(num, pageSize);
+        }
+    }
+</script>

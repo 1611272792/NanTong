@@ -1,0 +1,176 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>字段列宽设置</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/UI/bootstrap-paginator.min.js"></script>
+    <script src="~/Content/page/front-endPage.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    @*<link href="~/Content/page/table.css" rel="stylesheet" />*@
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .Buttons {
+            border-radius: 3px 4px;
+            background-color: #227dda;
+            border: 1px solid #227dda;
+            color: white;
+        }
+
+        .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .timetext, .seletext, #Select22, #Select33, #Select88, #Select8, #Select9 {
+            border-radius: 3px 4px;
+        }
+
+        .seletext, #Select22, #Select33, #Select8, #Select9 {
+            line-height: 26px;
+            height: 26px;
+        }
+
+        #divshow {
+            display: none;
+        }
+
+        th {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+
+</head>
+<body>
+    <div>
+        @if (ViewBag.fieldinfo != null)
+        {
+            DataTable dt = ViewBag.fieldinfo;
+            <table class="table table-bordered table-striped text-center table-hover table1" style="width:100%;margin-top:10px;">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th>列名</th>
+                    <th>列宽(%)</th>
+                    <th>操作</th>
+                </tr>
+
+
+                @for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (int.Parse(dt.Rows[i]["AllocationID"].ToString()) == 1)
+                    {
+
+                    }
+                    else
+                    {
+                        <tr class="tr1">
+                            <td>@dt.Rows[i]["AllocationTitle"]</td>
+                            <td>@dt.Rows[i]["FieldWidth"]</td>
+                            <td>
+                                <a class="btn_Edit_ALlocation" style="cursor:pointer;" data-toggle="modal" data-target="#Edit_Modal_ALlocation">编辑</a>
+                                <input type="hidden" value="@dt.Rows[i]["AllocationID"].ToString()" class="allocationid" />
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+
+        }
+        else
+        {
+            <table class="table table-bordered table-hover table1">
+                <tr class="tr1">
+                    <th>列名</th>
+                    <th>列宽比例(%)</th>
+                </tr>
+            </table>
+        }
+    </div>
+
+    @*编辑模态窗体*@
+    <div class="modal fade" id="Edit_Modal_ALlocation" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" style="color:white;">编辑列宽</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr hidden="hidden">
+                            <td>字段id：</td>
+                            <td><input type="text" class="form-control" id="allocationid" hidden="hidden" /></td>
+                        </tr>
+                        <tr>
+                            <td>列宽比例(%)：</td>
+                            <td>
+                                <input type="text" class="form-control" id="fieldwidth" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn_Edit_ok">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        保存
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    <script>
+        //得到需要编辑的内容
+        $(".btn_Edit_ALlocation").click(function () {
+            var allocationid = $(this).parent("td").children(".allocationid").val();
+            $.post("/FieldWidthSet/AllocationEditBySelect", { allocationid: allocationid }, function (data) {
+                if (data == "no") {
+                    alert("操作错误");
+                }
+                else {
+                    var info = data.split(",");
+                    $("#allocationid").val(info[0]);
+                    $("#fieldwidth").val(info[1]);
+                }
+            })
+        })
+
+        //编辑
+        $("#btn_Edit_ok").click(function () {
+            //通过用户的id进行修改，管理员只能修改用户的组
+            //id
+            var aid = $("#allocationid").val();
+            var fieldwidth = $("#fieldwidth").val();
+            //alert(fieldwidth)
+            $.post("/FieldWidthSet/AllocationEdit", { aid: aid, fieldwidth: fieldwidth }, function (data) {
+                if (data == "修改成功") {
+                    document.location.reload();
+                }
+                else {
+                    alert(data);
+                }
+            })
+        })
+    </script>
+</body>
+</html>

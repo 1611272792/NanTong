@@ -1,0 +1,777 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width" />
+    <title>生产监控</title>
+    <link href="~/Content/bootstrap-datetimepicker-master/sample in bootstrap v3/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <script src="~/Content/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link href="~/Content/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+             table tr td {
+             max-width:200px;
+     word-break:break-all;
+     word-wrap:break-word;
+        }
+        .ckstyle {
+            width: 20px;
+            height: 20px;
+        }
+
+        .form-control {
+            margin-top: 2px;
+        }
+        /*.Buttons {
+            border-radius: 3px 4px;
+            background-color: #227dda;
+            border: 1px solid #227dda;
+            color: white;
+        }*/
+        th {
+            text-align: center;
+        }
+
+        .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .hovers {
+            background-color: #b5b5b5;
+        }
+
+        #select_TerminalID {
+            width: 100px;
+        }
+         .thf {
+        font-size:18px;
+        
+        }   
+    
+    </style>
+  
+</head>
+<body>
+   
+    <div>
+        @if (ViewBag.pinfo == null)
+        {
+            <label>区域：</label>
+            <select  style="margin-right:20px;width:150px;display:inline;" class="form-control">
+                <option value="0">请选择</option>
+            </select>
+        }
+        else
+        {
+            DataTable lp = ViewBag.pinfo;
+            <label>区域：</label>
+            <select class="form-control" style="margin-right:20px;width:150px;display:inline;" id="Select_ProcessId" onchange="GetTerminalInfo(0)">
+                <option value="0">请选择</option>
+                @for (int i = 0; i < lp.Rows.Count; i++)
+                {
+                    <option value="@lp.Rows[i]["ProcessId"]">@lp.Rows[i]["ProcessName"]</option>
+                }
+            </select>
+
+
+        }
+        @*终端*@
+        @ViewBag.TerName：
+        <select id="select_TerminalID" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            <option value="0" selected="selected">查看全部</option>
+        </select>
+        <label>终端：</label>
+        @*<select id="Select88" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            <option value="0">请选择</option>
+        </select>*@
+
+        @*<span><span>@ViewBag.TerName</span>选择</span>
+        <select id="select_TerminalID" class="form-control" style="width:130px;display:inline">
+            <option value="0" selected="selected">查看全部</option>
+            @if (ViewBag.dt != null)
+            {
+
+                DataTable dt = ViewBag.dt;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+
+                    <option value="@dt.Rows[i]["TerminalID"].ToString()">@dt.Rows[i]["TerminalName"].ToString()</option>
+
+                }
+            }
+            else
+            {
+            }
+        </select>*@
+      
+        <a class="btn btn-primary Buttons" href="javascript:void(0);" onclick="MonAllFinish()" style="display:inline">
+            <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+            批量清空
+        </a>
+        @*显示*@
+        <div id="StateDivss">
+            <table class="table table-bordered table-hover text-center table-striped" style="margin-top:5px;">
+                <tr class="active">
+                    @if (ViewBag.title != null || ViewBag.title != "")
+                    {
+                        <th class="thf" style="width:200px;"><input id="Checkbox3" onchange="GetAll();" class="ckstyle" type="checkbox" style="margin-left: 67px;" /><span style="display: block;float:right;margin-right: 30px;position:relative;right: 10px;">全选</span></th>
+
+
+                        DataTable dt2 = ViewBag.title;
+                        for (int i = 1; i < dt2.Rows.Count; i++)
+                        {
+                            if (dt2.Rows[i]["AllocationName"].ToString() == "Issue")
+                            {
+
+                            }
+                            else
+                            {
+                                if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                                {
+                                    <th class="thf" hidden="hidden">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                                }
+                                else
+                                {
+                                    <th class="thf">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                                }
+                            }
+
+                        }
+                        <th class="thf" hidden="hidden" >操作</th>
+                    }
+                </tr>
+                @if (ViewBag.producetion == null)
+                {
+                }
+                else
+                {
+                    DataTable dt2 = ViewBag.title;
+                    DataTable dt = ViewBag.producetion;
+
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+
+                        <tr>
+                            <td><input type="checkbox" name="cks" class="ckstyle check" onchange="isChecked()" value="@dt.Rows[i]["ProductionPlanID"]" /></td>
+                            @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                            {
+                                if (dt2.Rows[ii]["AllocationName"].ToString() == "Issue" || dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[ii]["AllocationName"].ToString() == "ProcessId")
+                                {
+
+                                }
+                                else
+                                {
+
+                                    <td>
+                                        @if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID")
+                                        {
+                                            @dt.Rows[i]["TerminalName"].ToString()
+                                        }
+                                        @*else if (dt2.Rows[ii]["AllocationName"].ToString() == "State")
+                                            {
+                                                if (@dt.Rows[i]["State"].ToString() == "0")
+                                                {
+                                                    <span>未完成</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>已完成</span>
+                                                }
+                                            }*@
+                                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "StartTime")
+                                        {
+
+                                            @dt.Rows[i]["StartTime"].ToString();
+                                        }
+                                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "c50")
+                                        {
+                                        
+                                            @dt.Rows[i]["c50"].ToString()
+                                      
+                                        }
+                                        else
+                                        {
+                                            if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "1")
+                                            {
+                                                <span style="color:blue">未开始</span>
+                                            }
+                                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "2")
+                                            {
+                                                <span style="color:red">进行中</span>
+                                            }
+                                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "3")
+                                            {
+                                                <span style="color:lightgreen">已完成</span>
+                                            }
+                                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "0")
+                                            {
+                                                <span style="color:gray">无</span>
+                                            }
+                                            else
+                                            {
+                                                @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString();
+                                            }
+
+                                        }
+                                    </td>
+                                }
+
+                            }
+
+                            <td hidden="hidden">
+                                <a onclick="ProductionLineEdit(@dt.Rows[i]["ProductionPlanID"])" href="#" id="aa" data-toggle="modal" data-target="#bianjiProduction" >编辑</a>
+
+                            </td>
+                        </tr>
+
+
+                    }
+
+
+
+                }
+
+            </table>
+        </div>
+
+
+        @*编辑*@
+        <div class="modal fade" id="bianjiProduction" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header modal-header-backgcolo">
+                        <button type="button" class="close" data-dismiss="modal" onclick="quxiao()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" style="color:white">编辑操作</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table style="margin:0px auto;" id="editTable">
+                            @if (ViewBag.title != null || ViewBag.title != "")
+                            {
+                                DataTable dt2 = ViewBag.title;
+                                for (int i = 0; i < dt2.Rows.Count; i++)
+                                {
+                                    if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanID")
+                                    {
+                                        <tr hidden="hidden">
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <input id="edit_ProductionPlanID"   style="background-color:#f6ebeb;" class="form-control" type="text" hidden="hidden" />
+                                            </td>
+                                        </tr>
+                                    }
+                                    else if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanName")
+                                    {
+                                        <tr>
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <input id="edit_ProductionPlanName" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />
+                                            </td>
+                                        </tr>
+                                    }
+                                    else if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanVersion")
+                                    {
+                                        <tr>
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <input id="edit_ProductionPlanVersion" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />
+                                            </td>
+                                        </tr>
+                                    }
+                                    else if (dt2.Rows[i]["AllocationName"].ToString() == "PlanNum")
+                                    {
+                                        <tr>
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <input id="edit_PlanNum" class="form-control" type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+
+                                            </td>
+                                        </tr>
+                                    }
+                                    else if (dt2.Rows[i]["AllocationName"].ToString() == "RealNum")
+                                    {
+                                        <tr>
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <input id="edit_RealNum" class="form-control" type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+
+                                            </td>
+                                        </tr>
+                                    }
+                                    else if (dt2.Rows[i]["AllocationName"].ToString() == "StartTime")
+                                    {
+                                        <tr hidden="hidden">
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <input class="form-control" id="edit_StartTime" type="text" />
+
+                                            </td>
+                                        </tr>
+                                    }
+                                    else if (dt2.Rows[i]["AllocationName"].ToString() == "EndTime")
+                                    {
+                                        <tr hidden="hidden">
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <input class="form-control" id="edit_EndTime" type="text" />
+
+                                            </td>
+                                        </tr>
+                                    }
+                                    @*else if (dt2.Rows[i]["AllocationName"].ToString() == "State")
+                                    {
+                                        <tr>
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <select id="edit_State" class="form-control">
+                                                    <option value="1">已完成</option>
+                                                    <option value="0" selected="selected">未完成</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID")
+                                    {
+                                        <tr>
+                                            <td>
+                                                @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                            </td>
+                                            <td>
+                                                <select id="edit_TerminalID" class="form-control">
+                                                    @if (ViewBag.dt != null)
+                                                    {
+                                                        DataTable dt = ViewBag.dt;
+                                                        for (int j = 0; j < dt.Rows.Count; j++)
+                                                        {
+                                                            <option value="@dt.Rows[j]["TerminalID"].ToString()">@dt.Rows[j]["TerminalName"].ToString()</option>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <option>暂无 @dt2.Rows[i]["AllocationTitle"].ToString()</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    }*@
+                            else if (dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                            {
+                                <tr>
+                                    <td>
+                                        @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                    </td>
+                                    <td>
+                                        @if (ViewBag.pinfo == null)
+                                        {
+                                            <select>
+                                                <option value="0">请选择</option>
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            DataTable lp = ViewBag.pinfo;
+
+                                            <select class="form-control" style="margin-right:20px;width:100%;display:inline;" id="edit_ProcessId" disabled="disabled">
+                                                <option value="0">请选择</option>
+                                                @for (int j = 0; j < lp.Rows.Count; j++)
+                                                {
+                                                    <option value="@lp.Rows[j]["ProcessId"]">@lp.Rows[j]["ProcessName"]</option>
+                                                }
+                                            </select>
+
+
+                                        }
+
+
+                                    </td>
+                                </tr>
+                            }
+                            else if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID")
+                            {
+                                <tr>
+                                    <td>
+                                        @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                    </td>
+                                    <td>
+                                        <select id="edit_TerminalID" style="margin-right:20px;width:100%;display:inline;" class="form-control">
+                                            <option value="0">请选择</option>
+                                        </select>
+
+                                    </td>
+                                </tr>
+                            }
+                            else if (dt2.Rows[i]["AllocationName"].ToString() == "State")
+                            {
+                                <tr>
+                                    <td>
+                                        @dt2.Rows[i]["AllocationTitle"].ToString()：
+                                    </td>
+                                    <td>
+                                        <select id="edit_State" style="margin-right:20px;width:100%;display:inline;" class="form-control" onchange="JudgeSerial()">
+                                            <option value="0">请选择</option>
+                                        </select>
+
+                                    </td>
+                                </tr>
+                            }
+                            for (int z = 1; z <= 20; z++)
+                            {
+                                if (dt2.Rows[i]["AllocationName"].ToString() == "c" + z)
+                                {
+                                            <tr>
+                                                <td>@dt2.Rows[i]["AllocationTitle"].ToString()：</td>
+                                                <td><input id="@dt2.Rows[i]["AllocationName"]" class="form-control" tag="@dt2.Rows[i]["AllocationName"].ToString()" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" /></td>
+                                            </tr>
+
+                                        }
+                                    }
+                                }
+                            }
+                        </table>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" onclick="quxiao()" data-dismiss="modal">
+                            <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                            取消
+                        </button>
+                        <button type="button" class="btn btn-info" id="bianji_Production" data-dismiss="modal">
+                            <img class="buttonicon" src="~/Content/Icon/save.png">
+                            保存
+                        </button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal -->
+        </div>
+
+    </div>
+    <script>
+        //通过工序查出终端
+        function GetTerminalInfo(num) {
+            if (num == 0) {
+                var ProcessId = $("#Select_ProcessId").val();
+            } else if (num == 1) {
+                var ProcessId = $("#add_ProcessId").val();
+            } else if (num == 2) {
+                var ProcessId = $("#edit_ProcessId").val();
+            } else if (num == 3) {
+                var ProcessId = $("#Nextedit_ProcessId").val();
+            }
+
+            //alert(ProcessId);
+            $.ajaxSettings.async = false;
+            $.post("/Report/GetProcessTerminal", { ProcessId: ProcessId }, function (data) {
+
+                var str = '';
+                if (data != "" && data != null) {
+                    var json = eval('(' + data + ')');
+                    for (var o in json) {
+                        str += '<option value="' + json[o].TerminalID + '">' + json[o].TerminalName + '</option>';
+                    }
+                    if (num == 0) {
+                        $("#select_TerminalID").find("option").remove();
+                        $("#select_TerminalID").append(str);
+                    } else if (num == 1) {
+                        $("#add_TerminalID").find("option").remove();
+                        $("#add_TerminalID").append(str);
+                    } else if (num == 2) {
+                        $("#edit_TerminalID").find("option").remove();
+                        $("#edit_TerminalID").append(str);
+                    } else if (num == 3) {
+                        $("#Nextedit_TerminalID").find("option").remove();
+                        $("#Nextedit_TerminalID").append(str);
+                    }
+
+                }
+                else {
+                    if (num == 0) {
+                        str = '<option value="0">暂无终端</option>';
+                        $("#select_TerminalID").find("option").remove();
+                        $("#select_TerminalID").append(str);
+                    } else if (num == 1) {
+                        str = '<option value="">暂无终端</option>';
+                        $("#add_TerminalID").find("option").remove();
+                        $("#add_TerminalID").append(str);
+                    }
+                    else if (num == 2) {
+                        str = '<option value="">暂无终端</option>';
+                        $("#edit_TerminalID").find("option").remove();
+                        $("#edit_TerminalID").append(str);
+                    }
+                    else if (num == 3) {
+                        str = '<option value="">暂无终端</option>';
+                        $("#Nextedit_TerminalID").find("option").remove();
+                        $("#Nextedit_TerminalID").append(str);
+                    }
+
+                }
+            })
+            $.ajaxSettings.async = true;
+        }
+
+
+        var timeUpdate = 1000;//定时刷新也面频率
+        //文本框取消清空
+        $(".btn-default").click(function () {
+            //编辑
+            $("#edit_ProductionPlanName,#edit_ProductionPlanVersion,#edit_PlanNum,#edit_RealNum,#edit_StartTime,#edit_EndTime").val("");
+        })
+
+        //开始时间控件
+        $("#edit_StartTime").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+        //结束时间控件
+        $("#edit_EndTime").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+
+
+        $(function () {
+            //编辑
+        
+            $("#bianji_Production").click(function () {
+               
+                if ($("#edit_ProductionPlanName").val() == "" || $("#edit_ProductionPlanVersion").val() == "" || $("#edit_PlanNum").val() == "") {
+                    alert("不能为空，请输入合适的值！");
+                }else if ($("#Nextedit_ProcessId").val() != "" && $("#Nextedit_TerminalID").val() == "") {
+                    alert("下一道工序缺少终端，请添加！");
+                }
+                else if ($("#Nextedit_ProcessId").val() != "" && $("#Nextedit_State").val() == "") {
+                    alert("下一道工序缺少状态，请添加！");
+                } else {
+                    var produname = $("#edit_ProductionPlanName").val();
+                    var produver = $("#edit_ProductionPlanVersion").val();
+                    var produnum = $("#edit_PlanNum").val();
+                    var produrea = $("#edit_RealNum").val();
+                    var produstart = $("#edit_StartTime").val();
+
+                    //获取当前时间
+                    var date = new Date();
+                    var mon = date.getMonth() + 1;
+                    var day = date.getDate();
+                    var hours = date.getHours();
+                    var minutes = date.getMinutes();
+                    var seconds = date.getSeconds();
+                    var nowDay = date.getFullYear() + "-" + (mon < 10 ? "0" + mon : mon) + "-" + (day < 10 ? "0" + day : day) + " " + (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+
+                    var produend = "";
+                    var produstate = $("#edit_State").val();
+                    if (produstate == "0") {
+                        var produend = "";
+                    } else {
+                        produend = nowDay;
+                    }
+                    var produter = $("#edit_TerminalID").val();
+                    var processId = $("#edit_ProcessId").val()
+                    var produid = $("#edit_ProductionPlanID").val();
+
+                    var NextProcessId = $("#Nextedit_ProcessId").val();
+                    var NextTerminalId = $("#Nextedit_TerminalID").val();
+                    var NextStateId = $("#Nextedit_State").val();
+                    var i = $("#editTable").find("tr").length;//计算tr的数量
+                    var sumC = "";   //所有c字段的内容
+                    if (i > 9) {
+                        for (var j = 1; j <= i-9; j++) {
+                            sumC = sumC + "," + $("#c" + j).attr("tag") + "='" + $("#c" + j).val() + "'";
+                        }
+                    }
+                    $.post("/Monitoring/EditProduceline", { produName: produname, produVer: produver, produNum: produnum, produRea: produrea, produStart: produstart, produEnd: produend, produState: produstate, produTer: produter, processId: processId, produID: produid, FieldValue: sumC, NextProcessId: NextProcessId, NextTerminalId: NextTerminalId, NextStateId: NextStateId }, function (data) {
+                        $("#Nextedit_State").find("option").remove();
+                        $("#Nextedit_TerminalID").find("option").remove();
+                        $("#nt").fadeOut(500);
+
+                        var selects = $("#select_TerminalID").val();
+                            $("#StateDivss").load("/Monitoring/Index1?selectTerminalID=" + selects);
+
+                    })
+                }
+
+            })
+
+        })
+        //编辑,得到需要编辑的信息
+        function ProductionLineEdit(produid) {
+            var trnum = $("#editTable").find("tr").length;//计算tr的数量
+
+            $.post("/ProducelineManager/EditProducelineBySelect", { produID: produid, TrNum: trnum }, function (data) {
+                var info = data.split(",");
+                
+                $("#edit_ProductionPlanID").val(info[0]);
+                $("#edit_ProductionPlanName").val(info[1]);
+                $("#edit_ProductionPlanVersion").val(info[2]);
+                $("#edit_PlanNum").val(info[3]);
+
+                $("#edit_ProcessId").val(info[4]);
+         
+                $("#edit_TerminalID").val(info[5]);
+       
+                $("#edit_State").val(info[6]);
+            })
+
+
+        }
+       
+        //清空
+        function clear2() {
+            var msg = "您真的确定要删除吗？\n\n请确认！";
+            if (confirm(msg) == true) {
+                var selects = $("#select_TerminalID").val();
+                $.post("/Monitoring/Clear2?selectTerminalID=" + selects, null, function (data) {
+                    alert(data);
+                })
+            }
+            document.location.reload();
+        }
+        //取消时触发定时器
+        function quxiao() {
+
+            var a1 = window.setInterval(function () {
+
+                var selects = $("#select_TerminalID").val();
+                $("#StateDivss").load("/Monitoring/Index1?selectTerminalID=" + selects);
+
+            }, timeUpdate);
+
+            $("#Nextedit_State").find("option").remove();
+            $("#Nextedit_TerminalID").find("option").remove();
+            $("#nt").fadeOut(500);
+        }
+
+        //定时器
+        var a1 = window.setInterval(function () {
+
+            var selects = $("#select_TerminalID").val();
+            $("#StateDivss").load("/Monitoring/Index1?selectTerminalID=" + selects);
+
+        }, 1500);
+       
+        //全选
+        function GetAll() {
+      
+            var che = document.getElementById("Checkbox3");
+            var ischeck = che.checked;
+            if (che.checked == ischeck) {
+                var a = document.getElementsByName("cks");
+                for (var i = 0; i < a.length; i++) {
+                    a[i].checked = ischeck;
+                }
+            }
+            var checkedNum = $("input:checked").length;//获取多选框被选中的数量
+            if (checkedNum == 0) {
+                //location.reload();
+                    a1 = window.setInterval(function () {
+
+                    var selects = $("#select_TerminalID").val();
+                    $("#StateDivss").load("/Monitoring/Index1?selectTerminalID=" + selects);
+
+                }, 1500);
+            } else {
+                window.clearInterval(a1);
+            }
+        }
+        //判断是否选中状态
+        function isChecked() {
+
+            var checkedNum = $("input:checked").length;//获取多选框被选中的数量
+            if (checkedNum == 0) {
+                //location.reload();
+                a1 = window.setInterval(function () {
+
+                    var selects = $("#select_TerminalID").val();
+                    $("#StateDivss").load("/Monitoring/Index1?selectTerminalID=" + selects);
+
+                }, 1500);
+            } else {
+                window.clearInterval(a1);
+            }
+        }
+
+        //批量完成
+        function MonAllFinish() {
+            window.clearInterval(a1);
+            var selects = $("#select_TerminalID").val();
+            var b = document.getElementsByName("cks");
+            var r = 0;
+            var cheValue = "";
+            
+            for (var i = 0; i < b.length; i++) {
+                if (b[i].checked == true) {
+                    cheValue += b[i].value + ",";
+                }
+                else {
+                    r++;
+                }
+
+            }
+            if (r == b.length) {
+                alert("请先选中要清空的数据");
+
+            } else {
+                $.post("/Monitoring/AllSuccess", { allid: cheValue }, function (data) {
+                    alert(data);
+                    a1 = window.setInterval(function () {
+
+                        var selects = $("#select_TerminalID").val();
+                        $("#StateDivss").load("/Monitoring/Index1?selectTerminalID=" + selects);
+
+                    }, 1500);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

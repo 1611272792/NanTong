@@ -1,0 +1,198 @@
+﻿
+@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style>
+    .Buttons {
+        border-radius: 3px 4px;
+        background-color: #227dda;
+        border: 1px solid #227dda;
+        color: white;
+    }
+
+    th {
+        text-align: center;
+        vertical-align: central;
+    }
+
+    .timetext, .seletext, #Select22, #Select33, #Select8, #Select9 {
+        border-radius: 3px 4px;
+    }
+
+    #divshow {
+        display: none;
+    }
+
+    #barcon a {
+        text-decoration: none;
+    }
+
+    .barcon {
+        width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .barcon1 {
+        font-size: 17px;
+        float: left;
+        margin-top: 20px;
+    }
+
+    .barcon2 {
+        float: right;
+    }
+
+        .barcon2 ul {
+            margin: 20px 0;
+            padding-left: 0;
+            list-style: none;
+            text-align: center;
+        }
+
+        .barcon2 li {
+            display: inline;
+        }
+
+        .barcon2 a {
+            font-size: 16px;
+            font-weight: normal;
+            display: inline-block;
+            padding: 5px;
+            padding-top: 0;
+            color: black;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+            .barcon2 a:hover {
+                background-color: #eee;
+            }
+
+    .ban {
+        opacity: .4;
+    }
+
+    #reportta td {
+        padding-bottom: 5px;
+    }
+
+    .select {
+        -moz-user-select: none; /*火狐*/
+        -webkit-user-select: none; /*webkit浏览器*/
+        -ms-user-select: none; /*IE10*/
+        -khtml-user-select: none; /*早期浏览器*/
+        user-select: none;
+    }
+
+    .modal-header {
+        cursor: move;
+    }
+
+    table tr td {
+        padding-right: 5px;
+    }
+</style>
+
+
+
+<table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+    @if (ViewBag.title != null)
+    {
+        DataTable dt2 = ViewBag.title;
+        Session["title"] = ViewBag.title;
+        <tr>
+            @for (int i = 1; i < dt2.Rows.Count; i++)
+            {
+                if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                {
+                    <th class="thf" hidden="hidden">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                }
+                else
+                {
+                    <th class="thf">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                }
+            }
+            <th>质检报告</th>
+        </tr>
+    }
+    @if (ViewBag.selectdata != null)
+    {
+        DataTable dt = ViewBag.selectdata;
+        DataTable dt2 = ViewBag.title;
+        Session["datatable"] = ViewBag.extable;
+        <tbody id="adminTbody">
+            @for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                <tr>
+                    @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                    {
+                        if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[ii]["AllocationName"].ToString() == "ProcessId")
+                        {
+                            <td hidden="hidden"></td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "Issue")
+                        {
+                            if (dt.Rows[i]["Issue"].ToString() == "0")
+                            {
+                                <td>未发放</td>
+                            }
+                            else
+                            {
+                                <td>已发放</td>
+                            }
+                            <td hidden="hidden"></td>
+                        }
+                        else if (dt2.Rows[ii]["AllocationName"].ToString() == "c50")
+                        {
+                            <td class="@dt2.Rows[ii]["AllocationName"]">
+                                @dt.Rows[i]["c50"].ToString()
+                            </td>
+                        }
+                        else
+                        {
+                            if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "1")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    <span style="color:blue">未开始</span>
+                                </td>
+                            }
+                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "2")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    <span style="color:red">进行中</span>
+                                </td>
+                            }
+                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "3")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    <span style="color:lightgreen">已完成</span>
+                                </td>
+                            }
+                            else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "0")
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    <span style="color:gray">无</span>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()
+                                </td>
+                            }
+                        }
+                    }
+                    <td>@dt.Rows[i]["Result"].ToString()</td>
+                </tr>
+
+
+            }
+        </tbody>
+
+    }
+    else
+    {
+
+    }
+</table>
+

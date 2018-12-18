@@ -1,0 +1,77 @@
+﻿using Newtonsoft.Json;
+using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class QualityTestController : Controller
+    {
+        // GET: QualityTest
+        public ActionResult Index()
+        {
+            //首页加载的时候给项目下拉框赋值
+            DataTable dt = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjinfo'");
+            if (dt?.Rows.Count>0)
+            {
+                ViewBag.pjinfo = dt;
+            }
+            else
+            {
+                ViewBag.pjinfo = null;
+            }
+
+            //获取区域信息
+            DataTable info = SqlDbHelper.ExecuteDataTable("EXEC proc_Project @strType='allprocess'");
+            if (info?.Rows.Count > 0)
+            {
+                ViewBag.prinfo = info;
+            }
+            else
+            {
+                ViewBag.prinfo = null;
+            }
+            return View();
+        }
+
+        public string GetProductSelInfo(int ProjectId)
+        {
+            DataTable dt = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjpdinfo',@ProjectId={ProjectId}");
+            string Json = "";
+            if (dt?.Rows.Count>0)
+            {
+              Json = JsonConvert.SerializeObject(dt);
+            }
+            else
+            {
+                Json = null;
+            }
+            return Json;
+        }
+
+        /// <summary>
+        /// 获取工序id对应的工序名称
+        /// </summary>
+        /// <param name="fieldsId"></param>
+        /// <returns></returns>
+        public string getFieldsName(string fieldsId)
+        {
+            string FieldsName = "";
+            string strSql = string.Format($"SELECT AllocationTitle FROM dbo.Allocation WHERE AllocationID IN ({fieldsId})");
+            DataTable ds = SqlDbHelper.ExecuteDataTable(strSql);
+            string[] field = fieldsId.Split(',');
+            if (ds?.Rows.Count > 0)
+            {
+                for (int i = 0; i < ds.Rows.Count; i++)
+                {
+                    FieldsName += field[i] + "-" + ds.Rows[i]["AllocationTitle"] + ",";
+                }
+            }
+            return FieldsName.TrimEnd(',');
+        }
+    }
+}

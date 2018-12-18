@@ -1,0 +1,358 @@
+﻿@using XP_PPS_Model;
+@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>报表查询</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/UI/bootstrap-paginator.min.js"></script>
+    <script src="~/Content/page/front-endPage.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <script src="~/Content/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="~/Content/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link href="~/Content/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+    @*<link href="~/Content/page/table.css" rel="stylesheet" />*@
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .Buttons {
+            border-radius: 3px 4px;
+            background-color: #227dda;
+            border: 1px solid #227dda;
+            color: white;
+        }
+
+        .timetext, .seletext, #Select22, #Select33, #Select88, #Select8, #Select9 {
+            border-radius: 3px 4px;
+        }
+
+        .seletext, #Select22, #Select33, #Select8, #Select9 {
+            line-height: 26px;
+            height: 26px;
+        }
+
+        #divshow {
+            display: none;
+        }
+
+        th {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <p style="margin-bottom:20px;margin-top:20px;">
+        组合查询：
+        <span id="TimeZu1" style="margin-right:20px;">
+            <input id="starttime1" class="form-control" style="display:inline;width:150px;" type="text" name="name" />至<input id="endtime1" style="display:inline;width:150px;" class="form-control" type="text" />
+        </span>
+        @*产线*@
+        产线：
+        <select id="Select88" style="margin-right:20px;width:150px;display:inline;" class="form-control">
+            @if (ViewBag.terlist != null)
+            {
+                if (ViewBag.Role == 1)
+                {
+                    List<Terminal> terlist1 = ViewBag.terlist;
+                    foreach (var item in terlist1)
+                    {
+                        <option value="@item.TerminalID">@item.TerminalName</option>
+                    }
+                }
+                else
+                {
+                    <option value="0">所有产线</option>
+                    if (ViewBag.terlist != null)
+                    {
+                        List<Terminal> terlist1 = ViewBag.terlist;
+                        foreach (var item in terlist1)
+                        {
+                            <option value="@item.TerminalID">@item.TerminalName</option>
+                        }
+                    }
+                }
+            }
+            else
+            {
+                <option>暂无产线</option>
+            }
+
+        </select>
+        @*产品型号*@
+        产品型号：
+        <input type="text" name="name" value="" id="Select99" class="form-control" style="display:inline;width:150px;"/>
+        <button type="button" id="SelectDataDiffs" class="btn btn-info Buttons" onclick="all2()">
+            <img src="~/Content/Icon/select.png" />查询
+        </button>
+        <button type="button" id="excel" class="btn btn-info Buttons" onclick="Export()">
+            <img src="~/Content/Icon/导出.png" style="padding-bottom:3px;" />导出
+        </button>
+    </p>
+
+    <div id="dsidiv">
+        <table class="table table-bordered table-striped table-hover text-center" style="width:100%">
+            <tr>
+                @*标题*@
+                @if (ViewBag.title != null)
+                {
+                    DataTable dt2 = ViewBag.title;
+                    Session["title"] = ViewBag.title;
+                    for (int i = 1; i < dt2.Rows.Count; i++)
+                    {
+                        <th style="text-align:center;">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                    }
+                }
+            </tr>
+            @*数据*@
+            @if (ViewBag.indexdata == null)
+            {
+
+            }
+            else
+            {
+                DataTable dt2 = ViewBag.title;
+                DataTable dt = ViewBag.indexdata;
+                DataTable dt3 = ViewBag.terlist1;
+                Session["datatable"] = ViewBag.extable;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    <tr>
+                        @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                    {
+                            <td>
+                                @if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID")
+                                {
+                                    var lieName = "TerminalName";
+                                    @dt.Rows[i][lieName].ToString()
+                                }
+                                else if (dt2.Rows[ii]["AllocationName"].ToString() == "StartTime")
+                                {
+                                    @DateTime.Parse(dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()).ToString("yyyy/MM/dd");
+                                }
+                                else if (dt2.Rows[ii]["AllocationName"].ToString() == "State")
+                                {
+                                    if (dt.Rows[i]["State"].ToString() == "0")
+                                    {
+                                        <span>未完成</span>
+                                    }
+                                    else if (dt.Rows[i]["State"].ToString() == "1")
+                                    {
+                                        <span>已完成</span>
+                                    }
+                                }
+                                else
+                                {
+                                   @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString()
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </table>
+
+        <span style="margin-left:380px;margin-right:10px;">总页数：<input type="text" name="name" readonly="readonly" value="@ViewBag.lastpage" style="border:0;width:30px;text-align:center;color:red;margin-right:10px;" id="pagenum" />页</span>
+        <span style="margin-left:25px;">总行数： <input type="text" readonly="readonly" name="name" value="@ViewBag.hang" style="border:0;width:30px;text-align:center;color:red;margin-right:10px;" />行</span>
+    </div>
+    <div style="text-align:center;margin-top:-20px;float:right;width:85%">
+        每页<input onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" type="text" name="name" id="every" value="10" style="border:0;width:40px;text-align:center;color:red" oninput="all2()" />条 <a href="#" style="margin-left:40px;" onclick="first()">首页</a><a href="#" id="last" onclick="last()" style="margin-right:20px;margin-left:20px;">上一页</a>第<input type="text" name="name" id="now" value="1" style="border:0;width:40px;text-align:center;color:red" oninput="all2()" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" />页 <a href="#" id="next" onclick="next()" style="margin-left:20px;">下一页</a><a href="#" style="margin-left:20px;" onclick="end()">尾页</a>
+    </div>
+
+
+    @*<div id="histroyBox"></div>*@
+
+    <script type="text/javascript">
+
+        function Export() {
+                location.href = "/Excel/DownLoadExcel";
+        }
+
+        $("input").keyup(function (event) {
+            if (event.which == "13") { //回车键的键值为13
+                //alert("a");
+                document.getElementById("SelectDataDiffs").click();
+                //调用登录按钮的登录事件
+            }
+        })
+
+        //首页
+        function first() {
+            var num = document.getElementById("now");
+            num.value = 1;
+            all2();
+        }
+        //上一页
+        function last() {
+            var num = document.getElementById("now");
+            num.value = parseInt(num.value) - 1;
+            if (num.value <= 0) {
+                alert("已经是首页了！！");
+                num.value = 1;
+            }
+            all2();
+        }
+        //下一页
+        function next() {
+            var num = document.getElementById("now");
+            num.value = parseInt(num.value) + 1;
+            var pagenum = document.getElementById("pagenum");
+            pagenum.value = parseInt(pagenum.value);
+            //如果点击的页码数超过总页数 则返回总页数
+            //alert(num.value + "," + pagenum.value);
+            if (parseInt(num.value) > parseInt(pagenum.value)) {
+                alert("已经是最后一页了！");
+                num.value = parseInt(num.value) - 1;
+            }
+            all2();
+        }
+
+        //尾页
+        function end() {
+            var pagenum = $("#pagenum").val();
+            if (pagenum != "0") {
+                var num = document.getElementById("now");
+                var pagenum = document.getElementById("pagenum");
+                num.value = parseInt(pagenum.value);
+                all2();
+            }
+        }
+
+        function all2() {
+            var ss = $("#starttime1").val();
+            var gg = $("#endtime1").val();
+            var line = $("#Select88").val();
+            var version = $("#Select99").val();
+            var now = $("#now").val();
+            var pagenum = $("#pagenum").val();
+
+
+            //alert(now + "," + pagenum);
+            //如果用户输入的页数大于总页数
+            if (now != "1") {//当查询到的数据为空时pagenum就等于0了
+                if (parseInt(now) > parseInt(pagenum)) {
+                    //alert("超出页码范围！");
+                    now = pagenum;
+                    $("#now").val(pagenum);
+                }
+            }
+            var every = $("#every").val();
+            if (ss > gg) {
+                alert("开始日期不能大于结束日期！");
+            }
+            else {
+                $("#dsidiv").load("/DataReport/SelectAll?aa=" + ss + "&&bb=" + gg + "&&line=" + line + "&&version=" + version + "&&now=" + now + "&&every=" + every, function (data) {
+
+                });
+            }
+        }
+            
+
+        $("#starttime1").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+
+        $("#endtime1").datetimepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            showMeridian: true,
+            pickerPosition: "bottom-left",
+            language: 'zh-CN',//中文，需要引用zh-CN.js包
+            startView: 2,//月视图
+            minView: 2,//日期时间选择器所能够提供的最精确的时间选择视图
+            clearBtn: true
+        });
+
+    </script>
+    @*<script type="text/javascript">
+
+
+
+        Array.prototype.indexOf = function (val) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == val) return i;
+            }
+            return -1;
+        };
+
+        Array.prototype.remove = function (val) {
+            var index = this.indexOf(val);
+            if (index > -1) {
+                this.splice(index, 1);
+            }
+        };
+        $(function () {
+            var message = eval('(' + $("#title").val() + ')');
+            var me = Array();
+            if(message!=null)
+            {
+                for (var i = 0; i < message.length; i++) {
+                    me.push(message[i].AllocationTitle);
+                }
+            }
+            me.remove("生产计划编号");
+
+            var datas = [{ "AllocationID": 1, "AllocationName": "ProductionPlanID", "AllocationTitle": "生产计划编号", "Serial": 1 }, { "AllocationID": 14, "AllocationName": "c2", "AllocationTitle": "C2测试", "Serial": 1 }, { "AllocationID": 2, "AllocationName": "ProductionPlanName", "AllocationTitle": "生产计划名称", "Serial": 2 }, { "AllocationID": 3, "AllocationName": "ProductionPlanVersion", "AllocationTitle": "产品型号", "Serial": 3 }, { "AllocationID": 4, "AllocationName": "PlanNum", "AllocationTitle": "计划数量", "Serial": 4 }, { "AllocationID": 5, "AllocationName": "RealNum", "AllocationTitle": "实际数量", "Serial": 5 }, { "AllocationID": 6, "AllocationName": "StartTime", "AllocationTitle": "开始时间", "Serial": 6 }, { "AllocationID": 7, "AllocationName": "EndTime", "AllocationTitle": "结束时间", "Serial": 7 }, { "AllocationID": 8, "AllocationName": "State", "AllocationTitle": "状态", "Serial": 8 }, { "AllocationID": 9, "AllocationName": "TerminalID", "AllocationTitle": "产线", "Serial": 9 }, { "AllocationID": 13, "AllocationName": "c1", "AllocationTitle": "C1测试", "Serial": 10 }];
+            var a = Array();
+
+            for (var i = 0; i < datas.length; i++) {
+                a.push(datas[i].AllocationTitle);
+            }
+            a.remove("生产计划编号");
+            alert(a)
+
+
+            var b = Array();
+            for (var i = 0; i < datas.length; i++) {
+                b.push(datas[i].AllocationName);
+            }
+            b.remove("ProductionPlanID");
+
+            var data = [{ "ProductionPlanID": 3, "ProductionPlanName": "生产计划1rtttr", "ProductionPlanVersion": "1", "PlanNum": "1", "RealNum": "1", "StartTime": "2018-04-10T00:00:00", "EndTime": null, "State": "未完成", "TerminalID": "2", "c1": "1", "c2": "", "c3": "", "c4": "", "c5": "", "c6": "", "c7": "", "c8": "", "c9": "", "c10": "", "c11": "", "c12": "", "c13": "", "c14": "", "c15": "", "c16": "", "c17": "", "c18": "", "c19": "", "c20": "", "TerminalID:1": 2, "TerminalName": "喜洋洋", "UserInfoID": 2, "TerminalPwd": "123456" }, { "ProductionPlanID": 6, "ProductionPlanName": "uuyuu", "ProductionPlanVersion": "1", "PlanNum": "2", "RealNum": "2", "StartTime": "2018-02-26T00:00:00", "EndTime": "2018-02-26T00:00:00", "State": "未完成", "TerminalID": "2", "c1": "1", "c2": "", "c3": "", "c4": "", "c5": "", "c6": "", "c7": "", "c8": "", "c9": "", "c10": "", "c11": "", "c12": "", "c13": "", "c14": "", "c15": "", "c16": "", "c17": "", "c18": "", "c19": "", "c20": "", "TerminalID:1": 2, "TerminalName": "喜洋洋", "UserInfoID": 2, "TerminalPwd": "123456" }, { "ProductionPlanID": 7, "ProductionPlanName": "a计划", "ProductionPlanVersion": "a2131", "PlanNum": "2", "RealNum": "222", "StartTime": "2018-02-26T00:00:00", "EndTime": null, "State": "完成", "TerminalID": "4", "c1": null, "c2": null, "c3": null, "c4": null, "c5": null, "c6": null, "c7": null, "c8": null, "c9": null, "c10": null, "c11": null, "c12": null, "c13": null, "c14": null, "c15": null, "c16": null, "c17": null, "c18": null, "c19": null, "c20": null, "TerminalID:1": 4, "TerminalName": "1212", "UserInfoID": 3, "TerminalPwd": "123456" }, { "ProductionPlanID": 8, "ProductionPlanName": "a计划", "ProductionPlanVersion": "a2131", "PlanNum": "2", "RealNum": "222", "StartTime": "2018-02-26T00:00:00", "EndTime": null, "State": "完成", "TerminalID": "4", "c1": null, "c2": null, "c3": null, "c4": null, "c5": null, "c6": null, "c7": null, "c8": null, "c9": null, "c10": null, "c11": null, "c12": null, "c13": null, "c14": null, "c15": null, "c16": null, "c17": null, "c18": null, "c19": null, "c20": null, "TerminalID:1": 4, "TerminalName": "1212", "UserInfoID": 3, "TerminalPwd": "123456" }, { "ProductionPlanID": 9, "ProductionPlanName": "dddddd", "ProductionPlanVersion": "1", "PlanNum": "1", "RealNum": "14", "StartTime": "2018-02-26T00:00:00", "EndTime": "2018-03-23T14:25:10", "State": "未完成", "TerminalID": "2", "c1": "1", "c2": "", "c3": "", "c4": "", "c5": "", "c6": "", "c7": "", "c8": "", "c9": "", "c10": "", "c11": "", "c12": "", "c13": "", "c14": "", "c15": "", "c16": "", "c17": "", "c18": "", "c19": "", "c20": "", "TerminalID:1": 2, "TerminalName": "喜洋洋", "UserInfoID": 2, "TerminalPwd": "123456" }, { "ProductionPlanID": 10, "ProductionPlanName": "a计划", "ProductionPlanVersion": "P001", "PlanNum": "30", "RealNum": "10", "StartTime": "2018-02-26T00:00:00", "EndTime": "2018-03-23T14:25:10", "State": "未完成", "TerminalID": "2", "c1": null, "c2": null, "c3": null, "c4": null, "c5": null, "c6": null, "c7": null, "c8": null, "c9": null, "c10": null, "c11": null, "c12": null, "c13": null, "c14": null, "c15": null, "c16": null, "c17": null, "c18": null, "c19": null, "c20": null, "TerminalID:1": 2, "TerminalName": "喜洋洋", "UserInfoID": 2, "TerminalPwd": "123456" }, { "ProductionPlanID": 11, "ProductionPlanName": "PlanA", "ProductionPlanVersion": "P002", "PlanNum": "30", "RealNum": "10", "StartTime": "2018-02-26T00:00:00", "EndTime": "2018-03-23T14:25:10", "State": "未完成", "TerminalID": "2", "c1": null, "c2": null, "c3": null, "c4": null, "c5": null, "c6": null, "c7": null, "c8": null, "c9": null, "c10": null, "c11": null, "c12": null, "c13": null, "c14": null, "c15": null, "c16": null, "c17": null, "c18": null, "c19": null, "c20": null, "TerminalID:1": 2, "TerminalName": "喜洋洋", "UserInfoID": 2, "TerminalPwd": "123456" }, { "ProductionPlanID": 12, "ProductionPlanName": "PLanB", "ProductionPlanVersion": "1", "PlanNum": "15", "RealNum": "8", "StartTime": "2018-02-26T00:00:00", "EndTime": "2018-03-23T14:25:10", "State": "未完成", "TerminalID": "2", "c1": null, "c2": null, "c3": null, "c4": null, "c5": null, "c6": null, "c7": null, "c8": null, "c9": null, "c10": null, "c11": null, "c12": null, "c13": null, "c14": null, "c15": null, "c16": null, "c17": null, "c18": null, "c19": null, "c20": null, "TerminalID:1": 2, "TerminalName": "喜洋洋", "UserInfoID": 2, "TerminalPwd": "123456" }, { "ProductionPlanID": 18, "ProductionPlanName": "qwe", "ProductionPlanVersion": "zzz", "PlanNum": "2112fdfff", "RealNum": "1003", "StartTime": "2018-04-10T00:00:00", "EndTime": null, "State": "未完成", "TerminalID": "6", "c1": "", "c2": "", "c3": "", "c4": "", "c5": "", "c6": "", "c7": "", "c8": "", "c9": "", "c10": "", "c11": "", "c12": "", "c13": "", "c14": "", "c15": "", "c16": "", "c17": "", "c18": "", "c19": "", "c20": "", "TerminalID:1": 6, "TerminalName": "123", "UserInfoID": 3, "TerminalPwd": "123456" }, { "ProductionPlanID": 19, "ProductionPlanName": "qwe", "ProductionPlanVersion": "zzz", "PlanNum": "2112", "RealNum": "1004", "StartTime": "2018-03-30T00:00:00", "EndTime": null, "State": "未完成", "TerminalID": "4", "c1": "", "c2": "", "c3": "", "c4": "", "c5": "", "c6": "", "c7": "", "c8": "", "c9": "", "c10": "", "c11": "", "c12": "", "c13": "", "c14": "", "c15": "", "c16": "", "c17": "", "c18": "", "c19": "", "c20": "", "TerminalID:1": 4, "TerminalName": "1212", "UserInfoID": 3, "TerminalPwd": "123456" }];
+            //前台分页的样子
+            $('#histroyBox').CJJTable({
+                //["装点","卸点","运输货物","下单日期","作者"]
+                'title':me,//thead中的标题 必填
+                'body': b,//tbody td 取值的字段 必填
+                'display':[1,1,1,1,1,2],//隐藏域，1显示，2隐藏 必填
+                'pageNUmber':10,//每页显示的条数 选填
+                'pageLength':data.length,//选填
+                'url': data,//数据源 必填
+                'operation': 1,
+                dbTrclick:function(e){//双击tr事件
+                    alert(e.find('.ProductionPlanName').html())
+                }
+            });
+        })
+
+        function all2()
+        {
+
+        }
+        </script>*@
+</body>
+</html>

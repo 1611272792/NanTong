@@ -1,0 +1,165 @@
+﻿using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ProductController : Controller
+    {
+        // GET: Product
+        public ActionResult Index()
+        {
+            //首页加载获取所有产品信息
+            DataTable pdinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'allpdinfo'");
+            if (pdinfo?.Rows.Count > 0)
+            {
+                ViewBag.AllPdInfo = pdinfo;
+            }
+            else
+            {
+                ViewBag.AllPdInfo = null;
+            }
+            //首页加载获取所有项目信息
+            DataTable pjinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjinfo'");
+            if (pjinfo?.Rows.Count > 0)
+            {
+                ViewBag.PjInfo = pjinfo;
+            }
+            else
+            {
+                ViewBag.PjInfo = null;
+            }
+            return View();
+        }
+
+        #region 添加产品
+        /// <summary>
+        /// 添加产品
+        /// </summary>
+        /// <param name="ProjectId">项目Id</param>
+        /// <param name="ProductName">产品名称</param>
+        /// <returns>ok 添加成功， no 添加失败</returns>
+        public ActionResult AddProduct(string ProjectId, string ProductName)
+        {
+            if (string.IsNullOrWhiteSpace(ProjectId))
+            {
+                return Content("项目Id为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProductName))
+            {
+                return Content("产品名称为空");
+            }
+            int add = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'addpd',@ProjectId={ProjectId},@ProductName='{ProductName}'");
+            if (add > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        #region 删除产品
+        /// <summary>
+        /// 删除产品
+        /// </summary>
+        /// <param name="ProductId">产品Id</param>
+        /// <returns>ok 删除成功， no 删除失败</returns>
+        public ActionResult DelProduct(string ProductId)
+        {
+            if (string.IsNullOrWhiteSpace(ProductId))
+            {
+                return Content("产品Id为空");
+            }
+            string ProductIds = ProductId.Substring(0, ProductId.Length - 1);
+            int del = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'delpd',@ProductIds='{ProductIds}'");
+            if (del > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        #region 获取需要编辑的内容
+        /// <summary>
+        /// 获取需要编辑的内容
+        /// </summary>
+        /// <param name="PdId">产品Id</param>
+        /// <returns>返回字符串</returns>
+        public ActionResult GetUpdProductInfo(int PdId)
+        {
+            DataTable info = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'getpd',@ProductId={PdId}");
+            if (info?.Rows.Count > 0)
+            {
+                int ProductId = info.Rows[0].Field<int>("ProductId");
+                int ProjectId = info.Rows[0].Field<int>("ProjectId");
+                string ProjectName = info.Rows[0].Field<string>("ProjectName");
+                string ProductName = info.Rows[0].Field<string>("ProductName");
+                return Content(ProductId + "," + ProjectId + "," + ProjectName + "," + ProductName);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        #endregion
+
+        #region 编辑产品信息
+        /// <summary>
+        /// 编辑产品信息
+        /// </summary>
+        /// <param name="ProductId">产品Id</param>
+        /// <param name="ProjectId">产品所属项目Id</param>
+        /// <param name="ProductName">产品名称</param>
+        /// <returns>ok 添加成功， no 添加失败</returns>
+        public ActionResult EditProductInfo(string ProductId, string ProjectId, string ProductName)
+        {
+            if (string.IsNullOrWhiteSpace(ProductId))
+            {
+                return Content("产品Id为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProjectId))
+            {
+                return Content("项目Id为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProductName))
+            {
+                return Content("产品名称为空");
+            }
+            int upd = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Project] @strType = 'updpd',@ProductId={ProductId},@ProjectId={ProjectId},@ProductName='{ProductName}'");
+            if (upd > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        } 
+        #endregion
+
+        public ActionResult GetShareInfo(int ProjectId)
+        {
+            DataTable pjinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Project] @strType = 'pjpdinfo',@ProjectId={ProjectId}");
+            if (pjinfo?.Rows.Count>0)
+            {
+                ViewBag.AllPdInfo = pjinfo;
+            }
+            else
+            {
+                ViewBag.AllPdInfo = null;
+            }
+            return PartialView("_Product");
+        }
+    }
+}

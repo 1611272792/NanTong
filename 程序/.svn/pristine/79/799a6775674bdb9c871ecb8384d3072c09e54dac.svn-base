@@ -1,0 +1,133 @@
+﻿    @using System.Data;
+
+@*显示*@
+    <table class="table table-bordered table-hover text-center table-striped" style="margin-top:5px;">
+        <tr class="active" style="text-align:center;">
+            @if (ViewBag.title != null || ViewBag.title != "")
+            {
+                <th class="thf" style="width:200px;"><input id="Checkbox3" onchange="GetAll()" class="ckstyle" type="checkbox" style="margin-left: 67px;" /><span style="display: block;float:right;margin-right: 30px;position:relative;right: 10px;">全选</span></th>
+
+                DataTable dt2 = ViewBag.title;
+                for (int i = 1; i < dt2.Rows.Count; i++)
+                {
+                    if (dt2.Rows[i]["AllocationName"].ToString() == "Issue")
+                    {
+
+                    }
+                    else
+                    {
+                        if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[i]["AllocationName"].ToString() == "ProcessId")
+                        {
+                            <th class="thf" hidden="hidden">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                        }
+                        else
+                        {
+                            <th class="thf">@dt2.Rows[i]["AllocationTitle"].ToString()</th>
+                        }
+                    }
+                }
+                <th class="thf" hidden="hidden">操作</th>
+            }
+        </tr>
+        @if (ViewBag.producetion == null)
+        {
+        }
+        else
+        {
+            DataTable dt2 = ViewBag.title;
+            DataTable dt = ViewBag.producetion;
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+          
+                <tr>
+                    <td><input type="checkbox" name="cks" class="ckstyle check"  onchange="isChecked()" value="@dt.Rows[i]["ProductionPlanID"]" /></td>
+                    @for (int ii = 1; ii < dt2.Rows.Count; ii++)
+                    {
+                        if (dt2.Rows[ii]["AllocationName"].ToString() == "Issue" || dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID" || dt2.Rows[ii]["AllocationName"].ToString() == "ProcessId")
+                        {
+
+                        }
+                        else
+                        {
+                            <td>
+                                @if (dt2.Rows[ii]["AllocationName"].ToString() == "TerminalID")
+                            {
+                                    @dt.Rows[i]["TerminalName"].ToString()
+                                }
+                                else if (dt2.Rows[ii]["AllocationName"].ToString() == "ProductionPlanVersion")
+                                {
+                                <td class="@dt2.Rows[ii]["AllocationName"]">
+                                    @dt.Rows[i]["ProductionPlanVersion"].ToString()
+                                </td>
+                                }
+                                else if (dt2.Rows[ii]["AllocationName"].ToString() == "PlanNum")
+                                {
+                                    <td class="@dt2.Rows[ii]["AllocationName"]">
+                                        @dt.Rows[i]["PlanNum"].ToString()
+                                    </td>
+                                }
+                                @*else if (dt2.Rows[ii]["AllocationName"].ToString() == "State")
+                                {
+                                    if (@dt.Rows[i]["State"].ToString() == "0")
+                                    {
+                                        <span>未完成</span>
+                                    }
+                                    else
+                                    {
+                                        <span>已完成</span>
+                                    }
+                                }*@
+                                else if (dt2.Rows[ii]["AllocationName"].ToString() == "StartTime")
+                                {
+                                    @dt.Rows[i]["StartTime"].ToString();
+                                }
+                                else if (dt2.Rows[ii]["AllocationName"].ToString() == "c50")
+                                {
+                                    @dt.Rows[i]["c50"].ToString()
+                                }
+                                else
+                                {
+                                    if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "1")
+                                    {
+                                        <span style="color:blue">未开始</span>
+                                    }
+                                    else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "2")
+                                    {
+                                        <span style="color:red">进行中</span>
+                                    }
+                                    else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "3")
+                                    {
+                                        <span style="color:lightgreen">已完成</span>
+                                    }
+                                    else if (dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString() == "0")
+                                    {
+                                        <span style="color:gray">--</span>
+                                    }
+                                    else
+                                    {
+                                        @dt.Rows[i][dt2.Rows[ii]["AllocationName"].ToString()].ToString();
+                                    }
+
+                                }
+                            </td>
+                        }
+
+                    }
+
+                    <td  hidden="hidden">
+                        <a onclick="ProductionLineEdit(@dt.Rows[i]["ProductionPlanID"])" href="#" id="aa" data-toggle="modal" data-target="#bianjiProduction">编辑</a>
+                    </td>
+                </tr>
+
+
+            }
+
+        }
+
+    </table>
+
+ 
+
+
+ 

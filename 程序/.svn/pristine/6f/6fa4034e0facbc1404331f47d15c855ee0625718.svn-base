@@ -1,0 +1,255 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data;
+using XP_PPS_DAL;
+using ProductionPlanSystem.Help;
+using System.Data.SqlClient;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ProceFieldsController : Controller
+    {
+        // GET: ProceFields
+        public ActionResult Index()
+        {
+            //string sql = string.Format("SELECT * FROM ALLOCATION where [type]='pro'");
+            #region 查看所有工序
+            string sql = string.Format("EXEC [dbo].[AboutProcess] @type='getProcess'");
+            DataTable dt = ServerOrLit.isDataTable(LoginController.connType, sql);
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                dt.Rows[i]["Serial"] = Convert.ToInt32(dt.Rows[i]["Serial"].ToString()) - 10;
+                dt.Rows[i]["AllocationName"] = dt.Rows[i]["AllocationName"].ToString().Replace('c',' ');
+            }
+            
+ 
+            if (dt.Rows.Count > 0)
+            {
+                ViewBag.allocation = dt;
+            }
+            else
+            {
+                ViewBag.allocation = null;
+            }
+            #endregion
+
+            # region 获取下拉字段名
+            //string sql2 = string.Format("SELECT name FROM syscolumns WHERE id=Object_Id('ProductionPlan')");
+            string sql2 = string.Format("EXEC [dbo].[AboutProcess] @type='xiala'");
+            DataTable dt2 = ServerOrLit.isDataTable(LoginController.connType, sql2);
+            if (dt2.Rows.Count>0)
+            {
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    if (dt2.Rows[i]["name"].ToString().Substring(0,1)=="c")
+                    {
+                        dt2.Rows[i]["name"] = dt2.Rows[i]["name"].ToString().Replace('c',' ');
+                    }
+                   
+                }
+             
+            }
+            //DataTable dt2 = DALHelp.ExecuteDataTable(sql2, null);
+            ViewBag.ziduan = dt2;
+            #endregion
+            return View();
+        }
+
+
+       /// <summary>
+       /// 获得编辑的信息
+       /// </summary>
+       /// <param name="allocationid">所选id</param>
+       /// <returns></returns>
+        public ActionResult AllocationEditBySelect(string allocationid)
+        {
+            if (allocationid != "" || allocationid != null)
+            {
+                //string sqlstr = string.Format("SELECT * FROM ALLOCATION where AllocationID='{0}'", allocationid);//根据id找到需要编辑的内容
+                string sqlstr = string.Format($"EXEC [dbo].[AboutProcess] @type='getEdit',@allocationid={allocationid}");
+                DataTable dt = ServerOrLit.isDataTable(LoginController.connType, sqlstr);
+                //DataTable dt = DALHelp.ExecuteDataTable(sqlstr, null);
+                if (dt.Rows.Count > 0)
+                {
+                    string Aid = dt.Rows[0]["AllocationID"].ToString();
+                    string AName = dt.Rows[0]["AllocationName"].ToString();
+                    string ATitle = dt.Rows[0]["AllocationTitle"].ToString();
+                    int Serial =Convert.ToInt32(dt.Rows[0]["Serial"].ToString())-10;
+                    return Content(Aid + "," + AName + "," + ATitle + "," + Serial);
+                }
+                else
+                {
+                    return Content("no");
+                }
+            }
+            else
+            {
+                return Content("no");
+            }
+
+        }
+
+
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="aid">所选id</param>
+        /// <param name="aname">工序名</param>
+        /// <param name="atitle">工序标题</param>
+        /// <param name="serial">序号</param>
+        /// <returns></returns>
+        public ActionResult AllocationEdit(string aid, string aname, string atitle, int? serial)
+        {
+            if (aid != "" && aid != null && aname != "" && aid != null && atitle != null && atitle != "" && serial != null)
+            {
+                //string sql = string.Format("update Allocation set AllocationName='{0}',AllocationTitle='{1}',Serial={2} where AllocationID={3}", aname, atitle, (serial+10), aid);
+                string sql = string.Format($"EXEC [dbo].[AboutProcess] @type='editProcess',@allocationName='{aname}',@allocationTitle='{atitle}',@serial={(serial + 10)},@allocationid={aid} ");
+                int dt = ServerOrLit.isNum(LoginController.connType, sql);
+                if (dt > 0)
+                {
+                    return Content("修改成功");
+                }
+                else
+                {
+                    return Content("修改失败");
+                }
+            }
+            else
+            {
+                return Content("修改失败");
+            }
+        }
+
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="aid">所选id</param>
+        /// <param name="FeldName">需要清空的表头</param>
+        /// <returns></returns>
+        public ActionResult DeleteUserManager(string aid,string FeldName) 
+                {
+            if (aid != null && aid != "")
+            {
+                FeldName = ReplaceStr(FeldName);
+                string sqlstr =string.Format($"EXEC DeleteAndUpdate @AllactionId={aid},@FieldName='{FeldName}'");
+                int sum = ServerOrLit.isNum(LoginController.connType, sqlstr);
+                if (sum > 0)
+                {
+                    return Content("删除成功");
+                }
+                else
+                {
+                    return Content("删除失败");
+                }
+            }
+            else
+            {
+                return Content("删除失败");
+            }
+        }
+
+       /// <summary>
+       /// 批量删除
+       /// </summary>
+       /// <param name="aid">所选id</param>
+       /// <param name="FieldsName">需要清空的表头</param>
+       /// <returns></returns>
+        public ActionResult DeleteAllManager(string aid, string FieldsName)
+        {
+            try
+            {
+                FieldsName = ReplaceStr(FieldsName);
+            if (string.IsNullOrWhiteSpace(aid) || string.IsNullOrWhiteSpace(FieldsName))
+            {
+                return Content("删除失败");
+            }
+                aid = aid.TrimEnd(',');
+                FieldsName = FieldsName.TrimEnd(',');
+                //string sqlstr = string.Format($"DELETE FROM dbo.Allocation WHERE AllocationID IN ({aid})");
+                //string sqlstr = string.Format($"EXEC [dbo].[AboutProcess] @type='deleteSome',@someProssId='{aid}',@fieldName='{FieldsName}'");
+                SqlParameter[] sqlParams = new SqlParameter[3];
+                sqlParams[0] = new SqlParameter("@type", "deleteSome");
+                sqlParams[1] = new SqlParameter("@someProssId", aid);
+                sqlParams[2] = new SqlParameter("@fieldName", FieldsName);
+                int returnValue = 0;//影响行数
+                int sum = SqlDbHelper.RunProcedure("AboutProcess", sqlParams, out returnValue);
+                if (sum == 0)
+                {
+                    return Content("删除成功");
+                }
+                else
+                {
+                    return Content("删除失败");
+                }
+            }
+            catch (Exception e)
+            {
+
+                return Content("删除失败,"+e.Message);
+            }
+        }
+        
+
+       /// <summary>
+       /// 添加
+       /// </summary>
+       /// <param name="filedName">字段名</param>
+       /// <param name="filedHead">字段标题</param>
+       /// <returns></returns>
+        public ActionResult AddField(string filedName, string filedHead)
+        {
+            if (filedName != null && filedName != "" && filedHead != null && filedHead != "")
+            {
+                filedName = filedName.Replace(' ','c');
+                string isname = string.Format($"EXEC dbo.AboutProcess  @type = 'checkPro', @fieldName = '{filedName}'");
+                //DataTable dt = DALHelp.ExecuteDataTable(isname, null);
+                DataTable dt = ServerOrLit.isDataTable(LoginController.connType, isname);
+
+                if (dt.Rows.Count > 0)
+                {
+                    return Content("已配置此字段");
+                }
+                else
+                {   //查询最后的序号
+                    //string xuhao = string.Format("select Serial from Allocation  WHERE Serial NOT IN(46,47,48,49,50)  order by Serial desc");
+                    string xuhao = string.Format("EXEC dbo.AboutProcess  @type = 'selectEndpro' ");
+                    //DataTable dtxuhao = DALHelp.ExecuteDataTable(xuhao, null);
+                    DataTable dtxuhao = ServerOrLit.isDataTable(LoginController.connType, xuhao);
+                    int serial = int.Parse(dtxuhao.Rows[0][0].ToString()) + 1;
+
+                    //string sqlstr = string.Format("INSERT INTO Allocation (AllocationName,AllocationTitle,IsActive,Serial,[Type])VALUES('{0}','{1}',1,'{2}','pro')", filedName, filedHead, serial);
+                    string sqlstr = string.Format($"EXEC dbo.AboutProcess  @type = 'addPro' ,@fieldName='{filedName}',@allocationTitle='{filedHead}',@serial={serial}");
+                    //int info = DALHelp.ExecuteNonQuery(sqlstr, null);
+                    int info = ServerOrLit.isNum(LoginController.connType, sqlstr);
+
+
+                    if (info > 0)
+                    {
+                        return Content("添加成功");
+                    }
+                    else
+                    {
+                        return Content("添加失败");
+                    }
+                }
+            }
+            else
+            {
+                return Content("添加失败");
+            }
+        }
+
+        /// <summary>
+        /// 字符串转换
+        /// </summary>
+        /// <param name="fieldsName"></param>
+        /// <returns></returns>
+        public string ReplaceStr(string fieldsName) {
+            fieldsName = fieldsName.Replace(' ','c');
+            return fieldsName;
+        }
+    }
+}

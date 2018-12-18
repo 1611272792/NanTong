@@ -1,0 +1,429 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem_WebApi.Models
+{
+    public class LineData
+    {
+        private int productionPlanID;
+        public int ProductionPlanID
+        {
+            get { return productionPlanID; }
+            set { productionPlanID = value; }
+        }
+
+        private string productionPlanNameId;
+        public string ProductionPlanNameId
+        {
+            get { return productionPlanNameId; }
+            set { productionPlanNameId = value; }
+        }
+
+        private string productionPlanName;
+        public string ProductionPlanName
+        {
+            get { return productionPlanName; }
+            set { productionPlanName = value; }
+        }
+
+        private string productionPlanVersionId;
+        public string ProductionPlanVersionId
+        {
+            get { return productionPlanVersionId; }
+            set { productionPlanVersionId = value; }
+        }
+
+        private string productionPlanVersion;
+        public string ProductionPlanVersion
+        {
+            get { return productionPlanVersion; }
+            set { productionPlanVersion = value; }
+        }
+
+        private string planNum;
+        public string PlanNum
+        {
+            get { return planNum; }
+            set { planNum = value; }
+        }
+
+        private string realNum;
+        public string RealNum
+        {
+            get { return realNum; }
+            set { realNum = value; }
+        }
+
+        private string startTime;
+        public string StartTime
+        {
+            get { return startTime; }
+            set { startTime = value; }
+        }
+
+        private DateTime endTime;
+        public DateTime EndTime
+        {
+            get { return endTime; }
+            set { endTime = value; }
+        }
+
+        private int state;
+        public int State
+        {
+            get { return state; }
+            set { state = value; }
+        }
+
+        private int processId;
+        public int ProcessId
+        {
+            get { return processId; }
+            set { processId = value; }
+        }
+
+        private string terminalID;
+        public string TerminalID
+        {
+            get { return terminalID; }
+            set { terminalID = value; }
+        }
+
+        private int issue;
+        public int Issue
+        {
+            get { return issue; }
+            set { issue = value; }
+        }
+
+        private int clear;
+        public int Clear
+        {
+            get { return clear; }
+            set { clear = value; }
+        }
+
+        public string c1
+        {
+            get { return c1; }
+            set { c1 = value; }
+        }
+
+        public string c2
+        {
+            get { return c2; }
+            set { c2 = value; }
+        }
+
+        public string c3
+        {
+            get { return c3; }
+            set { c3 = value; }
+        }
+
+        public string c4
+        {
+            get { return c4; }
+            set { c4 = value; }
+        }
+
+        public string c5
+        {
+            get { return c5; }
+            set { c5 = value; }
+        }
+        public string c6
+        {
+            get { return c6; }
+            set { c6 = value; }
+        }
+
+
+        public string c7
+        {
+            get { return c7; }
+            set { c7 = value; }
+        }
+
+
+        public string c8
+        {
+            get { return c8; }
+            set { c8 = value; }
+        }
+
+        public string c9
+        {
+            get { return c9; }
+            set { c9 = value; }
+        }
+
+
+        public string c10
+        {
+            get { return c10; }
+            set { c10 = value; }
+        }
+
+        public string c11
+        {
+            get { return c11; }
+            set { c11 = value; }
+        }
+
+        public string c12
+        {
+            get { return c12; }
+            set { c12 = value; }
+        }
+
+        public string c13
+        {
+            get { return c13; }
+            set { c13 = value; }
+        }
+
+        public string c14
+        {
+            get { return c14; }
+            set { c14 = value; }
+        }
+
+        public string c15
+        {
+            get { return c15; }
+            set { c15 = value; }
+        }
+
+        public string c16
+        {
+            get { return c16; }
+            set { c16 = value; }
+        }
+
+        public string c17
+        {
+            get { return c17; }
+            set { c17 = value; }
+        }
+
+        public string c18
+        {
+            get { return c18; }
+            set { c18 = value; }
+        }
+
+        public string c19
+        {
+            get { return c19; }
+            set { c19 = value; }
+        }
+
+        public string c20
+        {
+            get { return c20; }
+            set { c20 = value; }
+        }
+
+        public string c21
+        {
+            get { return c21; }
+            set { c21 = value; }
+        }
+
+        
+        public string c22
+        {
+            get { return c22; }
+            set { c22 = value; }
+        }
+
+        
+        public string c23
+        {
+            get { return c23; }
+            set { c23 = value; }
+        }
+
+        public string c24
+        {
+            get { return c24; }
+            set { c24 = value; }
+        }
+
+        
+        public string c25
+        {
+            get { return c25; }
+            set { c25 = value; }
+        }
+
+        
+        public string c26
+        {
+            get { return c26; }
+            set { c26 = value; }
+        }
+
+        public string c27
+        {
+            get { return c27; }
+            set { c27 = value; }
+        }
+
+        public string c28
+        {
+            get { return c28; }
+            set { c28 = value; }
+        }
+
+        public string c29
+        {
+            get { return c29; }
+            set { c29 = value; }
+        }
+
+        public string c30
+        {
+            get { return c30; }
+            set { c30 = value; }
+        }
+
+        public string c31
+        {
+            get { return c31; }
+            set { c31 = value; }
+        }
+
+        public string c32
+
+        {
+            get { return c32; }
+            set { c32 = value; }
+        }
+
+        public string c33
+        {
+            get { return c33; }
+            set { c33 = value; }
+        }
+
+        public string c34
+        {
+            get { return c34; }
+            set { c34 = value; }
+        }
+
+        public string c35
+        {
+            get { return c35; }
+            set { c35 = value; }
+        }
+
+        public string c36
+        {
+            get { return c36; }
+            set { c36 = value; }
+        }
+
+        public string c37
+        {
+            get { return c37; }
+            set { c37 = value; }
+        }
+
+        public string c38
+        {
+            get { return c38; }
+            set { c38 = value; }
+        }
+
+        public string c39
+        {
+            get { return c39; }
+            set { c39 = value; }
+        }
+
+        public string c40
+        {
+            get { return c40; }
+            set { c40 = value; }
+        }
+
+        public string c41
+        {
+            get { return c41; }
+            set { c41 = value; }
+        }
+
+        public string c42
+        {
+            get { return c42; }
+            set { c42 = value; }
+        }
+
+        public string c43
+        {
+            get { return c43; }
+            set { c43 = value; }
+        }
+
+        public string c44
+        {
+            get { return c44; }
+            set { c44 = value; }
+        }
+
+        public string c45
+        {
+            get { return c45; }
+            set { c45 = value; }
+        }
+
+        public string c46
+        {
+            get { return c46; }
+            set { c46 = value; }
+        }
+
+        public string c47
+        {
+            get { return c47; }
+            set { c47 = value; }
+        }
+
+        public string c48
+        {
+            get { return c48; }
+            set { c48 = value; }
+        }
+
+        public string c49
+        {
+            get { return c49; }
+            set { c49 = value; }
+        }
+
+        public string c50
+        {
+            get { return c50; }
+            set { c50 = value; }
+        }
+
+    }
+
+    public class GetProductLineData : ActionResult
+    {
+        public int StateCode { get; set; }
+        public string ReaSon { get; set; }
+        public List<LineData> LineData { get; set; } = new List<LineData>();
+
+        public override void ExecuteResult(ControllerContext context)
+        {
+
+        }
+    }
+}

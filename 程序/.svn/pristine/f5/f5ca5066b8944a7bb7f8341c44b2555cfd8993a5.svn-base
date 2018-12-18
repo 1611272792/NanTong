@@ -1,0 +1,502 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/UI/bootstrap-paginator.min.js"></script>
+    <script src="~/Content/page/front-endPage.js"></script>
+    <script src="~/nfine/cololr/js.js"></script>
+    <link href="~/nfine/cololr/css.css" rel="stylesheet" />
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+
+
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .form-control {
+            margin-top: 2px;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .timetext, .seletext, #Select22, #Select33, #Select88, #Select8, #Select9 {
+            border-radius: 3px 4px;
+        }
+
+        .seletext, #Select22, #Select33, #Select8, #Select9 {
+            line-height: 26px;
+            height: 26px;
+        }
+
+        #divshow {
+            display: none;
+        }
+
+        th {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .ckstyle {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+
+</head>
+<body>
+<p>
+    <button class="btn btn-info" data-toggle="modal" data-target="#Add_Modal_Project">
+        <img class="buttonicon" src="~/Content/Icon/添加图标.png" />
+        添加项目
+    </button>
+    <button class="btn btn-info" data-toggle="modal" data-target="#Add_Modal_Product">
+        <img class="buttonicon" src="~/Content/Icon/添加图标.png" />
+        添加产品
+    </button>
+    <button class="btn btn-danger" onclick="AllDelete()">
+        <img class="buttonicon" src="~/Content/Icon/删除图标.png" />
+        批量删除
+    </button>
+</p>
+    <!--项目下拉框-->
+    @if (ViewBag.PjInfo == null)
+    {
+        <p>
+            <label>项目：</label>
+            <select class="form-control" style="width:130px;display:inline" id="Select_ProjectId">
+                <option value="0">请选择</option>
+            </select>
+        </p>
+    }
+    else
+    {
+        DataTable pj = ViewBag.PjInfo;
+        <p>
+            <label>项目：</label>
+            <select class="form-control" style="width:130px;display:inline" id="Select_ProjectId" onchange="GetProductInfo()">
+                <option value="0">查看全部</option>
+                @for (int i = 0; i < pj.Rows.Count; i++)
+                {
+                    <option value="@pj.Rows[i]["ProjectId"]">@pj.Rows[i]["ProjectName"]</option>
+                }
+            </select>
+        </p>
+
+    }
+    <div id="pg">
+        <!--所有的产品信息-->
+        @if (ViewBag.AllPdInfo == null)
+        {
+            <table class="table table-bordered table-hover table1">
+                <tr>
+                    <th><input type="checkbox" style="width:20px;height:20px;" id="checkAll" name="checkAll" onchange="GetAll()" /><span>&nbsp;全选</span></th>
+                    <th>序号</th>
+                    <th>项目名称</th>
+                    <th>产品名称</th>
+                    <th>操作</th>
+                </tr>
+            </table>
+        }
+        else
+        {
+            DataTable pd = ViewBag.AllPdInfo;
+            <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+                    <th>序号</th>
+                    <th>项目名称</th>
+                    <th>产品名称</th>
+                    <th>操作</th>
+                </tr>
+                @for (int i = 0; i < pd.Rows.Count; i++)
+                {
+                    <tr class="tr1">
+                        <td><input type="checkbox" name="cks" class="ckstyle check" value="@pd.Rows[i]["ProductId"]" /></td>
+                        <td>@pd.Rows[i]["XH"]</td>
+                        <td>@pd.Rows[i]["ProjectName"]</td>
+                        <td>@pd.Rows[i]["ProductName"]</td>                       
+                        <td>
+                            <a onclick="GetUpdProductInfo(@pd.Rows[i]["ProductId"])" href="#" data-toggle="modal" data-target="#UpdProduct">编辑</a>
+                            <a onclick="DelProduct(@pd.Rows[i]["ProductId"])" href="#" data-toggle="modal" data-target="#DelOneProduct">删除</a>
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+
+    <!--添加项目-->
+    <div class="modal fade" id="Add_Modal_Project" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">添加状态操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;" id="addTable">
+                            <tr>
+                                <td>项目名称：</td>
+                                <td>
+                                    <input id="add_ProjectName" class="form-control" type="text" />
+                                </td>
+                            </tr>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-primary" id="btn_add_Project">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        添加
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--添加产品-->
+    <div class="modal fade" id="Add_Modal_Product" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">添加状态操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;" id="addTable">
+                        @if (ViewBag.PjInfo == null)
+                        {
+                            <tr><td>暂无项目！请先添加项目</td></tr>
+                        }
+                        else
+                        {
+                            DataTable pj = ViewBag.PjInfo;
+                            <tr>
+                                <td>项目名称：</td>
+                                <td>
+                                    <select class="form-control" style="display:inline" id="add_ProjectId">
+                                        <option value="0">请选择</option>
+                                        @for (int i = 0; i < pj.Rows.Count; i++)
+                                        {
+                                            <option value="@pj.Rows[i]["ProjectId"]">@pj.Rows[i]["ProjectName"]</option>
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>产品名称：</td>
+                            <td>
+                                <input id="add_ProductName" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-primary" id="btn_add_Product">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        添加
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--删除产品-->
+    <div class="modal fade" id="DelOneProduct" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除状态</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="Del_Sure btn btn-info">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--批量删除-->
+    <div class="modal fade" id="ProductAllDelete" tabindex="-1" data-show="false" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除操作</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info chanpiliang Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--编辑-->
+    <div class="modal fade" id="UpdProduct" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">编辑状态</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr hidden="hidden">
+                            <td>产品Id：</td>
+                            <td>
+                                <input id="edit_ProductId" readonly="readonly" style="background-color:#f6ebeb;" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                        @if (ViewBag.PjInfo == null)
+                        {
+                            <tr><td>暂无项目！请先添加项目</td></tr>
+                        }
+                        else
+                        {
+                            DataTable pj = ViewBag.PjInfo;
+                            <tr>
+                                <td>项目名称：</td>
+                                <td>
+                                    <select class="form-control" style="display:inline" id="edit_ProjectId">
+                                        <option value="0">请选择</option>
+                                        @for (int i = 0; i < pj.Rows.Count; i++)
+                                        {
+                                            <option value="@pj.Rows[i]["ProjectId"]">@pj.Rows[i]["ProjectName"]</option>
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>产品名称：</td>
+                            <td>
+                                <input id="edit_ProductName" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info" id="Edit_Product">
+                        <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //添加项目
+        $("#btn_add_Project").click(function () {
+            //alert("添加");
+            var ProjectName = $("#add_ProjectName").val();
+            var NowProjectId = $("#Select_ProjectId").val();
+
+            if (ProjectName == "" || ProjectName == null) {
+                alert("请选择工序");
+                return false;
+            }
+            $.ajax({
+                type: "GET",
+                url: "/Product/AddProject",
+                data: { ProjectName: ProjectName},
+                success: function (data) {
+                    $("#Add_Modal_Project").modal("hide");
+                    //$("#pg").load("/StateSet/ShareState?ProjectId=" + NowProjectId, function (data) {
+                    //});
+                }, error: function (data) {
+                    alert(data);
+                }
+            })
+        })
+
+        //添加项目对应的产品
+        $("#btn_add_Product").click(function () {
+            var ProjectId = $("#add_ProjectId").val();
+            var ProductName = $("#add_ProductName").val();
+            if (ProjectId == "" && ProjectId == null && ProjectId == 0) {
+                alert("请先选择项目");
+                return false;
+            } else {
+                $.ajax({
+                    type: "GET",
+                    url: "/Product/AddProduct",
+                    data: { ProjectId: ProjectId, ProductName: ProductName },
+                    success: function (data) {
+                        $("#Add_Modal_Product").modal("hide");
+                        //$("#pg").load("/StateSet/ShareState?ProjectId=" + NowProjectId, function (data) {
+                        //});
+                    }, error: function (data) {
+                        alert(data);
+                    }
+                })
+            }
+        })
+
+        //删除产品
+        function DelProduct(ProductId) {
+            debugger;
+            var NowProjectId = $("#Select_ProjectId").val();
+            if (ProductId == null || ProductId == "") {
+                alert("请选择产品");
+            }
+            var cheValue = ProductId + ",";
+            $(".Del_Sure").click(function () {
+                $.post("/Product/DelProduct", { ProductId: cheValue }, function (data) {
+                    if (data == "ok") {
+                        $("#DelOneProduct").modal("hide");
+                        document.location.reload();
+                        //$("#pg").load("/StateSet/ShareState?ProcessId=" + NowProjectId, function (data) {
+                        //});
+                    }
+                    else {
+                        alert("删除失败！");
+                    }
+                });
+            });
+        }
+
+        //全选
+        function GetAll() {
+            var che = document.getElementById("Checkbox3");
+            var ischeck = che.checked;
+            if (che.checked == ischeck) {
+                var a = document.getElementsByName("cks");
+                for (var i = 0; i < a.length; i++) {
+                    a[i].checked = ischeck;
+                }
+            }
+        }
+
+        //多选删除
+        function AllDelete() {
+            debugger;
+            var NowProjectId = $("#Select_ProjectId").val();
+            var b = document.getElementsByName("cks");
+            //console.log(b);
+            var r = 0;
+            var cheValue = "";
+            for (var i = 0; i < b.length; i++) {
+                //alert("状态：" + b[i].checked);
+                if (b[i].checked == true) {
+                    cheValue += b[i].value + ",";
+                    //alert(b[i].value);
+                }
+                else {
+                    r++;
+                }
+            }
+            if (r == b.length) {
+                alert("请先选中要删除的数据");
+                $("#ProductAllDelete").modal("hide");
+            } else {
+                $("#ProductAllDelete").modal("show");
+                $(".chanpiliang").click(function () {
+                    $.post("/Product/DelProduct", { ProductId: cheValue }, function (data) {
+                        if (data == "ok") {
+                            $("#ProductAllDelete").modal("hide");
+                            //$("#pg").load("/StateSet/ShareState?ProcessId=" + NowProcessId, function (data) {
+                            //});
+                        }
+                        else {
+                            alert("批量删除失败！");
+                        }
+                    });
+                });
+
+            }
+        }
+
+        //获取需要需要编辑的信息
+        function GetUpdProductInfo(PId) {
+            //alert(StateId)
+            if (PId == null || PId == "") {
+                alert("请选择产品");
+            }
+            $.post("/Product/GetUpdProductInfo", { PId: PId }, function (data) {
+                //debugger;
+                var info = data.split(",");
+                $("#edit_ProductId").val(info[0]);
+                $("#edit_ProjectId").val(info[1]);
+                $("#edit_ProductName").val(info[3]);
+            })
+        }
+
+
+        //编辑
+        $("#Edit_Product").click(function () {
+            var NowProjectId = $("#Select_ProjectId").val();
+            var ProductId = $("#edit_ProductId").val();
+            var ProjectId = $("#edit_ProjectId").val();
+            var ProductName = $("#edit_ProductName").val();
+            $.post("/Product/EditProductInfo", { ProductId: ProductId, ProjectId: ProjectId, ProductName: ProductName}, function (data) {
+                if (data == "ok") {
+                    $("#UpdProduct").modal("hide");
+                    //$("#pg").load("/StateSet/ShareState?ProcessId=" + ProcessId, function (data) {
+                    //});
+                }
+                else if (data == "no") {
+                    alert("编辑失败");
+                } else {
+                    alert(data);
+                }
+            })
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,560 @@
+﻿@using System.Data; 
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <style>
+        .ckstyle {
+            width: 20px;
+            height: 20px;
+        }
+       
+          .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+         .form-control {
+        margin-top:2px;
+        }
+        .hovers {
+            background-color: #b5b5b5;
+        }
+        th {
+        text-align:center;
+        }
+          .rightColor {
+        color:green;
+        }
+        .errorColor {
+            color:red;
+        }
+         
+       .thf {
+        font-size:18px;
+        text-align:center;
+        }
+    </style>
+</head>
+<body>
+    <p>
+        @if (ViewBag.Role == 1)
+        {
+
+        }
+        else
+        {
+            <a class="btn btn-info Buttons" id="TerminalAdd" data-toggle="modal" data-target="#Terminaltianjia">
+                <img class="buttonicon" src="~/Content/Icon/添加图标.png">
+        添加</a>
+            <a class="btn btn-danger Buttons" onclick="TerminalAllDele()" data-toggle="modal" data-target="#WorkShopAllDelete">
+                <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+        批量删除</a>
+        @*<b><span style="float:right">可操作的终端数：<span style="color:red">@Session["TermialNumber"].ToString()</span></span></b>*@
+        }
+
+    </p>
+    <p>
+        <label>工序：</label>
+        <select id="select_PorcID" class="form-control" style="width:130px;display:inline" onchange="selectPorc()">            
+            @if (ViewBag.proc != null)
+            {
+                <option value="0" selected="selected">查看全部</option>
+                DataTable dt = ViewBag.proc;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    <option value="@dt.Rows[i]["ProcessId"].ToString()">@dt.Rows[i]["ProcessName"].ToString()</option>
+                }
+            }
+            else
+            {
+                <option value="0" selected="selected">请选择</option>
+            }
+        </select>
+    </p>
+
+    <div>
+        @*显示*@
+        <div id="showTer">
+            <table class="table table-bordered text-center table-hover table1  table-striped">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th style="width:200px;"><input id="Checkbox1_Terminal" onchange="GetAll_Terminal()" class="ckstyle" style="margin-left: 67px;position:relative;bottom:4px;" type="checkbox" /><span style="display: block;float:right;margin-right: 30px;position:relative;right: 10px;bottom:2px;">全选</span></th>
+                    <th>终端名</th>
+                    <th>责任人</th>
+                    <th>翻页时间</th>
+                    <th>操作</th>
+                </tr>
+                @if (ViewBag.terminal == null)
+            {
+
+            }
+            else
+            {
+                DataTable dt = ViewBag.terminal;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                        <tr>
+                            <td><input type="checkbox" name="ckname" class="ckstyle check" value="@dt.Rows[i]["TerminalId"]" /></td>
+                            <td>@dt.Rows[i]["TerminalName"].ToString()</td>
+                            <td>@dt.Rows[i]["UserName"].ToString()</td>
+                            <td>@dt.Rows[i]["PageTime"].ToString() S</td>
+                            @*<td hidden="hidden">@dt.Rows[i]["TerminalPwd"].ToString().Replace(@dt.Rows[i]["TerminalPwd"].ToString(), "******")</td>*@
+                            <td>
+                                @if (ViewBag.Role == 1)
+                                {
+                                    <a onclick="TerminalEdit(@dt.Rows[i]["TerminalId"])" href="#" data-toggle="modal" data-target="#Terminalbianji">编辑</a>
+
+                                }
+                                else
+                                {
+                                    <a onclick="TerminalEdit(@dt.Rows[i]["TerminalId"])" href="#" data-toggle="modal" data-target="#Terminalbianji">编辑</a>
+                                    <a onclick="TerminalDelete(@dt.Rows[i]["TerminalId"])" href="#">删除</a>
+                                }
+
+                            </td>
+                        </tr>
+                    }
+                }
+
+
+
+            </table>
+        </div>
+
+        @*编辑*@
+        <div class="modal fade" id="Terminalbianji" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header  modal-header-backgcolo">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" style="color:white">编辑终端操作</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table style="margin:0px auto;">
+                            <tr hidden="hidden">
+                                <td>终端ID：</td>
+                                <td>
+                                    <input id="edit_TerminalId" readonly="readonly" style="background-color:#f6ebeb;" class="form-control" type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>终端名称：</td>
+                                <td>
+                                    <input id="edit_TerminalName" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')"/>
+                                </td>
+                            </tr>
+                            <tr hidden="hidden">
+                                <td>终端密码：</td>
+                                <td>
+                                    <input id="edit_TerminalPwd" class="form-control" type="password" name="TerPwd" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+                                    
+                                 </td>
+                              <td><a href="#" id="passwordeye" class="aa" onclick="switchPwd()" style="font-size:15px;text-decoration:none">显示/隐藏</a></td>
+                            </tr>
+                            <tr>
+                                <td>工序：</td>
+                                <td>
+                                    <select id="Edit_Proc" class="form-control">
+                                        @if (ViewBag.proc != null)
+                                        {
+                                            DataTable dt = ViewBag.proc;
+                                            for (int i = 0; i < dt.Rows.Count; i++)
+                                            {
+                                                <option value="@dt.Rows[i]["ProcessId"].ToString()">@dt.Rows[i]["ProcessName"].ToString()</option>
+                                            }
+                                        }
+
+                                    </select>
+                                </td>
+                            </tr>
+                       
+                           
+                            <tr>
+                                <td>翻页时间(s)：</td>
+                                <td>
+                                    <input id="edit_TerPageTime" class="form-control" type="text" name="TerPageTime" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+                                </td>
+                                <td>
+                                    <span></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>责任人：</td>
+                                <td style="height:33px;">
+                                    @if (ViewBag.adduser != null)
+                                    {
+                                        DataTable dt = ViewBag.adduser;
+                                        <ul style="margin-top:10px;text-align:left;">
+                                            @for (int i = 0; i < dt.Rows.Count; i++)
+                                            {
+                                                <li style="width: 45.3%;float:left;list-style-type:none;margin-left: -30px;margin-right: 30px;"><input id="UsersID" type="checkbox" style="width:20px;height:20px;" name="teminals" value="@dt.Rows[i]["UserInfoID"].ToString()">&nbsp;<span style="position:relative;bottom:5px;">@dt.Rows[i]["UserName"].ToString()</span></li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                        
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消</button>
+                        <button type="button" class="btn btn-info" id="bianji_Terminal">
+                            <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*添加*@
+        <div class="modal fade" id="Terminaltianjia" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header  modal-header-backgcolo">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" style="color:white">添加终端操作</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table style="margin:0px auto;">
+                           
+                            <tr hidden="hidden">
+                                <td>终端ID：</td>
+                                <td>
+                                    <input readonly="readonly" style="background-color:#f6ebeb;" class="form-control" id="ipaddress" type="text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>终端名称：</td>
+                                <td>
+                                    <input id="Terminalname" class="form-control" type="text" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')"/>
+                                </td>
+                            </tr>
+                      
+                             
+                            <tr hidden="hidden">
+                                <td>终端密码：</td>
+                                @*<td>
+                                    <input id="TerminaPwd" class="form-control" type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+                                </td>*@                        
+                                <td><input value="123456" type="password" class="form-control" id="TerminaPwd" data-toggle="tooltip" data-placement="right" title="必填且在0-10位之间" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " /></td>
+                                <td>
+                                    <span></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>翻页时间(s)：</td>
+                                <td>
+                                    <input id="add_TerPageTime" class="form-control" type="text" name="TerPage" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " />
+                                </td>
+                                <td>
+                                    <span></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>工序：</td>
+                                <td>
+                                    <select id="Proc" class="form-control">
+                                        @if (ViewBag.proc != null)
+                                        {
+                                            DataTable dt = ViewBag.proc;
+                                            for (int i = 0; i < dt.Rows.Count; i++)
+                                            {
+                                                <option value="@dt.Rows[i]["ProcessId"].ToString()">@dt.Rows[i]["ProcessName"].ToString()</option>
+                                            }
+                                        }
+
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>责任人：</td>   @*遍历终端数，显示在网页上*@
+                                <td style="height:33px;">
+                                    @if (ViewBag.adduser != null)
+                                    {
+                                        DataTable dt = ViewBag.adduser;
+                                        <ul style="margin-top:10px;text-align:left;">
+                                            @for (int i = 0; i < dt.Rows.Count; i++)
+                                            {
+                                                <li style="width: 45.3%;float:left;list-style-type:none;margin-left: -30px;margin-right: 30px;"><input id="terID" type="checkbox" style="width:20px;height:20px;" name="teminal" value="@dt.Rows[i]["UserInfoID"].ToString()">&nbsp;<span style="position:relative;bottom:5px;">@dt.Rows[i]["UserName"].ToString()</span></li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+
+                                    }
+                                </td>
+                            </tr>
+                      
+                      
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消</button>
+                        <button type="button" onclick="TerminalAdd()" class="btn btn-info Buttons">
+                            <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        function switchPwd() {
+            debugger;
+            var passwordeye = $('#passwordeye');
+            var showPwd = $("#edit_TerminalPwd");
+           
+                if (passwordeye.hasClass('aa')) {
+                    passwordeye.removeClass('aa').addClass('bb');//密码可见
+                    showPwd.prop('type', 'text');
+                } else {
+                    passwordeye.removeClass('bb').addClass('aa');//密码不可见
+                    showPwd.prop('type', 'password');
+                };
+          
+        }
+        //根据工序显示不同页面
+        function selectPorc() {
+            var procID = $("#select_PorcID").val();
+            $("#showTer").load("/Terminal/Index1?selectProcID=" + procID);
+        }
+
+
+        $(function () {
+            //编辑
+            $("#bianji_Terminal").click(function () {
+         
+                var regex_pwd = /^[0-9._]{0,10}$/;//密码
+                //通过id来进行编辑
+                var termid = $("#edit_TerminalId").val();
+                var termName = $("#edit_TerminalName").val();
+                var terPwd = $("#edit_TerminalPwd").val();
+                var procId = $("#Edit_Proc").val();
+                var pageTime = $("#edit_TerPageTime").val();
+                if (pageTime=="") {
+                    pageTime = 10;
+                }
+                 //用户ID
+              var UserIds = "";
+            elements = document.getElementsByName("teminals");
+            for (var i = 0; i < elements.length; i++) {
+                if (elements[i].checked) {
+                    UserIds += "," + elements[i].value;
+                }
+            }
+            UserIds = UserIds.substring(1);
+            if ($("#edit_TerminalName").val() == "" || $("#edit_TerminalUser").val() == ""||UserIds=="") {      //||$("#edit_TerminalPwd").val()==""
+                    alert("不能为空！");
+                }
+                else if (!regex_pwd.test(terPwd)) {
+                    //alert("11");
+                    $(this).parent("td").siblings("td").find("span").html("密码位数应在0-10位").removeClass().addClass("errorColor");
+                }
+                else {
+                    $.post("/Terminal/EditTerminal", { terId: termid, terName: termName, userID: UserIds, terPwd: terPwd, ProcId: procId, PageTime: pageTime }, function (data) {
+                        //alert(data);
+                        document.location.reload();
+                    })
+                }
+
+            })
+        })
+        //编辑模态窗体密码验证
+        $("#edit_TerminalPwd").mouseover(function () {
+            $("#edit_TerminalPwd").addClass("mouseovers");
+            // alert("1");
+        })
+        $("#edit_TerminalPwd").mouseout(function () {
+            $("#edit_TerminalPwd").removeClass("mouseovers");
+        })
+        $("#edit_TerminalPwd").focusout(function () {
+            var Userpwd = $("#edit_TerminalPwd").val();
+            var regex = /^[0-9._]{0,10}$/;
+            if (Userpwd == "") {
+                $(this).parent("td").siblings("td").find("span").html("必填");
+
+            }
+            else if (!regex.test(Userpwd)) {
+                //alert("11");
+                $(this).parent("td").siblings("td").find("span").html("密码位数应在0-10位").removeClass().addClass("errorColor");
+            }
+            else {
+                $(this).parent("td").siblings("td").find("span").html("正确").removeClass().addClass("rightColor");
+            }
+        })
+        //编辑,得到需要编辑的信息
+        function TerminalEdit(terid) {
+
+            $.post("/Terminal/EditTerminalBySelect", { terId: terid }, function (data) {
+                var info = data.split(".");
+                $("#edit_TerminalId").val(info[0]);
+                $("#edit_TerminalName").val(info[1]);
+                //给多选框赋予选中的状态
+                var strs = info[2].split(",");
+                var checkobj = document.getElementsByName("teminals");
+                for (var i = 0; i < checkobj.length; i++) {
+                    for (var j = 0; j < strs.length; j++) {
+                        if (checkobj[i].value == strs[j]) {
+                            checkobj[i].checked = true;
+                            break;
+                        }
+                        else {
+                            checkobj[i].checked = false;
+                        }
+                    }
+                }
+                //$("#edit_TerminalUser").val(info[2]);
+                $("#edit_TerminalPwd").val(info[3]);
+                $("#Edit_Proc").val(info[4]);
+                $("#edit_TerPageTime").val(info[5]);
+            })
+        }
+
+        //单个删除
+        function TerminalDelete(terid) {
+            var msg = "您真的确定要删除吗？\n\n请确认！";
+            if (confirm(msg) == true) {
+                terid += ",";
+                $.post("/Terminal/DeleteTerminal", { termId: terid }, function (data) {
+                    //alert(data);
+                    document.location.reload();
+                })
+            }
+
+        }
+
+        //添加模态窗体密码验证
+        $("#TerminaPwd").mouseover(function () {
+            $("#TerminaPwd").addClass("mouseovers");
+            // alert("1");
+        })
+        $("#TerminaPwd").mouseout(function () {
+            $("#TerminaPwd").removeClass("mouseovers");
+        })
+        $("#TerminaPwd").focusout(function () {
+            var Userpwd = $("#TerminaPwd").val();
+            var regex = /^[0-9._]{0,10}$/;
+            if (Userpwd == "") {
+                $(this).parent("td").siblings("td").find("span").html("必填");
+
+            }
+            else if (!regex.test(Userpwd)) {
+                //alert("11");
+                $(this).parent("td").siblings("td").find("span").html("密码位数应在0-10位").removeClass().addClass("errorColor");
+            }
+            else {
+                $(this).parent("td").siblings("td").find("span").html("正确").removeClass().addClass("rightColor");
+            }
+        })
+
+        //添加
+        function TerminalAdd() {
+            debugger;
+            var regex_pwd = /^[0-9._]{0,10}$/;//密码
+            //终端名
+            var Terminalname2 = $("#Terminalname").val();
+            var ProcId = $("#Proc").val();//工序id
+            //用户ID
+            var UserIds = "";
+            elements = document.getElementsByName("teminal");
+            for (var i = 0; i < elements.length; i++) {
+                if (elements[i].checked) {
+                    UserIds += "," + elements[i].value;
+                }
+            }
+            UserIds = UserIds.substring(1);
+            //var userinfo2 = $("#userID").val();
+            //终端密码
+            var terminPwd = $("#TerminaPwd").val();
+            //翻页时间
+            
+            var pageTime = $("#add_TerPageTime").val();
+            if (pageTime == "") {
+                pageTime = 10;//默认十秒
+            }
+            if (Terminalname2 == ""||UserIds=="") {            //|| terminPwd == ""
+                alert("请输入有效值");
+            } else if (!regex_pwd.test(terminPwd)) {
+                alert("验证没有通过")
+                return false;
+            }
+                
+            else {
+                $.post("/Terminal/AddTerminal", { TerminalName: Terminalname2, userinfo: UserIds, termPwd: terminPwd, procId: ProcId, PageTime: pageTime }, function (data) {
+                    if (data == "添加成功") {
+
+                    } else {
+                        alert(data);
+                    }
+
+
+
+                    document.location.reload();
+                })
+            }
+        }
+        //全选
+        function GetAll_Terminal() {
+            var che = document.getElementById("Checkbox1_Terminal");
+            var ischeck = che.checked;
+            if (che.checked == ischeck) {
+                var a = document.getElementsByName("ckname");
+                for (var i = 0; i < a.length; i++) {
+                    a[i].checked = ischeck;
+                    //alert(a[i].value);//得到value值
+                }
+            }
+        }
+        //批量删除
+        function TerminalAllDele() {
+            var msg = "您真的确定要删除吗？\n\n请确认！";
+            if (confirm(msg) == true) {
+                var che = document.getElementsByClassName("check");
+                var cheValue = "";//获取选中的id
+                for (var i = 0; i < che.length; i++) {
+                    if (che[i].checked) {
+                        cheValue += che[i].value + ",";
+                    }
+                }
+                if (cheValue == "") {
+                    alert("请先选择删除项");
+                }
+                    //alert(cheValue);
+                else {
+                    $.post("/Terminal/DeleteTerminal", { termId: cheValue }, function (data) {
+                        //alert(data);
+                        document.location.reload();
+                    })
+                }
+
+            }
+        }
+
+    </script>
+</body>
+</html>

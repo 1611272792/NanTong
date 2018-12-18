@@ -1,0 +1,334 @@
+﻿using System.Collections.Generic;
+using System.Web.Mvc;
+using XP_PPS_DAL;
+using System.Data;
+using XP_PPS_Model;
+using Newtonsoft.Json;
+using ProductionPlanSystem.Help;
+using System.Data.SqlClient;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ReportController : BaseController
+    {
+        // GET: Report
+        public ActionResult Index()
+        {
+            //判断是管理员还是普通用户
+            string userid;
+            string Role1;
+            if (Session["UserInfoID"] == null || Session["Role"] == null)
+            {
+                return Content("<script>top.location = '/Login/Index';</script>");
+            }
+            else
+            {
+                userid = Session["UserInfoID"].ToString();//登录人id
+                Role1 = Session["Role"].ToString();
+            }
+            string Role = PeopleRole(userid, Role1);
+            string mysqls = "";
+            //主页面加载时的数据默认每页10条数据
+            if (Role == "管理员")
+            {
+                mysqls = string.Format("select * from DataReport");
+            }
+            else if (Role == "产线负责人")
+            {
+                ViewBag.Role = 1;
+                mysqls = string.Format($"select * from DataReport where TerminalID in (SELECT TerminalID FROM dbo.Terminal WHERE   UserInfoID LIKE '%,{userid},%'   OR UserInfoID LIKE '%,{userid}' OR UserInfoID LIKE '{userid},%' OR UserInfoID='{userid}')");
+            }
+            //DataTable dt = DALHelp.ExecuteDataTable(mysqls, null);
+            DataTable dt = ServerOrLit.isDataTable(LoginController.connType, mysqls);
+
+            if (dt?.Rows.Count > 0)
+            {
+                ViewBag.indexdata = dt;
+            }
+            else
+            {
+                ViewBag.indexdata = null;
+                Session["datatable"] = null;
+            }
+
+            #region 选择工序
+            SqlParameter[] values = new SqlParameter[1];
+            values[0] = new SqlParameter("@strType", "process");
+            //获取工序信息
+            DataSet info = SqlDbHelper.RunProcedure("proc_ProcessSet", values, "process");
+            if (info?.Tables.Count > 0 && info.Tables[0]?.Rows.Count > 0)
+            {
+                ViewBag.pinfo = info.Tables[0];
+            }
+            else
+            {
+                ViewBag.pinfo = null;
+            } 
+            #endregion
+
+            ////第一次加载时的下拉框数据
+            //string sql = "";
+            //if (Role == "管理员")
+            //{
+            //    sql = string.Format("select * from Terminal");
+            //}
+            //else if (Role == "产线负责人")
+            //{
+            //    sql = string.Format("select * from Terminal where UserInfoID = {0}", userid);
+            //}
+            ////产线下拉框数据
+            ////DataTable dt1 = DALHelp.ExecuteDataTable(sql, null);
+            //DataTable dt1 = ServerOrLit.isDataTable(LoginController.connType, sql);
+
+            //ViewBag.terlist1 = dt1;
+            //if (dt1.Rows.Count > 0)
+            //{
+            //    List<Terminal> terminal = new List<Terminal>();
+            //    for (int i = 0; i < dt1.Rows.Count; i++)
+            //    {
+            //        Terminal ter = new Terminal();
+            //        ter.TerminalID = int.Parse(dt1.Rows[i]["TerminalID"].ToString());
+            //        ter.TerminalName = dt1.Rows[i]["TerminalName"].ToString();
+            //        terminal.Add(ter);
+            //    }
+            //    ViewBag.terlist = terminal;
+            //}
+
+            //第一次加载数据时的表头数据
+            string sqltitle = string.Format("select * from Allocation where IsActive=1 order by Serial asc");
+            //DataTable dt2 = DALHelp.ExecuteDataTable(sqltitle, null);
+            DataTable dt2 = ServerOrLit.isDataTable(LoginController.connType, sqltitle);
+
+            if (dt2?.Rows.Count > 0)
+            {
+                ViewBag.title = dt2;
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    if (dt2.Rows[i]["AllocationName"].ToString() == "TerminalID")
+                    {
+                        ViewBag.TerName = dt2.Rows[i]["AllocationTitle"];//终端名
+                    }
+                    else if (dt2.Rows[i]["AllocationName"].ToString() == "ProductionPlanName")
+                    {
+                        ViewBag.XinHao = dt2.Rows[i]["AllocationTitle"];//产品型号名
+                    }
+                }
+            }
+            else
+            {
+                ViewBag.title = null;
+            }
+            return View();
+        }
+
+        #region 通过工序Id获取其对应的终端
+        /// <summary>
+        /// 通过工序Id获取其对应的终端
+        /// </summary>
+        /// <param name="ProcessId">终端Id</param>
+        /// <returns></returns>
+        public string GetProcessTerminal(string ProcessId)
+        {
+            string userid;
+            string Role1;
+            if (Session["UserInfoID"] == null || Session["Role"] == null)
+            {
+                return null;
+            }
+            else
+            {
+                userid = Session["UserInfoID"].ToString();//登录人id
+                Role1 = Session["Role"].ToString();
+            }
+            string Role = PeopleRole(userid, Role1);
+            string sqlTerminal = "";
+            if (Role == "管理员")
+            {
+                sqlTerminal = string.Format($@"SELECT * FROM dbo.Terminal WHERE ProcessId='{ProcessId}'");
+            }
+            else if (Role == "产线负责人")
+            {
+                sqlTerminal = string.Format($@"select * from Terminal where ProcessId='{ProcessId}' and (UserInfoID LIKE '%,{userid},%' OR UserInfoID LIKE '%,{userid}' OR UserInfoID LIKE '{userid},%' OR UserInfoID='{userid}')");
+            }
+            DataTable Terminal = ServerOrLit.isDataTable(LoginController.connType, sqlTerminal);
+            string Json = "";
+            if (Terminal?.Rows.Count > 0)
+            {
+                Json = JsonConvert.SerializeObject(Terminal);
+            }
+            return Json;
+        } 
+        #endregion
+
+
+        [HttpGet]
+        public ActionResult SelectAll(string aa, string bb,string ProcessId, string line, string version)
+        {
+            string sqltitle = string.Format("select * from Allocation where IsActive=1 order by Serial asc");
+            //DataTable dt2 = DALHelp.ExecuteDataTable(sqltitle, null);
+            DataTable dt2 = ServerOrLit.isDataTable(LoginController.connType, sqltitle);
+
+            if (dt2?.Rows.Count > 0)
+            {
+                ViewBag.title = dt2;
+               
+            }
+            else
+            {
+                ViewBag.title = null;
+            }
+            //判断是管理员还是普通用户
+            string userid;
+            string Role1;
+            if (Session["UserInfoID"] == null || Session["Role"] == null)
+            {
+                return Content("<script>top.location = '/Login/Index';</script>");
+            }
+            else
+            {
+                userid = Session["UserInfoID"].ToString();//登录人id
+                Role1 = Session["Role"].ToString();
+            }
+            string Role = PeopleRole(userid, Role1);
+            //分页
+            string mysqls = "";//总数据
+            if (Role == "管理员")
+            {
+                if (aa == "" && bb == "")
+                {
+                    if (ProcessId=="0")
+                    {
+                            mysqls = string.Format("select * from DataReport where ProductionPlanName like '%{0}%'", version);
+                    }
+                    else
+                    {
+                        if (line == "0")
+                        {
+                            //等于0时查询对应工序所有产线的数据
+                            mysqls = string.Format("select * from DataReport where ProcessId2='{1}' and ProductionPlanName like '%{0}%'", version,ProcessId);
+                        }
+                        else
+                        {
+                            //查询对应工序对应产线的数据
+                            mysqls = string.Format("select * from DataReport where ProcessId2='{2}' and ProductionPlanName like '%{0}%' and TerminalID='{1}'", version, line, ProcessId);
+                        }
+                    }
+                }
+                else
+                {
+                    if (ProcessId == "0")
+                    {
+                            mysqls = string.Format("select * from DataReport where StartTime>='{0}' and StartTime<='{1}' and ProductionPlanName like '%{2}%'", aa, bb, version);
+                    }
+                    else
+                    {
+                        if (line == "0")
+                        {
+                            mysqls = string.Format("select * from DataReport where StartTime>='{0}' and StartTime<='{1}' and ProcessId2='{3}' and ProductionPlanName like '%{2}%'", aa, bb, version,ProcessId);
+                        }
+                        else
+                        {
+                            mysqls = string.Format("select * from DataReport where StartTime>='{0}' and StartTime<='{1}' and ProcessId2='{4}' and ProductionPlanName like '%{2}%' and TerminalID='{3}'", aa, bb, version, line,ProcessId);
+                        }
+                    }
+
+                }
+            }
+            else if (Role == "产线负责人")
+            {
+                if (aa == "" && bb == "")
+                {
+                    if (ProcessId == "0")
+                    {
+                        //查询负责人所负责的所有数据
+                            mysqls = string.Format("select * from DataReport where ProductionPlanName like '%{0}%' and TerminalID in (select TerminalID from Terminal where (UserInfoID LIKE '%,{1},%'   OR UserInfoID LIKE '%,{1}' OR UserInfoID LIKE '{1},%' OR UserInfoID='{1}'))", version, userid);
+                    }
+                    else
+                    {
+                        if (line == "0")
+                        {
+                            //查询负责人所负责的工序的所有产线的数据
+                            mysqls = string.Format("select * from DataReport where ProductionPlanName like '%{0}%' and TerminalID in (select TerminalID from Terminal where (UserInfoID LIKE '%,{1},%'   OR UserInfoID LIKE '%,{1}' OR UserInfoID LIKE '{1},%' OR UserInfoID='{1}') and ProcessId2={2})", version, userid,ProcessId);
+                        }
+                        else
+                        {
+                            //查询负责人所负责的工序的对应产线的数据
+                            mysqls = string.Format("select * from DataReport where ProcessId2='{3}' and ProductionPlanName like '%{0}%' and TerminalID='{1}' and (UserInfoID LIKE '%,{2},%'   OR UserInfoID LIKE '%,{2}' OR UserInfoID LIKE '{2},%' OR UserInfoID='{2}')", version, line, userid,ProcessId);
+                        }
+                    }
+
+                }
+                else
+                {
+                    if (ProcessId == "0")
+                    {
+                            mysqls = string.Format("select * from DataReport where StartTime>='{0}' and StartTime<='{1}' and ProductionPlanName like '%{2}%' and TerminalID in (select TerminalID from Terminal where (UserInfoID LIKE '%,{3},%'   OR UserInfoID LIKE '%,{3}' OR UserInfoID LIKE '{3},%' OR UserInfoID='{3}'))", aa, bb, version, userid);
+                    }
+                    else
+                    {
+                        if (line == "0")
+                        {
+                            mysqls = string.Format("select * from DataReport where StartTime>='{0}' and StartTime<='{1}' and ProductionPlanName like '%{2}%' and TerminalID in (select TerminalID from Terminal where (UserInfoID LIKE '%,{3},%'   OR UserInfoID LIKE '%,{3}' OR UserInfoID LIKE '{3},%' OR UserInfoID='{3}') and ProcessId2={4})", aa, bb, version, userid,ProcessId);
+                        }
+                        else
+                        {
+                            mysqls = string.Format("select * from DataReport where StartTime>='{0}' and StartTime<='{1}' and ProcessId2='{5}' and ProductionPlanName like '%{2}%' and TerminalID='{3}' and (UserInfoID LIKE '%,{4},%'   OR UserInfoID LIKE '%,{4}' OR UserInfoID LIKE '{4},%' OR UserInfoID='{4}')", aa, bb, version, line, userid,ProcessId);
+                        }
+                    }
+                }
+            }
+            //DataTable dt = DALHelp.ExecuteDataTable(mysqls, null);
+            DataTable dt = ServerOrLit.isDataTable(LoginController.connType, mysqls);
+
+            if (dt?.Rows.Count > 0)
+            {
+                ViewBag.selectdata = dt;
+                ViewBag.extable = dt;
+            }
+            else
+            {
+                ViewBag.selectdata = null;
+                Session["datatable"] = null;
+            }
+            //Response.Buffer = true;
+            //Response.ExpiresAbsolute = System.DateTime.Now.AddSeconds(-1);
+            //Response.Expires = 0;
+            //Response.CacheControl = "no-cache";
+            return PartialView("_Report", dt);
+        }
+
+
+        #region 判断是否为管理员或产线负责人
+
+        /// <summary>
+        /// 判断是否为管理员或产线负责人
+        /// </summary>
+        /// <param name="userid">用户Id</param>
+        /// <param name="Role1">Role1</param>
+        /// <returns></returns>
+        public string PeopleRole(string userid, string Role1)
+        {
+            string IsPeople = "";
+            //如果用户账号为admin则是管理员
+            if (Role1 == Help.AppConfig.Role)
+            {
+                IsPeople = "管理员";
+            }
+            else
+            {
+                //如果此用户有负责的产线则为产线负责人
+                string sqlstr2 = string.Format($"SELECT * FROM dbo.Terminal WHERE   UserInfoID LIKE '%,{userid},%'   OR UserInfoID LIKE '%,{userid}' OR UserInfoID LIKE '{userid},%' OR UserInfoID='{userid}'");
+                DataTable linedt = ServerOrLit.isDataTable(LoginController.connType, sqlstr2);
+
+                //DataTable linedt = DALHelp.ExecuteDataTable(sqlstr2, null);
+                if (linedt?.Rows.Count > 0)
+                {
+                    IsPeople = "产线负责人";
+                    ViewBag.Role = 1;
+                }
+            }
+            return IsPeople;
+        } 
+        #endregion
+    }
+}

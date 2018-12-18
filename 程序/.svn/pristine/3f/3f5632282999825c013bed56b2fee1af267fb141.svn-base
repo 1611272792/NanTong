@@ -1,0 +1,180 @@
+﻿using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class ProcessSetController : Controller
+    {
+        // GET: ProcessSet
+        public ActionResult Index()
+        {
+            SqlParameter[] values = new SqlParameter[1];
+            values[0] = new SqlParameter("@strType", "process");
+            //获取工序信息
+            DataSet info = SqlDbHelper.RunProcedure("proc_ProcessSet", values, "process");
+            if (info.Tables.Count > 0 && info.Tables[0]?.Rows.Count > 0)
+            {
+                ViewBag.pinfo = info.Tables[0];
+            }
+            else
+            {
+                ViewBag.pinfo = null;
+            }
+            return View();
+        }
+
+        #region 添加工序
+        /// <summary>
+        /// 添加工序
+        /// </summary>
+        /// <param name="ProcessName"></param>
+        /// <param name="NextProcessId"></param>
+        /// <returns></returns>
+        public ActionResult AddProcess(string ProcessName, string NextProcessId)
+        {
+            #region 验证
+            if (string.IsNullOrWhiteSpace(ProcessName.Trim()))
+            {
+                return Content("ProcessName Is Null");
+            }
+            if (string.IsNullOrWhiteSpace(NextProcessId.Trim()))
+            {
+                return Content("NextProcessId Is Null");
+            }
+            #endregion
+            SqlParameter[] pars = new SqlParameter[3];
+            pars[0] = new SqlParameter("@strType", "addProcess");
+            pars[1] = new SqlParameter("@ProcessName", ProcessName);
+            pars[2] = new SqlParameter("@NextProcessId", NextProcessId);
+            int rows;
+            int info = SqlDbHelper.RunProcedure("proc_ProcessSet", pars, out rows);
+            if (rows > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        } 
+        #endregion
+
+        #region 删除工序
+        /// <summary>
+        /// 删除工序
+        /// </summary>
+        /// <param name="ProcessId">工序Id</param>
+        /// <returns></returns>
+        public ActionResult DelProcess(string ProcessId)
+        {
+            if (string.IsNullOrWhiteSpace(ProcessId))
+            {
+                return Content("ProcessId Is Null");
+            }
+            string ProcessIds = ProcessId.Substring(0, ProcessId.Length - 1);
+            SqlParameter[] pars = new SqlParameter[2];
+            pars[0] = new SqlParameter("@strType", "delProcess");
+            pars[1] = new SqlParameter("@ProcessIds", ProcessIds);
+            //获取第一个工序中的状态信息
+            int rows;
+            int delcstate = SqlDbHelper.RunProcedure("proc_ProcessSet", pars, out rows);
+            if (rows > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+
+        #region 获取需要编辑的工序信息
+        /// <summary>
+        /// 获取需要编辑的工序信息
+        /// </summary>
+        /// <param name="PId">工序Id</param>
+        /// <returns></returns>
+        public ActionResult GetUpdProcessInfo(int PId)
+        {
+            if (string.IsNullOrWhiteSpace(PId.ToString()))
+            {
+                return Content("PId Is Null");
+            }
+            SqlParameter[] pars = new SqlParameter[2];
+            pars[0] = new SqlParameter("@strType", "GetUpdProcessInfo");
+            pars[1] = new SqlParameter("@ProcessId", PId);
+            //获取第一个工序中的状态信息
+            DataSet ProcessInfo = SqlDbHelper.RunProcedure("proc_ProcessSet", pars, "GetUpdProcessInfo");
+            if (ProcessInfo?.Tables.Count > 0 && ProcessInfo.Tables[0]?.Rows.Count > 0)
+            {
+                string ProcessId = ProcessInfo.Tables[0].Rows[0]["ProcessId"].ToString();
+                string ProcessName = ProcessInfo.Tables[0].Rows[0]["ProcessName"].ToString();
+                string NextProcessId = ProcessInfo.Tables[0].Rows[0]["NextProcessId"].ToString();
+                return Content(ProcessId + "," + ProcessName + "," + NextProcessId);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        #endregion
+
+///查询自己所有的上级工序
+//        WITH AreaTree AS
+//(
+//    SELECT* from Process where NextProcessId = 2--需要查找的节点
+//    UNION ALL
+//    SELECT Process.* from AreaTree
+//    JOIN Process on AreaTree.ProcessId = Process.NextProcessId
+//)
+//SELECT* FROM dbo.Process WHERE ProcessId NOT IN(SELECT ProcessId FROM AreaTree) AND Process.ProcessId!=2
+
+        #region 编辑工序
+        /// <summary>
+        /// 编辑工序
+        /// </summary>
+        /// <param name="ProcessName">工序名称</param>
+        /// <param name="NextProcessId">下个工序Id</param>
+        /// <returns></returns>
+        public ActionResult EditProcess(int ProcessId,string ProcessName, int NextProcessId)
+        {
+            #region 验证
+            if (string.IsNullOrWhiteSpace(ProcessId.ToString().Trim()))
+            {
+                return Content("ProcessId Is Null");
+            }
+            if (string.IsNullOrWhiteSpace(NextProcessId.ToString().Trim()))
+            {
+                return Content("NextProcessId Is Null");
+            }
+            if (string.IsNullOrWhiteSpace(ProcessName.Trim()))
+            {
+                return Content("ProcessName Is Null");
+            }
+            #endregion
+            SqlParameter[] pars = new SqlParameter[4];
+            pars[0] = new SqlParameter("@strType", "editProcess");
+            pars[1] = new SqlParameter("@ProcessId", ProcessId);
+            pars[2] = new SqlParameter("@ProcessName", ProcessName);
+            pars[3] = new SqlParameter("@NextProcessId", NextProcessId);
+            int rows;
+            int info = SqlDbHelper.RunProcedure("proc_ProcessSet", pars, out rows);
+            if (rows > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+        #endregion
+    }
+}

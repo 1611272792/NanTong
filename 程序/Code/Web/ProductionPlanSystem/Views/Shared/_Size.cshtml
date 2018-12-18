@@ -1,0 +1,46 @@
+﻿@using System.Data;
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style>
+    th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+@if (ViewBag.AllSizeInfo == null)
+{
+    <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+        <tr style="font-size:18px;vertical-align:middle">
+            <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+            <th>编号</th>
+            <th>规格名称</th>
+            <th>产品名称</th>
+            <th>操作</th>
+        </tr>
+    </table>
+}
+else
+{
+    DataTable size = ViewBag.AllSizeInfo;
+    <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+        <tr style="font-size:18px;vertical-align:middle">
+            <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+            <th>编号</th>
+            <th>规格名称</th>
+            <th>产品名称</th>
+            <th>操作</th>
+        </tr>
+        @for (int i = 0; i < size.Rows.Count; i++)
+                {
+            <tr class="tr1">
+                <td><input type="checkbox" name="cks" class="ckstyle check" value="@size.Rows[i]["ProductSizeNo"]" /></td>
+                <td>@size.Rows[i]["XH"]</td>
+                <td>@size.Rows[i]["ProductSizeName"]</td>
+                <td>@size.Rows[i]["ProductId"]</td>
+                <td>
+                    <a onclick="GetUpdSizeInfo(@size.Rows[i]["ProductSizeNo"])" href="#" data-toggle="modal" data-target="#UpdProductSize">编辑</a>
+                    <a onclick="DelSize(@size.Rows[i]["ProductSizeNo"])" href="#" data-toggle="modal" data-target="#DelOneProductSize">删除</a>
+                </td>
+            </tr>
+        }
+    </table>
+}

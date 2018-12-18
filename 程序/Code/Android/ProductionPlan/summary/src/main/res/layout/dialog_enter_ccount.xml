@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_gravity="center"
+    android:layout_width="400dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_bg"
+    android:orientation="vertical"
+    android:padding="30dp"
+    android:id="@+id/rootView_ll"
+    >
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/pwd_rl"
+        android:background="@drawable/radius_bg"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="7dp">
+
+        <Spinner
+            android:visibility="gone"
+            android:background="@drawable/et_bg"
+            android:id="@+id/productLine_sp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="45dp"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@mipmap/product" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/ip_rl"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="7dp">
+
+        <EditText
+            android:id="@+id/ip_et"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:background="@drawable/et_bg"
+            android:enabled="true"
+            android:hint="请输入网址"
+            android:paddingBottom="3dp"
+            android:paddingLeft="50dp"
+            android:paddingRight="3dp"
+            android:paddingTop="3dp"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="45dp"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@mipmap/mac" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:visibility="gone"
+            android:layout_marginRight="10dp"
+            android:id="@+id/getProductLine_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/radius_bg3"
+            android:focusable="true"
+            android:text="获取产线"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+        <Button
+            android:layout_marginRight="10dp"
+            android:id="@+id/confirm_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/radius_bg3"
+            android:focusable="true"
+            android:text="确定"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+        <Button
+            android:id="@+id/cancel_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/radius_bg3"
+            android:focusable="true"
+            android:text="取消"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+    </LinearLayout>
+</LinearLayout>

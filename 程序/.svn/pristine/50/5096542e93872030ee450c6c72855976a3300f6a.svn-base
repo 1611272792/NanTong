@@ -1,0 +1,479 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>产品管理</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/UI/bootstrap-paginator.min.js"></script>
+    <script src="~/Content/page/front-endPage.js"></script>
+    <script src="~/nfine/cololr/js.js"></script>
+    <link href="~/nfine/cololr/css.css" rel="stylesheet" />
+    <link rel="icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/Content/Image/牛工厂 logo.gif" type="image/x-icon" />
+    <link href="~/Content/tableh.css" rel="stylesheet" />
+    <link href="~/CSS/paging.css" rel="stylesheet" />
+    <script src="~/Scripts/paging.js"></script>
+    <style type="text/css">
+        * {
+            margin: 0px;
+            /*padding: 0px;*/
+        }
+
+        .mouseovers {
+            border-color: #0094ff;
+        }
+
+        .form-control {
+            margin-top: 2px;
+        }
+
+        .modal-header-backgcolo {
+            background-color: #2684e6;
+        }
+
+        .timetext, .seletext, #Select22, #Select33, #Select88, #Select8, #Select9 {
+            border-radius: 3px 4px;
+        }
+
+        .seletext, #Select22, #Select33, #Select8, #Select9 {
+            line-height: 26px;
+            height: 26px;
+        }
+
+        #divshow {
+            display: none;
+        }
+
+        th {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .ckstyle {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+
+</head>
+<body>
+
+    <p>
+        <label>产品名称：</label>
+        <input id="Select_ProductName" class="form-control" style="margin-right:20px;width:150px;display:inline;" type="text" />
+        <label>规格名称：</label>
+        <input id="Select_SizeName" class="form-control" style="margin-right:20px;width:150px;display:inline;" type="text" />
+        <button type="button" id="SelectDataDiffs" class="btn btn-info Buttons" onclick="Search()">
+            <img src="~/Content/Icon/select.png" />
+            查询
+        </button>
+        <a class="btn btn-info Buttons" id="Producetianjia" data-toggle="modal" data-target="#AddProcess">
+            <img class="buttonicon" src="~/Content/Icon/添加图标.png">
+            添加产品
+        </a>
+        <a class="btn btn-danger Buttons" onclick="ProductionLineAllDele()" data-toggle="modal" data-target="#ProductionLineAllDelete">
+            <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+            批量删除
+        </a>
+    </p>
+    <div id="dsidiv">
+        @if (ViewBag.pinfo == null)
+        {
+            <table class="table table-bordered table-hover table1">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+                    <th>编号</th>
+                    <th>产品名称</th>
+                    <th>规格</th>
+                    <th>操作</th>
+                </tr>
+            </table>
+        }
+        else
+        {
+            DataTable lp = ViewBag.pinfo;
+            <table class="table table-bordered text-center table-hover table1 table-striped" style="width:100%; table-layout:fixed;margin-top: 10px">
+                <tr style="font-size:18px;vertical-align:middle">
+                    <th width="200px;"><input type="checkbox" style="width:20px;height:20px;margin-left: 75px;" id="Checkbox3" onchange="GetAll()" /><span style="display:block;float:right;margin-right:38px;">全选</span></th>
+                    <th>编号</th>
+                    <th>产品名称</th>
+                    <th>规格</th>
+                    <th>操作</th>
+                </tr>
+                @for (int i = 0; i < lp.Rows.Count; i++)
+                {
+                    <tr class="tr1">
+                        <td><input type="checkbox" name="cks" class="ckstyle check" value="@lp.Rows[i]["ProductSizeNo"]" /></td>
+                        <td>@lp.Rows[i]["XH"]</td>
+                        <td>@lp.Rows[i]["ProductName"]</td>
+                        <td>@lp.Rows[i]["ProductSizeName"]</td>
+                        <td>
+                            <a onclick="GetUpdProductInfo(@lp.Rows[i]["ProductSizeNo"])" href="#" data-toggle="modal" data-target="#UpdProcess">编辑</a>
+                            <a onclick="DelProduct(@lp.Rows[i]["ProductSizeNo"])" href="#" data-toggle="modal" data-target="#DelOneProcess">删除</a>
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+
+    <div id="pageTool"></div>
+    <div class="modal fade" id="myModal">
+        @*<div class="modal-dialog modal-sm">
+
+                <img alt="" src="data:image/gif;base64,R0lGODlhGQAZAJECAK7PTQBjpv///wAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDE0IDc5LjE1MTQ4MSwgMjAxMy8wMy8xMy0xMjowOToxNSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RUNGNUFGRUFGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RUNGNUFGRTlGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjk5NjI1NDg2LTZkZWQtMjY0NS04MTAzLWQ3Yzg4MTg5YzExNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFCgACACwAAAAAGQAZAAACTpSPqcu9AKMUodqLpAb0+rxFnWeBIUdixwmNqRm6JLzJ38raqsGiaUXT6EqO4uIHRAYQyiHw0GxCkc7l9FdlUqWGKPX64mbFXqzxjDYWAAAh+QQFCgACACwCAAIAFQAKAAACHYyPAsuNH1SbME1ajbwra854Edh5GyeeV0oCLFkAACH5BAUKAAIALA0AAgAKABUAAAIUjI+py+0PYxO0WoCz3rz7D4bi+BUAIfkEBQoAAgAsAgANABUACgAAAh2EjxLLjQ9UmzBNWo28K2vOeBHYeRsnnldKBixZAAA7" />
+
+            </div>*@<!-- /.modal-dialog -->
+
+        <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+            <div class="progress progress-striped active" style="margin-bottom: 0;">
+                <div class="progress-bar" style="width: 100%;"></div>
+            </div>
+            <h5 style="color:black"> <strong>数据加载中，请稍后…！</strong> </h5>
+        </div>
+    </div><!-- /.modal -->
+
+    @*添加*@
+    <div class="modal fade" id="AddProcess" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">添加产品操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;" id="addTable">
+                        <tr>
+                            <td>产品名称：</td>
+                            <td>
+                                <input id="add_ProductName" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>规格选择：</td>
+                            <td>
+                                <input id="add_SizeName" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" style="padding-bottom:4px;" src="~/Content/Icon/cancel.png" />
+                        取消
+                    </a>
+                    <a class="btn btn-primary" id="btn_add_Product">
+                        <img class="buttonicon" src="~/Content/Icon/save.png" />
+                        添加
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*删除*@
+    <div class="modal fade" id="DelOneProcess" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除状态</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="Del_Sure btn btn-info">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*批量删除*@
+    <div class="modal fade" id="ProductionLineAllDelete" tabindex="-1" data-show="false" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">删除操作</h4>
+                </div>
+                <div class="modal-body">
+                    是否删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info chanpiliang Buttons">
+                        <img class="buttonicon" src="~/Content/Icon/删除图标.png">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*编辑*@
+    <div class="modal fade" id="UpdProcess" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-backgcolo">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="color:white">编辑产品</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="margin:0px auto;">
+                        <tr hidden="hidden">
+                            <td>规格Id：</td>
+                            <td>
+                                <input id="edit_SizeId" readonly="readonly" style="background-color:#f6ebeb;" class="form-control" type="text" />
+                                <input id="edit_ProductId" readonly="readonly" style="background-color:#f6ebeb;" class="form-control" type="text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>产品名称：</td>
+                            <td>
+                                <input id="edit_ProductName" class="form-control" type="text"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>规格名称：</td>
+                            <td style="height:33px;">
+                                <input id="edit_SizeName" class="form-control" type="text"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <img class="buttonicon" src="~/Content/Icon/cancel.png">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-info" id="Edit_Product">
+                        <img class="buttonicon" src="~/Content/Icon/save.png">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            Search();
+        })
+
+@*alert('@ViewBag.count');*@
+var page = new Paging();
+        page.init({
+            target: $('#pageTool'), pagesize: 10, count: '@ViewBag.count', pageSizeList: [5, 10, 20], toolbar: true, current: 1, callback: function (pagecount, size, count) {
+                console.log(arguments)
+                //alert('当前第 ' + pagecount + '页,每页 ' + size + '条,总页数：' + count + '页');
+                var ProductName = $("#Select_ProductName").val();
+                var SizeName = $("#Select_SizeName").val();
+                $.ajax({
+                    type: "GET",
+                    url: "/Product/SelectAll",
+                    data: { ProductName: ProductName,SizeName:SizeName, pagecount: pagecount, size: size },
+                    beforeSend: function () {
+                        showModal();
+                    },
+                    success: function (data) {
+                        //alert(data);
+                        $("#dsidiv").html(data);
+                        hideModal();
+                    }
+                });
+            },
+            go: function (p) {
+                //alert("go");
+            },
+            changePagesize: function (pagesize, currenpage, pagecount) {
+                alert(pagesize);
+                alert("changePagesize");
+            }
+        });
+
+
+        //搜索按钮
+        function Search() {
+            var ProductName = $("#Select_ProductName").val();
+            var SizeName = $("#Select_SizeName").val();
+            $.ajax({
+                type: "GET",
+                url: "/Product/SelectAll",
+                data: { ProductName: ProductName,SizeName:SizeName, pagecount: 1, size: 10 },
+                beforeSend: function () {
+                    showModal();
+                },
+                success: function (data) {
+                    //alert(data);
+                    $("#dsidiv").html(data);
+                    hideModal();
+                }
+            });
+        }
+
+
+        //隐藏加载等待页面
+        function hideModal() {
+            $('#myModal').modal('hide');
+        }
+
+        //显示加载等待页面
+        function showModal() {
+            $('#myModal').modal({ backdrop: 'static', keyboard: false });
+        }
+
+
+
+        //添加产品
+        $("#btn_add_Product").click(function () {
+            var ProductName = $("#add_ProductName").val();
+            var SizeName = $("#add_SizeName").val();
+            $.post("/Product/AddProduct", { ProductName: ProductName, SizeName: SizeName }, function (data) {
+                if (data == "ok") {
+                    document.location.reload();
+                }
+                 else {
+                    alert(data);
+                }
+            })
+        })
+
+        //删除产品
+        function DelProduct(ProductSizeNos) {
+            if (ProductSizeNos == null || ProductSizeNos == "") {
+                alert("规格Id为空");
+            }else{
+            $(".Del_Sure").click(function () {
+                //debugger;
+                $.post("/Product/DelProduct", { ProductSizeNos: ProductSizeNos }, function (data) {
+                    if (data == "ok") {
+                        //alert("删除成功！");
+                        document.location.reload();
+                    }
+                    else {
+                        alert("删除失败！");
+                    }
+                });
+            });
+            }
+        }
+
+        //多选删除
+        function ProductionLineAllDele() {
+            //debugger;
+            var b = document.getElementsByName("cks");
+            //console.log(b);
+            var r = 0;
+            var cheValue = "";
+            for (var i = 0; i < b.length; i++) {
+                //alert("状态：" + b[i].checked);
+                if (b[i].checked == true) {
+                    cheValue += b[i].value + ",";
+                    //alert(b[i].value);
+                }
+                else {
+                    r++;
+                }
+            }
+
+            if (r == b.length) {
+                alert("请先选中要删除的数据");
+                $("#ProductionLineAllDelete").modal("hide");
+            } else {
+                $("#ProductionLineAllDelete").modal("show");
+                $(".chanpiliang").click(function () {
+                    debugger;
+                    $.post("/Product/DelProduct", { ProductSizeNos: cheValue }, function (data) {
+                        if (data == "ok") {
+                            //alert("批量删除成功！");
+                            document.location.reload();
+                        }
+                        else {
+                            alert("批量删除失败！");
+                        }
+                    });
+                });
+
+            }
+        }
+
+        //获取需要需要编辑的信息
+        function GetUpdProductInfo(ProductId) {
+            //alert(StateId)
+            if (ProductId == null || ProductId == "") {
+                alert("产品id不能为空");
+            }
+            $.post("/Product/GetUpdProductInfo", { PId: ProductId }, function (data) {
+                //debugger;
+                var info = data.split("@@");
+                $("#edit_SizeId").val(info[0]);
+                $("#edit_ProductId").val(info[1]);
+                $("#edit_ProductName").val(info[2]);
+                $("#edit_SizeName").val(info[3]);
+            })
+        }
+
+        //编辑
+        $("#Edit_Product").click(function () {
+            var SizeId = $("#edit_SizeId").val();
+            var ProductId = $("#edit_ProductId").val();
+            var ProductName = $("#edit_ProductName").val();
+            var SizeName = $("#edit_SizeName").val();
+
+            if(window.confirm('修改产品名称时此表对应的所有产品名称均会修改，确认修改？'))
+            {
+                $.post("/Product/EditProduct", { SizeId: SizeId, ProductId: ProductId, ProductName: ProductName, SizeName: SizeName }, function (data) {
+                    if (data == "ok") {
+                        document.location.reload();
+                    }
+                    else if (data == "no") {
+                        alert("编辑失败");
+                        document.location.reload();
+                    } else {
+                        alert(data);
+                    }
+                })
+            }
+            else { location.reload(); }
+
+        })
+
+        $(".aaa").click(function () {
+            document.location.reload();
+        })
+
+
+        //全选
+        function GetAll() {
+            var che = document.getElementById("Checkbox3");
+            var ischeck = che.checked;
+            if (che.checked == ischeck) {
+                var a = document.getElementsByName("cks");
+                for (var i = 0; i < a.length; i++) {
+                    a[i].checked = ischeck;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

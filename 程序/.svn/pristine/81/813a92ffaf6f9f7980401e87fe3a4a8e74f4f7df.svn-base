@@ -1,0 +1,141 @@
+﻿using ProductionPlanSystem.Help;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProductionPlanSystem.Controllers
+{
+    public class SizeController : Controller
+    {
+        // GET: Size
+        public ActionResult Index()
+        {
+            DataTable sizeinfo = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Size] @strType = 'AllSizeInfo'");
+            if (sizeinfo?.Rows.Count > 0)
+            {
+                //ViewBag.AllSizeInfo = sizeinfo;
+                ViewBag.count= sizeinfo.Rows[0].Field<int>("Count");
+            }
+            else
+            {
+                ViewBag.AllSizeInfo = null;
+                ViewBag.count = 0;
+            }
+            return View();
+        }
+
+        #region 添加规格
+        /// <summary>
+        /// 添加规格
+        /// </summary>
+        /// <param name="SizeName">规格名称</param>
+        /// <returns></returns>
+        public ActionResult AddSize(string SizeName)
+        {
+            if (string.IsNullOrWhiteSpace(SizeName))
+            {
+                return Content("规格为空");
+            }
+            DataTable isin = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Size] @strType = 'IsIn',@ProjectSizeName='{SizeName}'");
+            if (isin.Rows.Count > 0)
+            {
+                return Content("isin");
+            }
+            else
+            {
+                int add = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Size] @strType = 'AddSize',@ProjectSizeName='{SizeName}'");
+                if (add > 0)
+                {
+                    return Content("ok");
+                }
+                else
+                {
+                    return Content("no");
+                }
+            }
+        } 
+        #endregion
+
+        public ActionResult DelSize(string ProjectSizeNo)
+        {
+            if (string.IsNullOrWhiteSpace(ProjectSizeNo))
+            {
+                return Content("规格编号为空");
+            }
+            string ProjectSizeNos = ProjectSizeNo.Substring(0, ProjectSizeNo.Length - 1);
+            int del = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Size] @strType = 'DelSize',@ProjectSizeNos='{ProjectSizeNos}'");
+            if (del > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+
+        public ActionResult GetUpdSizeInfo(string PSNo)
+        {
+            if (string.IsNullOrWhiteSpace(PSNo))
+            {
+                return Content("规格编号为空");
+            }
+            DataTable info = SqlDbHelper.ExecuteDataTable($"EXEC dbo.[proc_Size] @strType = 'GetSizeInfo',@ProjectSizeNo={PSNo}");
+            if (info?.Rows.Count > 0)
+            {
+                int ProjectSizeNo = info.Rows[0].Field<int>("ProjectSizeNo");
+                string ProjectSizeName = info.Rows[0].Field<string>("ProjectSizeName");
+                return Content(ProjectSizeNo + "," + ProjectSizeName);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public ActionResult EditProjectSize(string ProjectSizeNo,string ProjectSizeName)
+        {
+            if (string.IsNullOrWhiteSpace(ProjectSizeNo))
+            {
+                return Content("规格编号为空");
+            }
+            if (string.IsNullOrWhiteSpace(ProjectSizeName))
+            {
+                return Content("规格名称为空");
+            }
+            int upd = SqlDbHelper.ExecuteNonQuery($"EXEC dbo.[proc_Size] @strType = 'UpdSize',@ProjectSizeNo={ProjectSizeNo},@ProjectSizeName='{ProjectSizeName}'");
+            if (upd > 0)
+            {
+                return Content("ok");
+            }
+            else
+            {
+                return Content("no");
+            }
+        }
+
+
+        [HttpGet]
+        public ActionResult SelectAll(string SizeName, string pagecount, string size)
+        {
+            //分页
+            string mysqls = "";//总数据
+            mysqls = string.Format($"EXEC dbo.[proc_Size] @strType='SelectAll',@ProjectSizeName='{SizeName}',@pagecount={pagecount},@size={size}");
+
+            DataTable dt = ServerOrLit.isDataTable(LoginController.connType, mysqls);
+            if (dt?.Rows.Count > 0)
+            {
+                ViewBag.AllSizeInfo = dt;
+            }
+            else
+            {
+                ViewBag.AllSizeInfo = null;
+            }
+
+            return PartialView("_Size", dt);
+        }
+    }
+}
