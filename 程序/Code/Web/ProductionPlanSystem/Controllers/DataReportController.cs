@@ -12,7 +12,7 @@ namespace ProductionPlanSystem.Controllers
         // GET: DataReport
         public ActionResult Index()
         {
-            //判断是管理员还是普通用户
+            //判断是管理员or普通用户
             string userid;
             string Role1;
             if (Session["UserInfoID"] == null || Session["Role"] == null)
